@@ -1,4 +1,5 @@
 import { donationRouter } from "./routers/donation";
+import { familyRouter } from "./routers/family";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   donation: donationRouter,
+  family: familyRouter,
 });
 
 // export type definition of API

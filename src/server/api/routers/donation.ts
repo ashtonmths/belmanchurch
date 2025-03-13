@@ -121,11 +121,15 @@ export const donationRouter = createTRPCRouter({
         });
       }
     }),
+
     getAll: publicProcedure.query(async () => {
       return await db.donation.findMany({
         select: {
           id: true,
+          type: true,
           amount: true,
+          byWhom: true,
+          forWhom: true,
           createdAt: true,
         },
       });

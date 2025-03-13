@@ -55,27 +55,39 @@ model User {
 }
 
 model Parishoner {
-  id     String  @id @default(cuid())
-  mobile String  @unique
-  userId String? @unique
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Self-referential relation to FamilyHead
-  familyHead   FamilyHead? @relation("FamilyMembers", fields: [familyHeadId], references: [id])
-  familyHeadId String?
-
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  FamilyHead FamilyHead[]
+  id         String   @id @default(cuid())
+  mobile     String   @unique
+  userId     String?  @unique
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String?
+  wardId     String?
+  ward       Ward?    @relation("WardParishoners", fields: [wardId], references: [id], onDelete: SetNull)
+  WardGurkar Ward?    @relation("WardGurkar")
+  familyId   String?
+  family     Family?  @relation(name: "FamilyMembers", fields: [familyId], references: [id], onDelete: SetNull) // ✅ Relation to Family
+  familyHead Family?  @relation(name: "FamilyHead")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
-model FamilyHead {
-  id         String       @id @default(cuid())
-  parishoner Parishoner   @relation(fields: [id], references: [id], onDelete: Cascade) // FamilyHead IS a Parishoner
-  members    Parishoner[] @relation("FamilyMembers")
+model Family {
+  id        String       @id @default(cuid())
+  name      String // ✅ Family Name
+  headId    String?      @unique
+  head      Parishoner?  @relation(name: "FamilyHead", fields: [headId], references: [id], onDelete: SetNull) // ✅ Family head
+  members   Parishoner[] @relation(name: "FamilyMembers") // ✅ Family members
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Ward {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  gurkarId    String       @unique
+  gurkar      Parishoner   @relation("WardGurkar", fields: [gurkarId], references: [id], onDelete: Cascade) // Gurkar is a Parishoner
+  parishoners Parishoner[] @relation("WardParishoners")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model VerificationToken {
