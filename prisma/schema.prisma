@@ -125,6 +125,23 @@ model Order {
   Donation        Donation[]
 }
 
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  venue     String
+  info      String? // Nullable for optional input
+  createdAt DateTime @default(now())
+}
+
+model Bethkati {
+  id        String   @id @default(cuid())
+  url       String
+  year      Int
+  month     String
+  createdAt DateTime @default(now())
+}
+
 enum Role {
   USER
   PARISHONER
