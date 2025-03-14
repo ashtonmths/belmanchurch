@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { api } from "~/trpc/react";
+import Button from "./Button";
 
 type Member = {
   id: string;
@@ -82,7 +83,7 @@ export default function Card() {
   };
 
   return (
-    <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center rounded-2xl bg-primary/20 p-4 shadow-lg overflow-y-auto overflow-x-hidden">
+    <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center overflow-y-auto overflow-x-hidden rounded-2xl bg-primary/20 p-4 shadow-lg">
       {/* Profile Section */}
       <div className="flex flex-col items-center text-center">
         <div className="mb-4">
@@ -94,9 +95,7 @@ export default function Card() {
             className="rounded-xl"
           />
         </div>
-        <p className="text-2xl font-bold text-primary">
-          {session?.user.name}
-        </p>
+        <p className="text-2xl font-bold text-primary">{session?.user.name}</p>
         <p className="text-lg font-semibold text-primary">
           {session?.user.role}
         </p>
@@ -138,8 +137,10 @@ export default function Card() {
                 key={member.id}
                 className="mt-2 flex w-full max-w-md flex-col items-center"
               >
-                <p className="text-primary text-lg font-bold">{member.name ?? "Unknown"}:</p>
-                <div className="flex w-full flex-row items-center gap-2 justify-center">
+                <p className="text-lg font-bold text-primary">
+                  {member.name ?? "Unknown"}:
+                </p>
+                <div className="flex w-[90%] flex-row items-center justify-center gap-2 md:w-[60%]">
                   <input
                     type="text"
                     value={
@@ -147,22 +148,28 @@ export default function Card() {
                       ""
                     }
                     onChange={(e) => handleChange(member.id, e.target.value)}
-                    className="w-auto rounded border p-2 bg-primary text-center text-textcolor"
+                    className="w-[100%] rounded border bg-primary p-2 text-center text-textcolor"
                     disabled={!isFamilyHead}
                   />
                   {isFamilyHead && (
-                    <button
-                      onClick={() =>
-                        handleSave(
-                          member.id,
+                    <Button
+                      onClick={() => {
+                        const currentMobile =
                           mobileNumbers.find((m) => m.id === member.id)
-                            ?.mobile ?? "",
-                        )
-                      }
-                      className="w-auto rounded bg-accent px-4 py-2 text-white"
+                            ?.mobile ?? "";
+                        if (member.mobile !== currentMobile) {
+                          handleSave(member.id, member.mobile);
+                        }
+                      }}
+                      className={`ml-3 h-9 ${
+                        member.mobile ===
+                        mobileNumbers.find((m) => m.id === member.id)?.mobile
+                          ? "cursor-not-allowed opacity-50"
+                          : ""
+                      }`}
                     >
                       Save
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
