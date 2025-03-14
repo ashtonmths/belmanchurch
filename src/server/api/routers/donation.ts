@@ -1,6 +1,6 @@
 import { db } from "~/server/db";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
@@ -122,8 +122,8 @@ export const donationRouter = createTRPCRouter({
       }
     }),
 
-    getAll: publicProcedure.query(async () => {
-      return await db.donation.findMany({
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      return await ctx.db.donation.findMany({
         select: {
           id: true,
           type: true,
