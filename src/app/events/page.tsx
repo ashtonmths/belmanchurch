@@ -4,6 +4,18 @@ import { api } from "~/trpc/react";
 export default function Bethkati() {
   const { data: events } = api.misc.getAllEvents.useQuery();
 
+  if (events?.length === 0) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
+        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
+          <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center text-primary text-4xl font-bold">
+            No events available
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
