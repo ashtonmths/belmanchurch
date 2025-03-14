@@ -3,7 +3,7 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 import Button from "~/components/Button";
 
-export default function AdminGallery() {
+export default function AdminMisc() {
   const [eventData, setEventData] = useState({
     name: "",
     date: "",

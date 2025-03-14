@@ -1,7 +1,7 @@
 "use client";
 import { api } from "~/trpc/react";
 
-export default function Bethkati() {
+export default function Events() {
   const { data: events } = api.misc.getAllEvents.useQuery();
 
   if (events?.length === 0) {
