@@ -72,7 +72,7 @@ model Parishoner {
 
 model Family {
   id        String       @id @default(cuid())
-  name      String // ✅ Family Name
+  name      String 
   headId    String?      @unique
   head      Parishoner?  @relation(name: "FamilyHead", fields: [headId], references: [id], onDelete: SetNull) // ✅ Family head
   members   Parishoner[] @relation(name: "FamilyMembers") // ✅ Family members
