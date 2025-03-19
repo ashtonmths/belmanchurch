@@ -36,10 +36,10 @@ export default function AdminMisc() {
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
-        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center">
-          <div className="grid h-screen w-full grid-cols-4 grid-rows-4 gap-4">
-            <div className="col-span-4 col-start-1 row-span-2 row-start-1 flex flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 p-6 md:col-span-2 md:row-span-4">
-              <h1 className="-mt-12 text-3xl font-semibold text-primary">
+        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center overflow-auto">
+          <div className="grid h-full w-full grid-cols-4 grid-rows-4 gap-4 mt-10">
+            <div className="h-full col-span-4 col-start-1 row-span-2 row-start-1 flex flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 p-6 md:col-span-2 md:row-span-4">
+              <h1 className="text-3xl font-semibold text-primary">
                 EVENT DETAILS
               </h1>
               <input
@@ -84,7 +84,7 @@ export default function AdminMisc() {
               <Button onClick={handlePublishEvent}>Publish</Button>
             </div>
             <div className="col-span-4 col-start-1 row-span-2 row-start-3 flex flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 md:col-span-2 md:col-start-3 md:row-span-4 md:row-start-1">
-              <h1 className="-mt-12 text-3xl font-semibold text-primary">
+              <h1 className="text-3xl font-semibold text-primary">
                 BETHKATI DETAILS
               </h1>
               <input
