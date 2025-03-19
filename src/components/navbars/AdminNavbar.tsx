@@ -43,7 +43,6 @@ export default function Navbar() {
             <div className="ml-auto mr-6 hidden space-x-8 font-bold text-primary md:flex">
               <NavButton route="/admin/donation">Donation</NavButton>
               <NavButton route="/admin/families">Families</NavButton>
-              <NavButton route="/admin/requests">Requests</NavButton>
               <NavButton route="/admin/misc">Events & Bethkati</NavButton>
               <NavButton route="/admin/gallery">Gallery</NavButton>
               <NavButton route="/">Home</NavButton>
@@ -101,12 +100,6 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                 >
                   Families
-                </NavButton>
-                <NavButton
-                  route="/admin/requests"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Requests
                 </NavButton>
                 <NavButton route="/admin/misc" onClick={() => setIsOpen(false)}>
                   Events & Bethkati
