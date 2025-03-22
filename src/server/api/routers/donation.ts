@@ -1,6 +1,10 @@
 import { db } from "~/server/db";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
@@ -65,7 +69,6 @@ export const donationRouter = createTRPCRouter({
       }
     }),
 
-  // ✅ VERIFY PAYMENT
   verifyPayment: publicProcedure
     .input(
       z.object({
@@ -111,6 +114,7 @@ export const donationRouter = createTRPCRouter({
             forWhom: updatedOrder.forWhom,
             byWhom: updatedOrder.byWhom,
             email: updatedOrder.email,
+            receiptIssued: false,
           },
         });
 
@@ -124,17 +128,65 @@ export const donationRouter = createTRPCRouter({
       }
     }),
 
-    getAll: protectedProcedure.query(async ({ ctx }) => {
-      return await ctx.db.donation.findMany({
-        select: {
-          id: true,
-          type: true,
-          amount: true,
-          byWhom: true,
-          email: true,
-          forWhom: true,
-          createdAt: true,
-        },
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "DEVELOPER"
+    ) {
+      throw new Error("Unauthorized");
+    }
+    return await ctx.db.donation.findMany({
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        byWhom: true,
+        email: true,
+        forWhom: true,
+        createdAt: true,
+        receiptIssued: true,
+      },
+    });
+  }),
+  getInbox: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "DEVELOPER"
+    ) {
+      throw new Error("Unauthorized");
+    }
+    return await db.donation.findMany({
+      where: { receiptIssued: false },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
+  getHistory: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "DEVELOPER"
+    ) {
+      throw new Error("Unauthorized");
+    }
+    return await db.donation.findMany({
+      where: { receiptIssued: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
+  issueReceipt: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (
+        ctx.session.user.role !== "ADMIN" &&
+        ctx.session.user.role !== "DEVELOPER"
+      ) {
+        throw new Error("Unauthorized");
+      }
+      await db.donation.update({
+        where: { id: input.id },
+        data: { receiptIssued: true },
       });
+      return { success: true };
     }),
 });
