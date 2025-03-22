@@ -57,12 +57,13 @@ model User {
 model Parishoner {
   id         String   @id @default(cuid())
   mobile     String   @unique
+  mobileVerified Boolean @default(false)
   userId     String?  @unique
   user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name       String?
+  dateOfBirth DateTime?
   wardId     String?
   ward       Ward?    @relation("WardParishoners", fields: [wardId], references: [id], onDelete: SetNull)
-  WardGurkar Ward?    @relation("WardGurkar")
   familyId   String?
   family     Family?  @relation(name: "FamilyMembers", fields: [familyId], references: [id], onDelete: SetNull) // ✅ Relation to Family
   familyHead Family?  @relation(name: "FamilyHead")
@@ -83,8 +84,6 @@ model Family {
 model Ward {
   id          String       @id @default(cuid())
   name        String       @unique
-  gurkarId    String       @unique
-  gurkar      Parishoner   @relation("WardGurkar", fields: [gurkarId], references: [id], onDelete: Cascade) // Gurkar is a Parishoner
   parishoners Parishoner[] @relation("WardParishoners")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
