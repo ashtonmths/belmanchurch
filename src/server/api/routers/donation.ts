@@ -26,6 +26,7 @@ export const donationRouter = createTRPCRouter({
         amount: z.number().min(1),
         forWhom: z.string(),
         byWhom: z.string(),
+        email: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -49,6 +50,7 @@ export const donationRouter = createTRPCRouter({
             amount: input.amount,
             forWhom: input.forWhom,
             byWhom: input.byWhom,
+            email: input.email,
             status: "PENDING",
           },
         });
@@ -101,7 +103,6 @@ export const donationRouter = createTRPCRouter({
           data: { status: "SUCCESS", paymentId: input.razorpay_payment_id },
         });
 
-        // ✅ Move order data to Donations Table
         await db.donation.create({
           data: {
             paymentId: input.razorpay_payment_id,
@@ -109,6 +110,7 @@ export const donationRouter = createTRPCRouter({
             amount: updatedOrder.amount,
             forWhom: updatedOrder.forWhom,
             byWhom: updatedOrder.byWhom,
+            email: updatedOrder.email,
           },
         });
 
@@ -129,6 +131,7 @@ export const donationRouter = createTRPCRouter({
           type: true,
           amount: true,
           byWhom: true,
+          email: true,
           forWhom: true,
           createdAt: true,
         },

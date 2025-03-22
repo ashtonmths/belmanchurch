@@ -14,6 +14,7 @@ interface DonateButtonProps {
   amount: string;
   forWhom: string;
   byWhom: string;
+  email: string;
 }
 
 export default function DonateButton({
@@ -21,6 +22,7 @@ export default function DonateButton({
   amount,
   forWhom,
   byWhom,
+  email,
 }: DonateButtonProps) {
   const [loading, setLoading] = useState(false);
   const createOrder = api.donation.createOrder.useMutation();
@@ -39,6 +41,7 @@ export default function DonateButton({
         amount: Number(amount),
         forWhom,
         byWhom,
+        email,
       });
 
       console.log("Razorpay Order ID:", razorpayOrderId);
