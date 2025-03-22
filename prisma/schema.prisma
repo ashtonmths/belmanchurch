@@ -116,6 +116,7 @@ model Order {
   amount    Float
   forWhom   String
   byWhom    String
+  email     String
   status    String  @default("PENDING")
   paymentId String? // Stores Razorpay payment ID after successful payment
 
