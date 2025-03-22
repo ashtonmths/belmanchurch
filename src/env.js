@@ -16,6 +16,10 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: z.string(),
     RAZORPAY_KEY_ID: z.string(),
     RAZORPAY_SECRET_KEY: z.string(),
+    SMTP_HOST: z.string(),
+    SMTP_PORT: z.string(),
+    SMTP_USER: z.string(),
+    SMTP_PASS: z.string(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -42,6 +46,10 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     RAZORPAY_SECRET_KEY: process.env.RAZORPAY_SECRET_KEY,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },

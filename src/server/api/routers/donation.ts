@@ -8,6 +8,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
+import { sendReceipt } from "~/server/utils/mail";
 
 // ✅ Initialize Razorpay instance with proper env variables
 const razorpay = new Razorpay({
@@ -175,18 +176,31 @@ export const donationRouter = createTRPCRouter({
   }),
 
   issueReceipt: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(
+      z.object({
+        id: z.string(),
+        method: z.enum(["upload", "scan"]), // Method type: upload or scan
+        email: z.string().email(),
+        file: z.object({
+          name: z.string(),
+          buffer: z.string(), // Base64 file data
+        }),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      if (
-        ctx.session.user.role !== "ADMIN" &&
-        ctx.session.user.role !== "DEVELOPER"
-      ) {
+      if (!["ADMIN", "DEVELOPER"].includes(ctx.session.user.role)) {
         throw new Error("Unauthorized");
       }
+
+      const buffer = Buffer.from(input.file.buffer, "base64"); // Convert base64 to Buffer
+
+      await sendReceipt(input.email, { name: input.file.name, buffer });
+
       await db.donation.update({
         where: { id: input.id },
         data: { receiptIssued: true },
       });
+
       return { success: true };
     }),
 });
