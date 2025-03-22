@@ -4,7 +4,6 @@ import { api } from "~/trpc/react";
 import EditMemberModal from "~/components/modals/EditMemberModal";
 import AddParishonerModal from "~/components/modals/AddParishonerModal";
 import AddFamilyModal from "~/components/modals/AddFamilyModal";
-import EditWardGurkarModal from "~/components/modals/EditWardGurkarModal";
 import AddToFamilyModal from "~/components/modals/AddToFamilyModal";
 
 type Member = {
@@ -26,7 +25,6 @@ export default function Families() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [showAddParishoner, setShowAddParishoner] = useState(false);
-  const [showEditWardGurkar, setShowEditWardGurkar] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
 
@@ -54,12 +52,6 @@ export default function Families() {
               >
                 Add a Parishoner
               </button>
-              <button
-                className="rounded-lg bg-primary px-4 py-2 font-semibold text-textcolor"
-                onClick={() => setShowEditWardGurkar(true)}
-              >
-                Edit Ward Gurkar
-              </button>
             </div>
             <input
               type="text"
@@ -74,14 +66,14 @@ export default function Families() {
           {isLoading ? (
             <p className="text-xl text-white">Loading families...</p>
           ) : (
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-4xl">
               {filteredFamilies?.length === 0 ? (
                 <p className="text-lg text-white">No families found.</p>
               ) : (
                 filteredFamilies?.map((family) => (
                   <div
                     key={family.id}
-                    className="mb-4 rounded-xl bg-secondary p-4 text-white"
+                    className="mb-4 rounded-xl bg-secondary p-4 text-textcolor"
                   >
                     <button
                       onClick={() =>
@@ -101,7 +93,7 @@ export default function Families() {
                             setSelectedFamily(family.id);
                             setIsAddMemberOpen(true);
                           }}
-                          className="cursor-pointer rounded bg-accent px-2 py-1 text-base text-primary"
+                          className="cursor-pointer rounded bg-accent px-2 py-1 text-sm text-primary"
                         >
                           + Add Member
                         </span>
@@ -116,7 +108,7 @@ export default function Families() {
                         {members?.map((member) => (
                           <div
                             key={member.id}
-                            className="flex justify-between rounded-lg bg-accent p-3 text-white"
+                            className="flex justify-between rounded-lg bg-accent p-3 text-primary font-semibold"
                           >
                             <span>
                               {member.name} - {member.mobile} -{" "}
@@ -161,9 +153,6 @@ export default function Families() {
           )}
           {showAddParishoner && (
             <AddParishonerModal onClose={() => setShowAddParishoner(false)} />
-          )}
-          {showEditWardGurkar && (
-            <EditWardGurkarModal onClose={() => setShowEditWardGurkar(false)} />
           )}
           {isAddMemberOpen && selectedFamily && (
             <AddToFamilyModal

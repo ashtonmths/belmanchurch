@@ -10,7 +10,7 @@ export default function AddParishonerModal({ onClose }: { onClose: () => void })
 
   const { data: wards } = api.ward.getAllWards.useQuery();
   const { data: families } = api.family.getAllFamilies.useQuery();
-  const addParishoner = api.family.addParishoner.useMutation({
+  const addParishoner = api.parishoner.addParishoner.useMutation({
     onSuccess: () => {
       window.location.reload();
     },

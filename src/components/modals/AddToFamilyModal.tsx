@@ -15,9 +15,9 @@ export default function AddMemberModal({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // ✅ Fetch all parishioners
-  const { data: parishoners } = api.family.getAllParishoners.useQuery();
+  const { data: parishoners } = api.parishoner.getAllParishoners.useQuery();
 
-  const addMember = api.family.assignParishonerToFamily.useMutation({
+  const addMember = api.parishoner.assignParishonerToFamily.useMutation({
     onSuccess: () => {
       window.location.reload(); // 🔄 Refresh to reflect new member
     },

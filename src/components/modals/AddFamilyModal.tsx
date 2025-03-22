@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { api } from "~/trpc/react";
 
@@ -7,7 +6,7 @@ export default function AddFamilyModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
   const [headId, setHeadId] = useState("");
 
-  const { data: parishoners } = api.family.getAllParishoners.useQuery();
+  const { data: parishoners } = api.parishoner.getAllParishoners.useQuery();
   const addFamily = api.family.addFamily.useMutation({
     onSuccess: () => {
       window.location.reload();

@@ -18,7 +18,7 @@ type Member = {
 
 export default function Card() {
   const { data: session } = useSession();
-  const { data: parishoner } = api.family.getParishonerDetails.useQuery();
+  const { data: parishoner } = api.parishoner.getParishonerDetails.useQuery();
   const [mobileInput, setMobileInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 

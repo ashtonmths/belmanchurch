@@ -26,7 +26,7 @@ export default function EditMemberModal({
 
   // ✅ Fetch all wards
   const { data: wards } = api.ward.getAllWards.useQuery();
-  const updateMember = api.family.updateParishoner.useMutation({
+  const updateMember = api.parishoner.updateParishoner.useMutation({
     onSuccess: () => {
       window.location.reload(); // 🔄 Full page refresh after update
     },
