@@ -159,7 +159,7 @@ export default function DonationAdmin() {
                           </td>
                           <td className="p-2 text-center">
                             <button
-                              className="rounded border-2 border-accent bg-primary px-4 py-2 text-textcolor transition-all duration-300 ease-in-out"
+                              className="rounded border-2 border-accent bg-primary px-4 py-2 text-textcolor hover:bg-accent hover:text-primary transition-all duration-300 ease-in-out"
                               onClick={() =>
                                 setExpandedRow((prev) =>
                                   prev === donation.id ? null : donation.id,
