@@ -32,6 +32,15 @@ export default function DonationAdmin() {
 
   const [activeTab, setActiveTab] = useState<"inbox" | "history">("inbox");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredInboxDonations = inboxDonations.filter((donation) =>
+    donation.byWhom.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const filteredHistoryDonations = historyDonations.filter((donation) =>
+    donation.byWhom.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   const ReceiptUploader: React.FC<ReceiptUploaderProps> = ({ id }) => {
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,6 +114,13 @@ export default function DonationAdmin() {
             >
               History
             </button>
+            <input
+              type="text"
+              placeholder={`Search ${activeTab === "inbox" ? "Inbox" : "History"} by donor...`}
+              className="w-[25%] font-semibold rounded-lg border border-accent bg-primary placeholder-accent px-4 py-2 text-textcolor focus:outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           {activeTab === "inbox" && (
@@ -125,10 +141,10 @@ export default function DonationAdmin() {
                     </tr>
                   </thead>
                   <tbody>
-                    {inboxDonations.map((donation) => (
+                    {filteredInboxDonations.map((donation) => (
                       <React.Fragment key={donation.id}>
                         {/* Row with donation details */}
-                        <tr className="border-2 border-accent bg-primary font-semibold text-textcolor">
+                        <tr className="border-2 border-accent bg-primary font-bold text-textcolor">
                           <td className="border-2 border-accent p-2">
                             {donation.type}
                           </td>
@@ -143,7 +159,7 @@ export default function DonationAdmin() {
                           </td>
                           <td className="p-2 text-center">
                             <button
-                              className="rounded bg-primary px-4 py-2 text-textcolor border-2 border-accent transition-all duration-300 ease-in-out"
+                              className="rounded border-2 border-accent bg-primary px-4 py-2 text-textcolor transition-all duration-300 ease-in-out"
                               onClick={() =>
                                 setExpandedRow((prev) =>
                                   prev === donation.id ? null : donation.id,
@@ -206,7 +222,7 @@ export default function DonationAdmin() {
 
           {activeTab === "history" && (
             <div className="flex h-full w-[70%] flex-col items-center gap-3 overflow-y-auto rounded p-3">
-              {historyDonations.length === 0 ? (
+              {filteredHistoryDonations.length === 0 ? (
                 <p className="text-4xl font-extrabold text-primary">
                   No receipts issued.
                 </p>
@@ -215,15 +231,22 @@ export default function DonationAdmin() {
                   <thead>
                     <tr className="border-2 border-accent bg-primary text-textcolor">
                       <th className="border-2 border-accent p-2">Type</th>
+                      <th className="border-2 border-accent p-2">By?</th>
                       <th className="border-2 border-accent p-2">Amount</th>
                       <th className="border-2 border-accent p-2">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {historyDonations.map((donation) => (
-                      <tr key={donation.id} className="border-2 border-accent bg-primary font-semibold text-textcolor">
+                      <tr
+                        key={donation.id}
+                        className="border-2 border-accent bg-primary font-semibold text-textcolor"
+                      >
                         <td className="border-2 border-accent p-2">
                           {donation.type}
+                        </td>
+                        <td className="border-2 border-accent p-2">
+                          {donation.byWhom}
                         </td>
                         <td className="border-2 border-accent p-2">
                           ₹{donation.amount}
