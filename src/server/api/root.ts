@@ -3,6 +3,7 @@ import { familyRouter } from "./routers/family";
 import { miscRouter } from "./routers/misc";
 import { parishonerRouter } from "./routers/parishoner";
 import { wardRouter } from "./routers/wards";
+import { galleryRouter } from "./routers/gallery";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -15,7 +16,8 @@ export const appRouter = createTRPCRouter({
   family: familyRouter,
   misc: miscRouter,
   ward: wardRouter,
-  parishoner: parishonerRouter
+  parishoner: parishonerRouter,
+  gallery: galleryRouter
 });
 
 // export type definition of API

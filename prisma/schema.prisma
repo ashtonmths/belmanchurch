@@ -130,6 +130,7 @@ model Order {
 model Event {
   id        String   @id @default(cuid())
   name      String
+  image     String   @default("")
   date      DateTime
   venue     String
   info      String? // Nullable for optional input
@@ -142,6 +143,14 @@ model Bethkati {
   year      Int
   month     String
   createdAt DateTime @default(now())
+}
+
+model Gallery {
+  id               String   @id @default(uuid())
+  eventName        String
+  eventDate        DateTime
+  cloudinaryFolder String
+  createdAt        DateTime @default(now())
 }
 
 enum Role {
