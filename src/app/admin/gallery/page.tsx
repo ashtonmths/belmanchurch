@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import Button from "~/components/Button";
 import { ToastContainer, toast } from "react-toastify";
-import imageCompression from "browser-image-compression";
 import "react-toastify/dist/ReactToastify.css";
+import imageCompression from "browser-image-compression";
 
 export default function AdminGallery() {
   const [images, setImages] = useState<File[]>([]);
@@ -28,61 +28,70 @@ export default function AdminGallery() {
     },
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const totalFiles = files.length;
-
-      // Show initial toast with a progress bar
-      const toastId = toast.info(`Compressing images... (0/${totalFiles})`, {
-        autoClose: false,
-        progress: 0,
-      });
-
-      // Compression options
+  const compressImage = async (file: File): Promise<File> => {
+    try {
       const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
+        maxSizeMB: 1, // Keep file under 1MB
+        maxWidthOrHeight: 1024, // Resize if necessary
+        useWebWorker: true, // Use Web Workers for performance
       };
+  
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error("Compression error:", error);
+      return file; // Return original file if compression fails
+    }
+  };
 
-      try {
-        let completed = 0;
-        const compressedFiles: File[] = await Promise.all(
-          files.map(async (file) => {
-            const compressed = await imageCompression(file, options);
-            completed++;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
 
-            // Update progress in the toast
-            toast.update(toastId, {
-              render: `Compressing images... (${completed}/${totalFiles})`,
-              progress: completed / totalFiles,
-            });
+    const files = Array.from(e.target.files);
+    const totalFiles = files.length;
 
-            return compressed;
-          }),
-        );
+    // Show initial toast with progress
+    const toastId = toast.info(`Compressing images... (0/${totalFiles})`, {
+      autoClose: false,
+      progress: 0,
+    });
 
-        setImages([...images, ...compressedFiles]);
+    try {
+      let completed = 0;
+      const compressedFiles: File[] = await Promise.all(
+        files.map(async (file) => {
+          const compressed = await compressImage(file);
+          completed++;
 
-        // Update the toast to success
-        toast.update(toastId, {
-          render: "Images compressed and added successfully!",
-          type: "success",
-          autoClose: 3000,
-          progress: undefined,
-        });
-      } catch (error) {
-        console.error("Image compression error:", error);
+          // Update progress in the toast
+          toast.update(toastId, {
+            render: `Compressing images... (${completed}/${totalFiles})`,
+            progress: completed / totalFiles,
+          });
 
-        // Update the toast to an error state
-        toast.update(toastId, {
-          render: "Failed to compress images.",
-          type: "error",
-          autoClose: 3000,
-          progress: undefined,
-        });
-      }
+          return compressed;
+        }),
+      );
+
+      setImages([...images, ...compressedFiles]);
+
+      // Update toast to success
+      toast.update(toastId, {
+        render: "Images compressed and added successfully!",
+        type: "success",
+        autoClose: 3000,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.error("Image compression failed:", error);
+
+      // Update toast to error state
+      toast.update(toastId, {
+        render: "Failed to compress images.",
+        type: "error",
+        autoClose: 3000,
+        progress: undefined,
+      });
     }
   };
 
