@@ -9,6 +9,8 @@ import Button from "~/components/Button";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { FaHeart, FaShareAlt, FaDownload } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Gallery() {
   const { data: folders, isLoading, error } = api.gallery.getFolders.useQuery();
@@ -41,21 +43,37 @@ export default function Gallery() {
   const [likes, setLikes] = useState<Record<string, number>>({});
 
   const handleLike = (imageId: string) => {
+    // Check if the user has already liked the image
+    if (likes[imageId]) {
+      toast.info("You already liked this image!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      return; // Prevent API call
+    }
+  
     updateLikeMutation.mutate(
       { imageId },
       {
         onSuccess: (data) => {
           setLikes((prevLikes) => ({
             ...prevLikes,
-            [imageId]: data.likes, // Update likes for that image
+            [imageId]: data.likes,
           }));
+          toast.success("You liked the image!", {
+            position: "top-right",
+            autoClose: 2000,
+          });
         },
         onError: (error) => {
-          alert(error.message);
+          toast.error(error.message || "Something went wrong!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
         },
       },
     );
-  };
+  };  
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
@@ -284,6 +302,7 @@ export default function Gallery() {
             </AnimatePresence>
           </div>
         </div>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </ProtectedRoute>
   );
