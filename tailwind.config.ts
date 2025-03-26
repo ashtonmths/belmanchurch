@@ -7,6 +7,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
+        cursive: ["'Great Vibes'", "cursive"],
       },
       colors: {
         primary: "#EAC696",
