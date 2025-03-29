@@ -47,7 +47,7 @@ export const galleryRouter = createTRPCRouter({
       return { success: true, cloudinaryFolder };
     }),
 
-  getFolders: protectedProcedure.query(async ({ }) => {
+  getFolders: protectedProcedure.query(async ({}) => {
     const folders = await db.gallery.findMany({
       select: {
         id: true,
@@ -84,65 +84,64 @@ export const galleryRouter = createTRPCRouter({
     return folderPreviews;
   }),
 
-  updateLike: protectedProcedure
-    .input(z.object({ imageId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
+  toggleLike: protectedProcedure
+  .input(z.object({ imageId: z.string() }))
+  .mutation(async ({ ctx, input }) => {
+    const { imageId } = input;
+    const userId = ctx.session.user.id;
 
-      const image = await db.galleryImage.findUnique({
-        where: { id: input.imageId },
-        select: { likedBy: true, likes: true },
-      });
+    // Fetch image
+    const image = await ctx.db.galleryImage.findUnique({
+      where: { id: imageId },
+      select: { likedBy: true },
+    });
 
-      if (!image) {
-        throw new Error("Image not found");
-      }
+    if (!image) throw new Error("Image not found");
 
-      if (image.likedBy.includes(userId)) {
-        throw new Error("You have already liked this image.");
-      }
+    const updatedLikedBy = image.likedBy.includes(userId)
+      ? image.likedBy.filter((id) => id !== userId) // Unlike
+      : [...image.likedBy, userId]; // Like
 
-      const updatedImage = await db.galleryImage.update({
-        where: { id: input.imageId },
-        data: {
-          likes: { increment: 1 },
-          likedBy: { push: userId }, // Adds userId without overwriting the array
-        },
-        select: { likes: true },
-      });
+    // Update DB
+    await ctx.db.galleryImage.update({
+      where: { id: imageId },
+      data: { likedBy: updatedLikedBy },
+    });
 
-      return { success: true, likes: updatedImage.likes };
-    }),
+    return { likes: updatedLikedBy.length, isLiked: updatedLikedBy.includes(userId) };
+  }),
+
   getImages: protectedProcedure
-    .input(z.object({ folder: z.string() })) // Expect folder name
-    .query(async ({ input }) => {
-      // Find the gallery by cloudinaryFolder
-      const gallery = await db.gallery.findFirst({
-        where: { cloudinaryFolder: input.folder }, // Find by folder name
-        select: { id: true },
-      });
+  .input(z.object({ folder: z.string() })) // Expect folder name
+  .query(async ({ ctx, input }) => {
+    // Find the gallery by cloudinaryFolder
+    const gallery = await db.gallery.findFirst({
+      where: { cloudinaryFolder: input.folder }, // Find by folder name
+      select: { id: true },
+    });
 
-      if (!gallery) {
-        throw new Error("Gallery not found");
-      }
+    if (!gallery) throw new Error("Gallery not found");
 
-      // Fetch images linked to this gallery
-      const images = await db.galleryImage.findMany({
-        where: { galleryId: gallery.id },
-        select: {
-          id: true,
-          url: true,
-          likes: true,
-          uploadedBy: { select: { id: true, name: true, image: true } }, 
-        },
-        orderBy: { createdAt: "desc" },
-      });
+    // Fetch images linked to this gallery
+    const images = await db.galleryImage.findMany({
+      where: { galleryId: gallery.id },
+      select: {
+        id: true,
+        url: true,
+        likedBy: true,
+        uploadedBy: { select: { id: true, name: true, image: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
-      return images.map((image) => ({
-        id: image.id,
-        url: image.url,
-        likes: image.likes,
-        uploadedBy: image.uploadedBy ?? null,
-      }));
-    }),
+    const userId = ctx.session.user.id;
+
+    return images.map((image) => ({
+      id: image.id,
+      url: image.url,
+      likes: image.likedBy.length, // Calculate from likedBy array
+      uploadedBy: image.uploadedBy ?? null,
+      isLiked: image.likedBy.includes(userId),
+    }));
+  }),
 });
