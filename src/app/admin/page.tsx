@@ -84,7 +84,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
-        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center">
+        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center overflow-y-auto">
           <div className="flex h-full w-full flex-col md:flex-row">
             {/* Left Panel */}
             <div className="flex h-full w-full flex-col gap-5 p-5 text-white md:w-1/3">
