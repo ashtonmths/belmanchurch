@@ -54,10 +54,16 @@ export default function Card() {
 
   const handleVerify = () => {
     setIsVerifying(true);
+
     verifyMobileMutation.mutate(
       { mobile: mobileInput },
       {
-        onSettled: () => setIsVerifying(false),
+        onSuccess: () => {
+          window.location.reload();
+        },
+        onSettled: () => {
+          setIsVerifying(false);
+        },
       },
     );
   };
@@ -83,9 +89,15 @@ export default function Card() {
   };
 
   return (
-    <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center overflow-y-auto overflow-x-hidden rounded-2xl bg-primary/20 p-4 shadow-lg">
+    <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-primary/20 p-4 shadow-lg">
+      <div className="-z-10 absolute inset-0 pt-[170%] md:pt-[110%] flex items-center justify-center overflow-hidden h-[100%]">
+        <div className="animate-wave absolute h-[170%] w-[200%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-40"></div>
+        <div className="animate-wave-second absolute h-[170%] w-[200%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-40"></div>
+        <div className="animate-wave-third absolute h-[170%] w-[200%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-40"></div>
+      </div>
+
       {/* Profile Section */}
-      <div className="flex flex-col items-center text-center">
+      <div className="flex flex-col items-center text-center overflow-y-auto">
         <div className="mb-4">
           <Image
             src={session?.user.image ?? "/default-avatar.png"}
@@ -116,16 +128,16 @@ export default function Card() {
               type="text"
               value={mobileInput}
               onChange={(e) => setMobileInput(e.target.value)}
-              className="mt-2 w-full rounded border p-2 text-center"
+              className="mt-2 w-[60%] rounded border bg-primary p-2 text-center text-textcolor placeholder-textcolor"
               placeholder="Enter mobile number"
             />
-            <button
+            <Button
               onClick={handleVerify}
-              className="mt-2 w-full rounded bg-accent px-4 py-2 text-white"
+              className="mt-5 rounded bg-primary px-4 py-2"
               disabled={isVerifying}
             >
               {isVerifying ? "Verifying..." : "Verify"}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex flex-col items-center">

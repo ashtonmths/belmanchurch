@@ -23,3 +23,24 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #C8AE7D;
 }
+
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-wave {
+  animation: wave 35s infinite linear;
+}
+
+.animate-wave-second {
+  animation: wave 25s infinite linear;
+}
+
+.animate-wave-third {
+  animation: wave 15s infinite linear;
+}
