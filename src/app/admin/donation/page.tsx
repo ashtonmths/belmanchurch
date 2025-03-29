@@ -179,7 +179,7 @@ export default function DonationAdmin() {
                               ) : (
                                 <div className="flex flex-col items-center">
                                   <Image
-                                    src={receipt[donation.id]?.data ?? ""}
+                                    src={receipt[donation.id]?.data ?? "/favicon.webp"}
                                     alt="Scanned Receipt"
                                     className="mt-2 h-40 w-auto rounded object-cover"
                                     width={300}

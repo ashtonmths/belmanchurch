@@ -51,7 +51,7 @@ export default function Gallery() {
       });
       return; // Prevent API call
     }
-  
+
     updateLikeMutation.mutate(
       { imageId },
       {
@@ -73,7 +73,7 @@ export default function Gallery() {
         },
       },
     );
-  };  
+  };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
@@ -136,7 +136,7 @@ export default function Gallery() {
                   <div className="relative flex h-[70%] w-full items-center justify-center overflow-hidden bg-primary p-4">
                     <div className="relative h-full w-full overflow-hidden rounded-lg">
                       <Image
-                        src={folder.previewImage ?? ""}
+                        src={folder.previewImage ?? "/favicon.webp"}
                         alt={folder.eventName}
                         fill
                         className="scale-110 object-cover"
@@ -177,7 +177,7 @@ export default function Gallery() {
                       >
                         Close
                       </Button>
-                      <div className="relative h-[80%] w-[90%] overflow-y-auto p-4 mt-5">
+                      <div className="relative mt-5 h-[80%] w-[90%] overflow-y-auto p-4">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                           {images.map((img, index) => (
                             <motion.div
@@ -196,7 +196,9 @@ export default function Gallery() {
                                     ? {
                                         id: img.uploadedBy.id,
                                         name: img.uploadedBy.name,
-                                        image: img.uploadedBy.image ?? "",
+                                        image:
+                                          img.uploadedBy.image ??
+                                          "/favicon.webp",
                                       }
                                     : null,
                                 });
@@ -247,51 +249,67 @@ export default function Gallery() {
                     exit={{ scale: 0.8 }}
                     onClick={(e) => e.stopPropagation()} // Prevent closing on click inside
                   >
-                    <div className="flex h-[90%] w-full flex-col gap-4 border-4 border-primary p-4 md:w-[35%]">
-                      <div className="relative flex h-[74%] w-full overflow-hidden">
-                        <div className="relative flex h-full w-full justify-start overflow-hidden rounded-lg border-4 border-primary">
-                          <Zoom>
-                            <Image
-                              src={fullScreenImage.url}
-                              alt="Full-Screen Image"
-                              fill
-                              objectFit="contain"
-                            />
-                          </Zoom>
-                        </div>
+                    <div className="w-11/12 max-w-sm overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105">
+                      {/* Image Section */}
+                      <div
+                        className="relative w-full"
+                      >
+                        <Zoom>
+                          <Image
+                            src={fullScreenImage.url}
+                            alt="Full-Screen Image"
+                            layout="fill"
+                            objectFit="contain"
+                            className="rounded-t-lg"
+                          />
+                        </Zoom>
                       </div>
-                      <div className="h-[18%] w-full border-4 border-primary flex flex-row justify-around text-base items-center">
+
+                      {/* Actions Section */}
+                      <div className="flex items-center justify-around border-t border-gray-200 bg-white p-4 text-gray-700">
                         <button
-                          className="flex items-center gap-2 text-primary flex-col md:flex-row"
-                          onClick={() => handleLike(fullScreenImage.id)}
+                          className="flex items-center gap-2 hover:text-red-500"
+                          onClick={() => {
+                            if (likes[fullScreenImage.id]) {
+                              toast.info("You already liked this image!");
+                              return;
+                            }
+                            handleLike(fullScreenImage.id);
+                          }}
                         >
                           <FaHeart className="text-red-500" />{" "}
                           {likes[fullScreenImage.id]} Likes
                         </button>
                         <button
-                          className="flex items-center gap-2 text-primary flex-col md:flex-row"
+                          className="flex items-center gap-2 hover:text-blue-500"
                           onClick={handleShare}
                         >
                           <FaShareAlt /> Share
                         </button>
                         <button
-                          className="flex items-center gap-2 text-primary flex-col md:flex-row"
+                          className="flex items-center gap-2 hover:text-green-500"
                           onClick={handleDownload}
                         >
                           <FaDownload /> Download
                         </button>
                       </div>
-                      <div className="h-[8%] w-full text-primary flex flex-row justify-center items-center gap-2">
-                        Uploaded by <div className="text-lg text-bold">{fullScreenImage.uploadedBy?.name}</div>
+
+                      {/* Uploader Info */}
+                      <div className="flex items-center justify-center gap-2 bg-gray-100 p-3 text-sm text-gray-700">
+                        Uploaded by{" "}
+                        <span className="font-semibold">
+                          {fullScreenImage.uploadedBy?.name}
+                        </span>
                         {fullScreenImage.uploadedBy?.image && (
                           <Image
                             src={
-                              fullScreenImage.uploadedBy.image ?? ""
+                              fullScreenImage.uploadedBy.image ??
+                              "/favicon.webp"
                             }
                             alt={fullScreenImage.uploadedBy.name ?? "Uploader"}
-                            width={40}
-                            height={40}
-                            className="rounded-full"
+                            width={32}
+                            height={32}
+                            className="rounded-full border"
                           />
                         )}
                       </div>

@@ -58,7 +58,6 @@ export const galleryRouter = createTRPCRouter({
       orderBy: { eventDate: "desc" },
     });
 
-    // Fetch first image for each folder
     const folderPreviews = await Promise.all(
       folders.map(async (folder) => {
         try {
