@@ -1,9 +1,14 @@
 import { db } from "~/server/db";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
+import { sendReceipt } from "~/server/utils/mail";
 
 // ✅ Initialize Razorpay instance with proper env variables
 const razorpay = new Razorpay({
@@ -26,6 +31,7 @@ export const donationRouter = createTRPCRouter({
         amount: z.number().min(1),
         forWhom: z.string(),
         byWhom: z.string(),
+        email: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -49,6 +55,7 @@ export const donationRouter = createTRPCRouter({
             amount: input.amount,
             forWhom: input.forWhom,
             byWhom: input.byWhom,
+            email: input.email,
             status: "PENDING",
           },
         });
@@ -63,7 +70,6 @@ export const donationRouter = createTRPCRouter({
       }
     }),
 
-  // ✅ VERIFY PAYMENT
   verifyPayment: publicProcedure
     .input(
       z.object({
@@ -101,7 +107,6 @@ export const donationRouter = createTRPCRouter({
           data: { status: "SUCCESS", paymentId: input.razorpay_payment_id },
         });
 
-        // ✅ Move order data to Donations Table
         await db.donation.create({
           data: {
             paymentId: input.razorpay_payment_id,
@@ -109,6 +114,8 @@ export const donationRouter = createTRPCRouter({
             amount: updatedOrder.amount,
             forWhom: updatedOrder.forWhom,
             byWhom: updatedOrder.byWhom,
+            email: updatedOrder.email,
+            receiptIssued: false,
           },
         });
 
@@ -121,13 +128,79 @@ export const donationRouter = createTRPCRouter({
         });
       }
     }),
-    getAll: publicProcedure.query(async () => {
-      return await db.donation.findMany({
-        select: {
-          id: true,
-          amount: true,
-          createdAt: true,
-        },
+
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "DEVELOPER"
+    ) {
+      throw new Error("Unauthorized");
+    }
+    return await ctx.db.donation.findMany({
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        byWhom: true,
+        email: true,
+        forWhom: true,
+        createdAt: true,
+        receiptIssued: true,
+      },
+    });
+  }),
+  getInbox: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "DEVELOPER"
+    ) {
+      throw new Error("Unauthorized");
+    }
+    return await db.donation.findMany({
+      where: { receiptIssued: false },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
+  getHistory: protectedProcedure.query(async ({ ctx }) => {
+    if (
+      ctx.session.user.role !== "ADMIN" &&
+      ctx.session.user.role !== "DEVELOPER"
+    ) {
+      throw new Error("Unauthorized");
+    }
+    return await db.donation.findMany({
+      where: { receiptIssued: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
+  issueReceipt: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        method: z.enum(["upload", "scan"]), // Method type: upload or scan
+        email: z.string().email(),
+        file: z.object({
+          name: z.string(),
+          buffer: z.string(), // Base64 file data
+        }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!["ADMIN", "DEVELOPER"].includes(ctx.session.user.role)) {
+        throw new Error("Unauthorized");
+      }
+
+      const buffer = Buffer.from(input.file.buffer, "base64"); // Convert base64 to Buffer
+
+      await sendReceipt(input.email, { name: input.file.name, buffer });
+
+      await db.donation.update({
+        where: { id: input.id },
+        data: { receiptIssued: true },
       });
+
+      return { success: true };
     }),
 });

@@ -1,18 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer utilities {
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-}
 
 ::-webkit-scrollbar {
   width: 10px;
@@ -33,4 +22,25 @@
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #C8AE7D;
+}
+
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-wave {
+  animation: wave 35s infinite linear;
+}
+
+.animate-wave-second {
+  animation: wave 25s infinite linear;
+}
+
+.animate-wave-third {
+  animation: wave 15s infinite linear;
 }

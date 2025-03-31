@@ -84,23 +84,23 @@ export default function AdminDashboard() {
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
-        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center">
+        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center overflow-y-auto">
           <div className="flex h-full w-full flex-col md:flex-row">
             {/* Left Panel */}
             <div className="flex h-full w-full flex-col gap-5 p-5 text-white md:w-1/3">
-              <div className="flex h-1/2 md:h-1/3 items-center border-2 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
+              <div className="flex h-1/2 md:h-1/3 items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
                 <p>
                   Total Donations: <br />
                   <br />₹{totalDonations.toLocaleString()}
                 </p>
               </div>
-              <div className="flex h-1/2 md:h-1/3 items-center border-2 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
+              <div className="flex h-1/2 md:h-1/3 items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
                 <p>
                   Weekly Donations: <br />
                   <br />₹{weeklyDonations.toLocaleString()}
                 </p>
               </div>
-              <div className="flex h-1/2 md:h-1/3 items-center border-2 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
+              <div className="flex h-1/2 md:h-1/3 items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
                 <p>DUMMY</p>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
             {/* Right Panel */}
             <div className="flex h-full w-full flex-col text-white md:w-2/3">
               {/* Graph Section */}
-              <div className="h-[50%] rounded-lg bg-black/50 border-2 border-primary p-5 md:h-[60%]">
+              <div className="h-[50%] rounded-lg bg-black/50 border-4 border-primary p-5 md:h-[60%]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={monthlyData}
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </div>
               {/* Empty Div Below Graph */}
-              <div className="mt-5 flex h-[50%] items-center border-2 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary md:h-[40%]">
+              <div className="mt-5 flex h-[50%] items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary md:h-[40%]">
                 <p>DUMMY</p>
               </div>
             </div>

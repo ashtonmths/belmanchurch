@@ -6,6 +6,7 @@ export default function DonatePage() {
   const [type, setType] = useState("");
   const [forWhom, setForWhom] = useState("");
   const [byWhom, setByWhom] = useState("");
+  const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
 
   return (
@@ -40,13 +41,20 @@ export default function DonatePage() {
                 onChange={(e) => setByWhom(e.target.value)}
               />
               <input
+                type="email"
+                className="w-full rounded-lg p-2"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
                 type="number"
                 className="w-full rounded-lg p-2"
                 placeholder="Amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
-              <DonateButton type={type} amount={amount} forWhom={forWhom} byWhom={byWhom} />
+              <DonateButton type={type} amount={amount} forWhom={forWhom} byWhom={byWhom} email={email} />
             </div>
           </div>
         </div>

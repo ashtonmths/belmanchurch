@@ -43,39 +43,51 @@ model Session {
 }
 
 model User {
-  id            String      @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String?
-  email         String?     @unique
+  email         String?        @unique
   emailVerified DateTime?
-  role          Role        @default(USER)
+  role          Role           @default(USER)
   image         String?
   accounts      Account[]
   sessions      Session[]
   Parishoner    Parishoner?
+  GalleryImage  GalleryImage[]
 }
 
 model Parishoner {
-  id     String  @id @default(cuid())
-  mobile String  @unique
-  userId String? @unique
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Self-referential relation to FamilyHead
-  familyHead   FamilyHead? @relation("FamilyMembers", fields: [familyHeadId], references: [id])
-  familyHeadId String?
-
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  FamilyHead FamilyHead[]
+  id             String    @id @default(cuid())
+  mobile         String    @unique
+  mobileVerified Boolean   @default(false)
+  userId         String?   @unique
+  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String?
+  dateOfBirth    DateTime?
+  wardId         String?
+  ward           Ward?     @relation("WardParishoners", fields: [wardId], references: [id], onDelete: SetNull)
+  familyId       String?
+  family         Family?   @relation(name: "FamilyMembers", fields: [familyId], references: [id], onDelete: SetNull) // ✅ Relation to Family
+  familyHead     Family?   @relation(name: "FamilyHead")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
-model FamilyHead {
-  id         String       @id @default(cuid())
-  parishoner Parishoner   @relation(fields: [id], references: [id], onDelete: Cascade) // FamilyHead IS a Parishoner
-  members    Parishoner[] @relation("FamilyMembers")
+model Family {
+  id        String       @id @default(cuid())
+  name      String
+  headId    String?      @unique
+  head      Parishoner?  @relation(name: "FamilyHead", fields: [headId], references: [id], onDelete: SetNull) // ✅ Family head
+  members   Parishoner[] @relation(name: "FamilyMembers") // ✅ Family members
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Ward {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  parishoners Parishoner[] @relation("WardParishoners")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model VerificationToken {
@@ -87,15 +99,17 @@ model VerificationToken {
 }
 
 model Donation {
-  id        String   @id @default(cuid())
-  paymentId String   @unique
-  type      String
-  amount    Float
-  forWhom   String
-  byWhom    String
-  createdAt DateTime @default(now())
-  Order     Order?   @relation(fields: [orderId], references: [id])
-  orderId   String?
+  id            String   @id @default(cuid())
+  paymentId     String   @unique
+  type          String
+  amount        Float
+  forWhom       String
+  byWhom        String
+  email         String
+  createdAt     DateTime @default(now())
+  receiptIssued Boolean  @default(false)
+  Order         Order?   @relation(fields: [orderId], references: [id])
+  orderId       String?
 }
 
 model Order {
@@ -104,6 +118,7 @@ model Order {
   amount    Float
   forWhom   String
   byWhom    String
+  email     String
   status    String  @default("PENDING")
   paymentId String? // Stores Razorpay payment ID after successful payment
 
@@ -111,6 +126,44 @@ model Order {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   Donation        Donation[]
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  image     String   @default("")
+  date      DateTime
+  venue     String
+  info      String? // Nullable for optional input
+  createdAt DateTime @default(now())
+}
+
+model Bethkati {
+  id        String   @id @default(cuid())
+  url       String
+  year      Int
+  month     String
+  createdAt DateTime @default(now())
+}
+
+model Gallery {
+  id               String         @id @default(uuid())
+  eventName        String
+  eventDate        DateTime
+  cloudinaryFolder String
+  createdAt        DateTime       @default(now())
+  images           GalleryImage[] // Relation
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  url          String   @unique
+  likedBy      String[] @default([])
+  createdAt    DateTime @default(now())
+  gallery      Gallery  @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  galleryId    String
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], map: "GalleryImage_uploadedById_fkey")
+  uploadedById String?
 }
 
 enum Role {
