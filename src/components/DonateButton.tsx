@@ -8,13 +8,17 @@
 import { useState } from "react";
 import Script from "next/script";
 import { api } from "~/trpc/react";
+import { toast } from "react-toastify";
 
 interface DonateButtonProps {
-  type: string;
+  type: "CHURCH" | "CHAPEL" | "THANKSGIVING";
   amount: string;
   forWhom: string;
   byWhom: string;
   email: string;
+  purpose?: string;
+  massTiming?: string;
+  onValidate: () => boolean;
 }
 
 export default function DonateButton({
@@ -23,16 +27,17 @@ export default function DonateButton({
   forWhom,
   byWhom,
   email,
+  purpose,
+  massTiming,
+  onValidate,
 }: DonateButtonProps) {
   const [loading, setLoading] = useState(false);
   const createOrder = api.donation.createOrder.useMutation();
   const verifyPayment = api.donation.verifyPayment.useMutation();
 
   const handlePayment = async () => {
-    if (!amount || Number(amount) <= 0) {
-      alert("Please enter a valid amount.");
-      return;
-    }
+    const isValid = onValidate();
+    if (!isValid) return;
 
     setLoading(true);
     try {
@@ -42,9 +47,9 @@ export default function DonateButton({
         forWhom,
         byWhom,
         email,
+        purpose,
+        massTiming,
       });
-
-      console.log("Razorpay Order ID:", razorpayOrderId);
 
       const paymentObject = new (window as any).Razorpay({
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -55,7 +60,7 @@ export default function DonateButton({
         order_id: razorpayOrderId,
         prefill: {
           name: byWhom,
-          email: "test@example.com",
+          email,
           contact: "9999999999",
         },
         theme: { color: "#EAC696" },
@@ -67,8 +72,8 @@ export default function DonateButton({
               razorpay_signature: response.razorpay_signature,
             });
 
-            alert(
-              "Payment Successful! Payment ID: " + response.razorpay_payment_id,
+            toast.success(
+              `Payment Successful! Payment ID: ${response.razorpay_payment_id}`
             );
           }
         },
@@ -77,7 +82,7 @@ export default function DonateButton({
       paymentObject.open();
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Payment failed. Please try again.");
+      toast.error("Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -87,7 +92,7 @@ export default function DonateButton({
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <button
-        className="hover:bg-something w-full rounded-lg bg-accent p-3 text-white disabled:opacity-50"
+        className="w-full rounded-lg bg-[#765827] p-3 text-white font-semibold transition hover:bg-[#65451F] disabled:opacity-50"
         onClick={handlePayment}
         disabled={loading}
       >

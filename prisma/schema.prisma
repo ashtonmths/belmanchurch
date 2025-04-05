@@ -100,33 +100,46 @@ model VerificationToken {
 
 model Donation {
   id            String   @id @default(cuid())
-  paymentId     String   @unique
-  type          String
+  paymentId     String   @unique              
+  type          DonationType               
+  purpose       String?                 
+  massTiming    String?                   
   amount        Float
-  forWhom       String
-  byWhom        String
+  forWhom       String                 
+  byWhom        String      
   email         String
   createdAt     DateTime @default(now())
   receiptIssued Boolean  @default(false)
-  Order         Order?   @relation(fields: [orderId], references: [id])
+
   orderId       String?
+  Order         Order?   @relation(fields: [orderId], references: [id])
 }
 
 model Order {
-  id        String  @id @default(cuid()) // Prisma-generated ID
-  type      String
-  amount    Float
-  forWhom   String
-  byWhom    String
-  email     String
-  status    String  @default("PENDING")
-  paymentId String? // Stores Razorpay payment ID after successful payment
+  id               String   @id @default(cuid())
+  type             DonationType           
+  amount           Float
+  forWhom          String
+  byWhom           String
+  email            String
+  status           String    @default("PENDING")
+  razorpayOrderId  String?   @unique               
+  paymentId        String?       
+  purpose          String?  // ✅ Add this line
+  massTiming       String?  // ✅ And this line    
 
-  razorpayOrderId String?    @unique // ✅ Store Razorpay Order ID
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  Donation        Donation[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  Donation         Donation[]
 }
+
+enum DonationType {
+  CHURCH       
+  CHAPEL  
+  THANKSGIVING 
+}
+
 
 model Event {
   id        String   @id @default(cuid())
