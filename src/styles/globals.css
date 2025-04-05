@@ -9,19 +9,19 @@
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #765827;
+  background: transparent;
   border-radius: 5px;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #EAC696;
+  background: transparent;
   border-radius: 5px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #C8AE7D;
+  background: transparent;
 }
 
 @keyframes wave {
