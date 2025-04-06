@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 import Button from "./Button";
+import { signOut } from "next-auth/react";
+import { TbLogout } from "react-icons/tb";
+import { useRouter } from "next/navigation";
 
 type Member = {
   id: string;
@@ -18,6 +21,7 @@ type Member = {
 
 export default function Card() {
   const { data: session } = useSession();
+  const router = useRouter();
   const { data: parishoner } = api.parishoner.getParishonerDetails.useQuery();
   const [mobileInput, setMobileInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -89,15 +93,26 @@ export default function Card() {
   };
 
   return (
-    <div className="relative mx-auto flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-primary/20 p-4 shadow-lg">
-      <div className="-z-10 absolute inset-0 pt-[170%] md:pt-[110%] flex items-center justify-center overflow-hidden h-[100%]">
-        <div className="animate-wave absolute h-[170%] w-[200%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-40"></div>
-        <div className="animate-wave-second absolute h-[170%] w-[200%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-40"></div>
-        <div className="animate-wave-third absolute h-[170%] w-[200%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-40"></div>
+    <div className="relative mx-auto flex w-full max-w-2xl flex-col items-center justify-start rounded-2xl bg-primary/20 p-4 shadow-lg">
+      <div className="absolute inset-0 -z-10 flex h-full items-center justify-center overflow-hidden rounded-2xl">
+        <div className="animate-wave absolute h-[90%] w-[140%] translate-y-[30%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-25 md:translate-y-[20%]"></div>
+        <div className="animate-wave-second absolute h-[90%] w-[140%] translate-y-[30%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-25 md:translate-y-[20%]"></div>
+        <div className="animate-wave-third absolute h-[90%] w-[140%] translate-y-[30%] rounded-[40%] bg-gradient-to-br from-primary via-accent to-secondary opacity-25 md:translate-y-[20%]"></div>
       </div>
 
       {/* Profile Section */}
-      <div className="flex flex-col items-center text-center overflow-y-auto">
+      <div className="mt-8 flex flex-col items-center overflow-y-auto text-center">
+        <button
+          onClick={async () => {
+            router.push("/");
+            await signOut({ redirect: false });
+          }}
+          className="absolute right-4 top-4 bg-transparent"
+          aria-label="Logout"
+        >
+          <TbLogout size={40} color="red" />
+        </button>
+
         <div className="mb-4">
           <Image
             src={session?.user.image ?? "/default-avatar.png"}
@@ -191,7 +206,7 @@ export default function Card() {
       </div>
 
       {/* Dummy Section */}
-      <div className="mt-6 w-full max-w-md text-center text-textcolor"></div>
+      <div className="mt-16 w-full max-w-md text-center text-textcolor"></div>
     </div>
   );
 }

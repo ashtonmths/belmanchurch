@@ -92,7 +92,7 @@ export default function DonateButton({
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <button
-        className="w-full rounded-lg bg-[#765827] p-3 text-white font-semibold transition hover:bg-[#65451F] disabled:opacity-50"
+        className="w-full rounded-lg bg-accent p-3 text-primary font-semibold disabled:opacity-50"
         onClick={handlePayment}
         disabled={loading}
       >
