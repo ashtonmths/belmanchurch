@@ -3,7 +3,8 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 import { SessionProvider } from "next-auth/react";
 import TransitionWrapper from "~/components/Loader";
-import NavbarSelector from "~/components/navbars/NavbarSelector"; // Import new component
+import NavbarSelector from "~/components/navbars/NavbarSelector";
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
   title: "Belman Church",
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex max-h-screen flex-col">
+        <Analytics />
         <SessionProvider>
           <TransitionWrapper>
             <TRPCReactProvider>
