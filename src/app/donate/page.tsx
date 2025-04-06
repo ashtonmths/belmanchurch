@@ -220,9 +220,7 @@ export default function DonatePage() {
                   forWhom={forWhom}
                   byWhom={byWhom}
                   email={email}
-                  purpose={
-                    type === "THANKSGIVING" ? "Thanksgiving Mass" : undefined
-                  }
+                  
                   massTiming={massTiming}
                   onValidate={validateForm}
                 />

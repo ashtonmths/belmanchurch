@@ -139,6 +139,7 @@ export default function DonationAdmin() {
                         <th className="border-2 border-accent p-2">For?</th>
                         <th className="border-2 border-accent p-2">By?</th>
                         <th className="border-2 border-accent p-2">Amount</th>
+                        <th className="border-2 border-accent p-2">Mass Timing</th>
                         <th className="border-2 border-accent p-2">Action</th>
                       </tr>
                     </thead>
@@ -158,6 +159,9 @@ export default function DonationAdmin() {
                             </td>
                             <td className="border-2 border-accent p-2">
                               ₹{donation.amount}
+                            </td>
+                            <td className="border-2 border-accent p-2">
+                              {donation.massTiming}
                             </td>
                             <td className="p-2 text-center">
                               <button
@@ -243,6 +247,7 @@ export default function DonationAdmin() {
                         <th className="border-2 border-accent p-2">Type</th>
                         <th className="border-2 border-accent p-2">By?</th>
                         <th className="border-2 border-accent p-2">Amount</th>
+                        <th className="border-2 border-accent p-2">Mass Timing</th>
                         <th className="border-2 border-accent p-2">Status</th>
                       </tr>
                     </thead>
@@ -260,6 +265,9 @@ export default function DonationAdmin() {
                           </td>
                           <td className="border-2 border-accent p-2">
                             ₹{donation.amount}
+                          </td>
+                          <td className="border-2 border-accent p-2">
+                            {donation.massTiming}
                           </td>
                           <td className="border-2 border-accent p-2 font-bold text-green-700">
                             Receipt Issued ✅

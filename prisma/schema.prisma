@@ -101,8 +101,7 @@ model VerificationToken {
 model Donation {
   id            String   @id @default(cuid())
   paymentId     String   @unique              
-  type          DonationType               
-  purpose       String?                 
+  type          DonationType         
   massTiming    String?                   
   amount        Float
   forWhom       String                 
@@ -125,7 +124,6 @@ model Order {
   status           String    @default("PENDING")
   razorpayOrderId  String?   @unique               
   paymentId        String?       
-  purpose          String?  // ✅ Add this line
   massTiming       String?  // ✅ And this line    
 
   createdAt        DateTime   @default(now())

@@ -30,7 +30,6 @@ export const donationRouter = createTRPCRouter({
         forWhom: z.string(),
         byWhom: z.string(),
         email: z.string().email(),
-        purpose: z.string().optional(),
         massTiming: z.string().optional(),
       }),
     )
@@ -55,7 +54,6 @@ export const donationRouter = createTRPCRouter({
             byWhom: input.byWhom,
             email: input.email,
             status: "PENDING",
-            purpose: input.purpose ?? null,
             massTiming: input.massTiming ?? null,
           },
         });
@@ -113,7 +111,6 @@ export const donationRouter = createTRPCRouter({
             forWhom: updatedOrder.forWhom,
             byWhom: updatedOrder.byWhom,
             email: updatedOrder.email,
-            purpose: updatedOrder.purpose,
             massTiming: updatedOrder.massTiming,
             receiptIssued: false,
             orderId: updatedOrder.id,
@@ -142,7 +139,6 @@ export const donationRouter = createTRPCRouter({
         byWhom: true,
         email: true,
         forWhom: true,
-        purpose: true,
         massTiming: true,
         createdAt: true,
         receiptIssued: true,

@@ -16,7 +16,6 @@ interface DonateButtonProps {
   forWhom: string;
   byWhom: string;
   email: string;
-  purpose?: string;
   massTiming?: string;
   onValidate: () => boolean;
 }
@@ -27,7 +26,6 @@ export default function DonateButton({
   forWhom,
   byWhom,
   email,
-  purpose,
   massTiming,
   onValidate,
 }: DonateButtonProps) {
@@ -47,7 +45,6 @@ export default function DonateButton({
         forWhom,
         byWhom,
         email,
-        purpose,
         massTiming,
       });
 
