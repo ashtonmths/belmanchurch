@@ -6,6 +6,7 @@ import Button from "~/components/Button";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import imageCompression from "browser-image-compression";
+import ProtectedRoute from "~/components/ProtectRoute";
 
 export default function AdminGallery() {
   const [images, setImages] = useState<File[]>([]);
@@ -134,6 +135,7 @@ export default function AdminGallery() {
   };
 
   return (
+    <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
         <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center rounded-xl border-2 border-primary bg-black/40 text-center">
@@ -221,5 +223,6 @@ export default function AdminGallery() {
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
+    </ProtectedRoute>
   );
 }

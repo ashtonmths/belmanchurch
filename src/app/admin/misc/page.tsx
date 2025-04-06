@@ -4,6 +4,7 @@ import { api } from "~/trpc/react";
 import Button from "~/components/Button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ProtectedRoute from "~/components/ProtectRoute";
 
 export default function AdminMisc() {
   const [eventData, setEventData] = useState({
@@ -99,6 +100,7 @@ export default function AdminMisc() {
   };
 
   return (
+    <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
       <ToastContainer />
       <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
@@ -182,5 +184,6 @@ export default function AdminMisc() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

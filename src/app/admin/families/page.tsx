@@ -5,6 +5,7 @@ import EditMemberModal from "~/components/modals/EditMemberModal";
 import AddParishonerModal from "~/components/modals/AddParishonerModal";
 import AddFamilyModal from "~/components/modals/AddFamilyModal";
 import AddToFamilyModal from "~/components/modals/AddToFamilyModal";
+import ProtectedRoute from "~/components/ProtectRoute";
 
 type Member = {
   id: string;
@@ -34,7 +35,8 @@ export default function Families() {
   );
 
   return (
-    <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
+    <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>  
+      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
         <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center text-center">
           {/* Buttons and Search Bar */}
@@ -163,5 +165,6 @@ export default function Families() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
