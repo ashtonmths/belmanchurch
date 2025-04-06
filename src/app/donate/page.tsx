@@ -29,10 +29,10 @@ export default function DonatePage() {
     setSelectedType(value);
     if (value === "CHURCH") {
       setForWhom("St Joseph Church, Belman");
-      setAmount("100");
+      setAmount("");
     } else if (value === "CHAPEL") {
       setForWhom("St Anthony Church, Manjarpalke");
-      setAmount("100");
+      setAmount("");
     } else if (value === "THANKSGIVING") {
       setForWhom("");
       setAmount("300");
@@ -77,8 +77,8 @@ export default function DonatePage() {
   return (
     <div className="min-h-screen w-full bg-[url('/bg/home.jpg')] bg-cover bg-center">
       <ToastContainer />
-      <div className="w-full min-h-screen bg-black/50 backdrop-blur-sm flex items-center justify-center">
-        <div className="w-[90%] mt-[35%] mb-10 md:mt-36 max-w-xl rounded-2xl bg-[#C8AE7D] p-6 text-[#65451F] shadow-2xl sm:p-10">
+      <div className="flex min-h-screen w-full items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="mb-10 mt-[35%] w-[90%] max-w-xl rounded-2xl bg-[#C8AE7D] p-6 text-[#65451F] shadow-2xl sm:p-10 md:mt-36">
           <h1 className="mb-6 text-center text-3xl font-extrabold">
             Make a Donation
           </h1>
@@ -116,13 +116,29 @@ export default function DonatePage() {
             {/* For */}
             <div>
               <label className="mb-1 block font-semibold">For:</label>
-              <input
-                type="text"
-                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                value={forWhom}
-                disabled={type !== "THANKSGIVING"}
-                onChange={(e) => setForWhom(e.target.value)}
-              />
+              {type === "THANKSGIVING" ? (
+                <select
+                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                  value={forWhom}
+                  onChange={(e) => setForWhom(e.target.value)}
+                >
+                  <option value="">----- Select Occasion -----</option>
+                  <option value="Birthday">Birthday</option>
+                  <option value="Anniversary">Anniversary</option>
+                  <option value="Wedding">Wedding</option>
+                  <option value="Success">Success</option>
+                  <option value="Healing">Healing</option>
+                  <option value="Thanksgiving">General Thanksgiving</option>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                  value={forWhom}
+                  disabled
+                  onChange={(e) => setForWhom(e.target.value)}
+                />
+              )}
             </div>
 
             {/* Email */}
