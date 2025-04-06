@@ -155,7 +155,7 @@ export default function AdminMisc() {
                 type="file"
                 accept="application/pdf"
                 onChange={handlePDFUpload}
-                className="w-[50%] rounded-lg bg-secondary file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-textcolor hover:file:bg-accent/80"
+                className="w-[50%] rounded-lg bg-secondary text-textcolor file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-primary hover:file:bg-accent/80"
               />
 
               <input
