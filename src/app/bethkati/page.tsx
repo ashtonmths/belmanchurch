@@ -68,7 +68,7 @@ export default function Bethkati() {
         </div>
       ) : (
         <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-          <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-md">
+          <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-xl py-6">
             <div className="flex h-[81%] w-[90%] items-center justify-center">
               <BethkatiViewer
                 file={selectedFile}
