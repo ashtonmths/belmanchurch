@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import Button from "./Button";
 
 interface BethkatiViewerProps {
   file: string;
@@ -16,19 +17,34 @@ pdfjs.GlobalWorkerOptions.workerSrc =
 export default function BethkatiViewer({ file, onClose }: BethkatiViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [width, setWidth] = useState(340); 
+
+  useEffect(() => {
+    const updateWidth = () => {
+      const isMobile = window.innerWidth <= 768;
+      setWidth(isMobile ? 330 : 380);
+    };
+
+    updateWidth(); // Set on mount
+    window.addEventListener("resize", updateWidth); // Update on resize
+
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
 
   const goNext = () =>
     setPageNumber((prev) => (numPages && prev < numPages ? prev + 1 : prev));
   const goPrev = () => setPageNumber((prev) => (prev > 1 ? prev - 1 : prev));
 
   return (
-    <div className="absolute flex justify-center backdrop-blur-sm">
-      <button
+    <div className="absolute flex flex-col justify-center items-center w-[90%]">
+      <Button
         onClick={onClose}
-        className="absolute -right-6 -top-6 text-2xl text-white"
+        className="mb-5 -mt-5"
       >
-        ✖
-      </button>
+        Close
+      </Button>
       <div className="flex flex-col items-center">
           <Document
             file={file}
@@ -38,28 +54,25 @@ export default function BethkatiViewer({ file, onClose }: BethkatiViewerProps) {
               pageNumber={pageNumber}
               renderTextLayer={false}
               renderAnnotationLayer={false}
-              width={300}
-              height={500}
+              width={width}
             />
           </Document>
         <div className="mt-4 flex gap-4">
-          <button
+          <Button
             onClick={goPrev}
             disabled={pageNumber === 1}
-            className="rounded bg-white p-2"
           >
             Prev
-          </button>
-          <span className="text-white">
+          </Button>
+          <span className="text-primary text-base">
             Page {pageNumber} of {numPages ?? "?"}
           </span>
-          <button
+          <Button
             onClick={goNext}
             disabled={numPages === null || pageNumber === numPages}
-            className="rounded bg-white p-2"
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     </div>

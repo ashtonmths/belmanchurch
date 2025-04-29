@@ -47,7 +47,7 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-30 flex flex-col items-center justify-center bg-primary/90"
+            className="fixed inset-0 z-30 flex flex-col items-center justify-center bg-primary"
           >
             <div className="flex flex-col space-y-6 text-2xl text-textcolor font-bold justify-center items-center">
               <NavButton route="/" onClick={() => setIsOpen(false)}>

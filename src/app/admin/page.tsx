@@ -11,6 +11,7 @@ import { api } from "~/trpc/react";
 import { useMemo } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
+import ProtectedRoute from "~/components/ProtectRoute";
 
 dayjs.extend(isBetween);
 
@@ -82,6 +83,7 @@ export default function AdminDashboard() {
   }, [donations]);
 
   return (
+    <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
         <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center overflow-y-auto">
@@ -141,5 +143,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 type UserRole = "DEVELOPER" | "ADMIN" | "PHOTOGRAPHER" | "PARISHONER" | "USER";
 
 interface ProtectedRouteProps {
-  allowedRoles: ("DEVELOPER" | "ADMIN" | "PHOTOGRAPHER" | "PARISHONER" | "USER")[];
+  allowedRoles: UserRole[];
   children: React.ReactNode;
 }
 
@@ -14,21 +14,21 @@ export default function ProtectedRoute({
   allowedRoles,
   children,
 }: ProtectedRouteProps) {
-  const { status } = useSession(); // Only to track loading state
-  const role = useRole();
+  const { status } = useSession(); // Handles auth state
+  const role = useRole(); // Custom hook (may return undefined initially)
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "loading") return; // Wait for session
+    if (status === "loading") return;
 
-    if (!role) {
-      router.push("/api/auth/signin"); // Redirect to login
-    } else if (!allowedRoles.includes(role as UserRole)) {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
+    } else if (role && !allowedRoles.includes(role as UserRole)) {
       router.push("/unauthorized");
     }
-  }, [role, status, router, allowedRoles]);
+  }, [status, role, allowedRoles, router]);
 
-  if (status === "loading") return <p>Loading...</p>;
+  if (status === "loading" || !role) return <p>Loading...</p>;
 
   return <>{children}</>;
 }

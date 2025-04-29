@@ -13,10 +13,12 @@ export default function Profile() {
         "DEVELOPER",
       ]}
     >
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center">
-            <ProfileCard />
+      <div className="min-h-screen w-full bg-[url('/bg/home.jpg')] bg-cover bg-center">
+        <div className="w-full bg-black/50 backdrop-blur-sm">
+          <div className="flex w-full flex-col items-center justify-center pt-[12rem] pb-[4rem]">
+            <div className="w-[90%] max-w-4xl text-center">
+              <ProfileCard />
+            </div>
           </div>
         </div>
       </div>

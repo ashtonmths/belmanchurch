@@ -11,13 +11,13 @@ export const galleryRouter = createTRPCRouter({
       z.object({
         eventName: z.string(),
         eventDate: z.string(),
-        images: z.array(z.string()), // Base64 images
+        images: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { eventName, eventDate, images } = input;
 
-      const cloudinaryFolder = `${eventName} - ${eventDate}`; // Folder name
+      const cloudinaryFolder = `${eventName} - ${eventDate}`;
 
       // Upload images to Cloudinary
       const uploadedImages = await Promise.all(
@@ -35,7 +35,6 @@ export const galleryRouter = createTRPCRouter({
         },
       });
 
-      // Save uploaded images in GalleryImage table
       await db.galleryImage.createMany({
         data: uploadedImages.map((img) => ({
           url: img.secure_url,
@@ -139,7 +138,7 @@ export const galleryRouter = createTRPCRouter({
     return images.map((image) => ({
       id: image.id,
       url: image.url,
-      likes: image.likedBy.length, // Calculate from likedBy array
+      likes: image.likedBy.length,
       uploadedBy: image.uploadedBy ?? null,
       isLiked: image.likedBy.includes(userId),
     }));

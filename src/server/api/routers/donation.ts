@@ -10,7 +10,6 @@ import crypto from "crypto";
 import Razorpay from "razorpay";
 import { sendReceipt } from "~/server/utils/mail";
 
-// ✅ Initialize Razorpay instance with proper env variables
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_SECRET_KEY!,
@@ -23,22 +22,21 @@ type RazorpayVerificationInput = {
 };
 
 export const donationRouter = createTRPCRouter({
-  // ✅ CREATE ORDER
   createOrder: publicProcedure
     .input(
       z.object({
-        type: z.string(),
-        amount: z.number().min(1),
+        type: z.enum(["CHURCH", "CHAPEL", "THANKSGIVING"]),
+        amount: z.number().min(100),
         forWhom: z.string(),
         byWhom: z.string(),
-        email: z.string(),
+        email: z.string().email(),
+        massTiming: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        // ✅ Create Razorpay Order
         const razorpayOrder = await razorpay.orders.create({
-          amount: input.amount * 100, // Convert INR to paise
+          amount: input.amount * 100,
           currency: "INR",
           receipt: `receipt_${Date.now()}`,
         });
@@ -47,16 +45,16 @@ export const donationRouter = createTRPCRouter({
           throw new Error("Failed to create Razorpay order");
         }
 
-        // ✅ Store order in DB
         await db.order.create({
           data: {
-            razorpayOrderId: razorpayOrder.id, // ✅ Store Razorpay Order ID
+            razorpayOrderId: razorpayOrder.id,
             type: input.type,
             amount: input.amount,
             forWhom: input.forWhom,
             byWhom: input.byWhom,
             email: input.email,
             status: "PENDING",
+            massTiming: input.massTiming ?? null,
           },
         });
 
@@ -88,7 +86,6 @@ export const donationRouter = createTRPCRouter({
           });
         }
 
-        // ✅ Validate Razorpay Signature
         const generatedSignature = crypto
           .createHmac("sha256", secret)
           .update(`${input.razorpay_order_id}|${input.razorpay_payment_id}`)
@@ -101,9 +98,8 @@ export const donationRouter = createTRPCRouter({
           });
         }
 
-        // ✅ Update Order in DB
         const updatedOrder = await db.order.update({
-          where: { razorpayOrderId: input.razorpay_order_id }, // ✅ FIXED: Using correct field
+          where: { razorpayOrderId: input.razorpay_order_id },
           data: { status: "SUCCESS", paymentId: input.razorpay_payment_id },
         });
 
@@ -115,11 +111,13 @@ export const donationRouter = createTRPCRouter({
             forWhom: updatedOrder.forWhom,
             byWhom: updatedOrder.byWhom,
             email: updatedOrder.email,
+            massTiming: updatedOrder.massTiming,
             receiptIssued: false,
+            orderId: updatedOrder.id,
           },
         });
 
-        return { success: true }; // ✅ Indicate success
+        return { success: true };
       } catch (error) {
         console.error("Payment verification failed:", error);
         throw new TRPCError({
@@ -130,10 +128,7 @@ export const donationRouter = createTRPCRouter({
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    if (
-      ctx.session.user.role !== "ADMIN" &&
-      ctx.session.user.role !== "DEVELOPER"
-    ) {
+    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
       throw new Error("Unauthorized");
     }
     return await ctx.db.donation.findMany({
@@ -144,16 +139,15 @@ export const donationRouter = createTRPCRouter({
         byWhom: true,
         email: true,
         forWhom: true,
+        massTiming: true,
         createdAt: true,
         receiptIssued: true,
       },
     });
   }),
+
   getInbox: protectedProcedure.query(async ({ ctx }) => {
-    if (
-      ctx.session.user.role !== "ADMIN" &&
-      ctx.session.user.role !== "DEVELOPER"
-    ) {
+    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
       throw new Error("Unauthorized");
     }
     return await db.donation.findMany({
@@ -163,10 +157,7 @@ export const donationRouter = createTRPCRouter({
   }),
 
   getHistory: protectedProcedure.query(async ({ ctx }) => {
-    if (
-      ctx.session.user.role !== "ADMIN" &&
-      ctx.session.user.role !== "DEVELOPER"
-    ) {
+    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
       throw new Error("Unauthorized");
     }
     return await db.donation.findMany({
@@ -179,20 +170,20 @@ export const donationRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        method: z.enum(["upload", "scan"]), // Method type: upload or scan
+        method: z.enum(["upload", "scan"]),
         email: z.string().email(),
         file: z.object({
           name: z.string(),
-          buffer: z.string(), // Base64 file data
+          buffer: z.string(),
         }),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (!["ADMIN", "DEVELOPER"].includes(ctx.session.user.role)) {
+      if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
         throw new Error("Unauthorized");
       }
 
-      const buffer = Buffer.from(input.file.buffer, "base64"); // Convert base64 to Buffer
+      const buffer = Buffer.from(input.file.buffer, "base64");
 
       await sendReceipt(input.email, { name: input.file.name, buffer });
 
