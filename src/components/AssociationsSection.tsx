@@ -92,7 +92,6 @@ const AssociationsSection: React.FC = () => {
             <AssociationItem
               name={association.name}
               image={association.image}
-              description={association.description}
               onClick={() => handleSelect(association)}
               isActive={selectedAssociation?.id === association.id}
             />

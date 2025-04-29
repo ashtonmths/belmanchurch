@@ -4,12 +4,11 @@ import React from "react";
 interface AssociationItemProps {
   name: string;
   image: string;
-  description: string;
   onClick: () => void;
   isActive: boolean;
 }
 
-const AssociationItem: React.FC<AssociationItemProps> = ({ name, image, description, onClick, isActive }) => {
+const AssociationItem: React.FC<AssociationItemProps> = ({ name, image, onClick, isActive }) => {
   return (
     <div 
       className={`association-item ${isActive ? 'active ring-accent' : ''}`}
