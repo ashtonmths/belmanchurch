@@ -41,21 +41,24 @@ export default function Gallery() {
 
   const handleLike = (imageId: string) => {
     const isLiked = likes[imageId] ?? false;
-  
+
     setLikes((prevLikes) => ({
       ...prevLikes,
       [imageId]: !isLiked,
     }));
-  
+
     // 🔥 Ensure like count updates correctly when unliking
     if (fullScreenImage?.id === imageId) {
-      setFullScreenImage((prev) => prev && ({
-        ...prev,
-        isLiked: !isLiked,
-        likes: prev.likes + (!isLiked ? 1 : -1), // Ensure unliking decreases count
-      }));
+      setFullScreenImage(
+        (prev) =>
+          prev && {
+            ...prev,
+            isLiked: !isLiked,
+            likes: prev.likes + (!isLiked ? 1 : -1), // Ensure unliking decreases count
+          },
+      );
     }
-  
+
     updateLikeMutation.mutate(
       { imageId },
       {
@@ -73,15 +76,18 @@ export default function Gallery() {
             ...prevLikes,
             [imageId]: isLiked, // Rollback in case of failure
           }));
-  
+
           if (fullScreenImage?.id === imageId) {
-            setFullScreenImage((prev) => prev && ({
-              ...prev,
-              isLiked: isLiked, // Rollback the heart color
-              likes: prev.likes + (isLiked ? 1 : -1), // Fix rollback issue
-            }));
+            setFullScreenImage(
+              (prev) =>
+                prev && {
+                  ...prev,
+                  isLiked: isLiked, // Rollback the heart color
+                  likes: prev.likes + (isLiked ? 1 : -1), // Fix rollback issue
+                },
+            );
           }
-  
+
           toast.error(error.message || "Something went wrong!", {
             position: "top-right",
             autoClose: 3000,
@@ -89,7 +95,7 @@ export default function Gallery() {
         },
       },
     );
-  };  
+  };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
@@ -126,29 +132,35 @@ export default function Gallery() {
       console.error("No image URL to download");
       return;
     }
-  
+
     try {
       const response = await fetch(fullScreenImage.url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-  
+
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = "image.jpg"; // Change filename if needed
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       // Cleanup
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Error downloading the image:", error);
     }
-  };  
+  };
 
   return (
     <ProtectedRoute
-      allowedRoles={["PARISHONER", "PHOTOGRAPHER", "ADMIN", "DEVELOPER"]}
+      allowedRoles={[
+        "USER",
+        "PARISHONER",
+        "PHOTOGRAPHER",
+        "ADMIN",
+        "DEVELOPER",
+      ]}
     >
       <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
         <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
@@ -225,7 +237,9 @@ export default function Gallery() {
                                     ? {
                                         id: img.uploadedBy.id,
                                         name: img.uploadedBy.name,
-                                        image: img.uploadedBy.image ?? "/favicon.webp",
+                                        image:
+                                          img.uploadedBy.image ??
+                                          "/favicon.webp",
                                       }
                                     : null,
                                   isLiked: likes[img.id] ?? img.isLiked,
@@ -234,7 +248,7 @@ export default function Gallery() {
                                   ...prevLikes,
                                   [img.id]: likes[img.id] ?? img.isLiked,
                                 }));
-                              }}                                                                            
+                              }}
                             >
                               <Image
                                 src={img.url}
