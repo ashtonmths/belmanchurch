@@ -10,11 +10,15 @@ import Button from "~/components/Button";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { FaHeart, FaShareAlt, FaDownload } from "react-icons/fa";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Gallery() {
   const { data: folders, isLoading, error } = api.gallery.getFolders.useQuery();
+  const { status } = useSession();
+  const router = useRouter();
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [likes, setLikes] = useState<Record<string, boolean>>({});
   const [fullScreenImage, setFullScreenImage] = useState<{
@@ -38,6 +42,11 @@ export default function Gallery() {
       }));
     }
   }, [fullScreenImage]);
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
+    }
+  }, [status, router]);
 
   const handleLike = (imageId: string) => {
     const isLiked = likes[imageId] ?? false;
