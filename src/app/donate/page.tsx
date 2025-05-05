@@ -78,9 +78,6 @@ export default function DonatePage() {
   return (
     <ProtectedRoute
       allowedRoles={[
-        "USER",
-        "PARISHONER",
-        "PHOTOGRAPHER",
         "DEVELOPER",
         "ADMIN",
       ]}

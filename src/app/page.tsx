@@ -13,7 +13,7 @@ export default function Home() {
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
         <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center">
-          <div className="-mt-24">
+          <div className="flex flex-col items-center justify-center"> 
             <motion.h1
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -51,9 +51,9 @@ export default function Home() {
                   Upload
                 </Button>
               ) : role === "PARISHONER" || role === "USER" ? (
-                <Button onClick={() => router.push("/profile")}>Profile</Button>
+                null
               ) : null}
-              <Button onClick={() => router.push("/donate")}>Donate</Button>
+              <Button onClick={() => router.push("/gallery")}>Gallery</Button>
             </motion.div>
           </div>
         </div>
