@@ -196,7 +196,7 @@ export default function Gallery() {
                     {folder.eventName}
                   </div>
                   <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-xl font-bold text-textcolor">
-                    {folder.eventDate.toLocaleDateString()}
+                    {folder.eventDate.toLocaleDateString('en-GB')}
                   </div>
                 </motion.div>
               ))

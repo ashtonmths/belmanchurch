@@ -265,7 +265,7 @@ export default function AdminGallery() {
                         {folders.map((folder) => (
                           <option key={folder.id} value={folder.id}>
                             📁 {folder.eventName} —{" "}
-                            {new Date(folder.eventDate).toLocaleDateString()}
+                            {new Date(folder.eventDate).toLocaleDateString('en-GB')}
                           </option>
                         ))}
                       </select>
