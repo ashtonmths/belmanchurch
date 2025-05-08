@@ -110,12 +110,11 @@ export const galleryRouter = createTRPCRouter({
     return { likes: updatedLikedBy.length, isLiked: updatedLikedBy.includes(userId) };
   }),
 
-  getImages: protectedProcedure
-  .input(z.object({ folder: z.string() })) // Expect folder name
+  getImagesByID: protectedProcedure
+  .input(z.object({ id: z.string() })) 
   .query(async ({ ctx, input }) => {
-    // Find the gallery by cloudinaryFolder
     const gallery = await db.gallery.findFirst({
-      where: { cloudinaryFolder: input.folder }, // Find by folder name
+      where: { id: input.id }, // Find by gallery ID
       select: { id: true },
     });
 

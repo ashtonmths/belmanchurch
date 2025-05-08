@@ -33,7 +33,7 @@ export default function Events() {
                       {event.name}
                     </div>
                     <div className="w-full text-sm rounded-xl bg-accent p-2 px-6 font-extrabold text-primary">
-                      {event.date.toLocaleString()}
+                        {new Date(event.date).toLocaleDateString('en-GB')}
                     </div>
                     <div className="w-full text-sm rounded-xl bg-accent p-2 px-6 font-extrabold text-primary">
                       {event.venue}

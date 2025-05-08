@@ -26,7 +26,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex ml-auto space-x-8 mr-6 text-textcolor font-bold">
             <NavButton route="/">Home</NavButton>
-            <NavButton route="/gallery">Gallery</NavButton>
+            {/* <NavButton route="/gallery">Gallery</NavButton> */}
             <NavButton route="/events">Events</NavButton>
             <NavButton route="/bethkati">Bethkati</NavButton>
             <NavButton route="/about">About</NavButton>
