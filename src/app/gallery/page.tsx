@@ -20,7 +20,6 @@ export default function Gallery() {
     }
   }, [status, router]);
 
-
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
 
@@ -59,7 +58,14 @@ export default function Gallery() {
                     {folder.eventName}
                   </div>
                   <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-xl font-bold text-textcolor">
-                    {folder.eventDate.toLocaleDateString('en-GB')}
+                    {folder.eventDate.toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false, // Use 24-hour format
+                    })}
                   </div>
                 </motion.div>
               ))
