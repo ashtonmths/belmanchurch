@@ -16,7 +16,7 @@ export default function Home() {
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
       <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
         <div className="mb-5 flex h-[81%] w-[90%] flex-col overflow-hidden text-center">
-          <div className="mt-[15%] flex flex-col items-center justify-center md:mt-[5%]">
+          <div className="mt-[15%] flex flex-col items-center justify-center md:mt-[8%]">
             <motion.h1
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
