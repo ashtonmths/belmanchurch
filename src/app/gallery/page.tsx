@@ -57,15 +57,16 @@ export default function Gallery() {
                   <div className="flex h-[20%] w-full items-center justify-center bg-primary p-2 font-cursive text-4xl font-bold text-textcolor">
                     {folder.eventName}
                   </div>
-                  <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-xl font-bold text-textcolor">
+                  <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-lg font-bold text-textcolor">
                     {folder.eventDate.toLocaleString("en-GB", {
                       day: "2-digit",
                       month: "2-digit",
                       year: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
-                      hour12: false, // Use 24-hour format
-                    })}
+                      hour12: true,
+                      timeZone: "Asia/Kolkata",
+                    })} IST
                   </div>
                 </motion.div>
               ))
