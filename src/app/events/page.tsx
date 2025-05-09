@@ -1,6 +1,31 @@
 "use client";
 import { api } from "~/trpc/react";
 
+function formatDateToIST(date: string | Date) {
+  let dateString: string;
+
+  // If the date is a string, replace the space with "T" to make it ISO 8601
+  if (typeof date === "string") {
+    dateString = date.replace(" ", "T");
+  } else {
+    // If it's already a Date object, convert it to string
+    dateString = date.toISOString();
+  }
+
+  // Parse the ISO string and convert to the desired time zone (Asia/Kolkata)
+  const dateInIST = new Date(dateString);
+  return dateInIST.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  });
+}
+
+
 export default function Events() {
   const { data: events } = api.misc.getAllEvents.useQuery();
 
@@ -33,15 +58,7 @@ export default function Events() {
                       {event.name}
                     </div>
                     <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
-                      {new Date(event.date).toLocaleString("en-GB", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                      timeZone: "Asia/Kolkata",
-                    })} IST
+                      {formatDateToIST(event.date)} IST
                     </div>
                     <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
                       {event.venue}
