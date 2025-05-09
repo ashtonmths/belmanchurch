@@ -34,13 +34,14 @@ export default function Events() {
                     </div>
                     <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
                       {new Date(event.date).toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false, // Use 24-hour format
-                      })}
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                      timeZone: "Asia/Kolkata",
+                    })} IST
                     </div>
                     <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
                       {event.venue}
