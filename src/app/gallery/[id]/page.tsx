@@ -10,11 +10,13 @@ import { FaHeart, FaShareAlt, FaDownload } from "react-icons/fa";
 import Image from "next/image";
 import Button from "../../../components/Button";
 import { ToastContainer, toast } from "react-toastify";
+import { useSession } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
 
 const GalleryPage = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const { data: session } = useSession();
   const updateLikeMutation = api.gallery.toggleLike.useMutation();
   const [likes, setLikes] = useState<Record<string, boolean>>({});
   const { data, isFetching, isError } = api.gallery.getImagesByID.useQuery(
@@ -31,6 +33,17 @@ const GalleryPage = () => {
   const imageslength = data?.length ?? 0;
 
   const handleLike = (imageId: string) => {
+    if (!session) {
+      toast.error("Please log in to like images.", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      setTimeout(() => {
+        router.push("/api/auth/signin");
+      }, 2000);
+      return;
+    }
+
     const isLiked = likes[imageId] ?? false;
 
     setLikes((prevLikes) => ({
@@ -175,7 +188,7 @@ const GalleryPage = () => {
                 </p>
               ) : imageslength > 0 ? (
                 <>
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                  <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
                     <Button
                       className="relative z-30 h-9"
                       onClick={() => {
@@ -214,11 +227,11 @@ const GalleryPage = () => {
                                       img.uploadedBy.image ?? "/favicon.webp",
                                   }
                                 : null,
-                              isLiked: likes[img.id] ?? img.isLiked,
+                              isLiked: likes[img.id] ?? img.isLiked ?? false,
                             });
                             setLikes((prevLikes) => ({
                               ...prevLikes,
-                              [img.id]: likes[img.id] ?? img.isLiked,
+                              [img.id]: likes[img.id] ?? img.isLiked ?? false, // same defaulting here
                             }));
                           }}
                         >
@@ -280,7 +293,7 @@ const GalleryPage = () => {
                 >
                   <div className="flex w-11/12 max-w-sm flex-col overflow-hidden rounded-lg shadow-lg transition-transform">
                     {/* Image Section */}
-                    <div className="relative w-full md:-mt-20 flex items-center justify-center overflow-hidden">
+                    <div className="relative flex w-full items-center justify-center overflow-hidden md:-mt-20">
                       <Zoom>
                         <img
                           src={selectedImage.url}
