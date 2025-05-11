@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import cloudinary from "cloudinary";
 import { db } from "~/server/db";
 
@@ -46,7 +46,7 @@ export const galleryRouter = createTRPCRouter({
       return { success: true, cloudinaryFolder };
     }),
 
-  getFolders: protectedProcedure.query(async ({}) => {
+  getFolders: publicProcedure.query(async ({}) => {
     const folders = await db.gallery.findMany({
       select: {
         id: true,
@@ -110,7 +110,7 @@ export const galleryRouter = createTRPCRouter({
     return { likes: updatedLikedBy.length, isLiked: updatedLikedBy.includes(userId) };
   }),
 
-  getImagesByID: protectedProcedure
+  getImagesByID: publicProcedure
   .input(z.object({ id: z.string() })) 
   .query(async ({ ctx, input }) => {
     const gallery = await db.gallery.findFirst({
@@ -132,14 +132,14 @@ export const galleryRouter = createTRPCRouter({
       orderBy: { createdAt: "desc" },
     });
 
-    const userId = ctx.session.user.id;
+    const userId = ctx.session?.user?.id;
 
     return images.map((image) => ({
       id: image.id,
       url: image.url,
       likes: image.likedBy.length,
       uploadedBy: image.uploadedBy ?? null,
-      isLiked: image.likedBy.includes(userId),
+      isLiked: userId ? image.likedBy.includes(userId) : null,
     }));
   }),
 });
