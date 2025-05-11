@@ -34,7 +34,10 @@ const GalleryPage = () => {
 
   const handleLike = (imageId: string) => {
     if (!session) {
-      toast.info("Please log in to like this post.");
+      toast.error("Please log in to like images.", {
+        position: "top-right",
+        autoClose: 2000,
+      });
       setTimeout(() => {
         router.push("/api/auth/signin");
       }, 2000);
