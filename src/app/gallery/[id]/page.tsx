@@ -239,6 +239,7 @@ const GalleryPage = () => {
                             src={img.url}
                             alt={`Image ${index + 1}`}
                             layout="fill"
+                            loading="lazy"
                             objectFit="cover"
                             className="rounded-lg"
                             unoptimized
