@@ -7,6 +7,8 @@ import {
 import cloudinary from "cloudinary";
 import { db } from "~/server/db";
 
+cloudinary.v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+
 export const galleryRouter = createTRPCRouter({
   uploadGallery: protectedProcedure
     .input(
