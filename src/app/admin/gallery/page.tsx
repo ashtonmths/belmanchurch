@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
 import { api } from "~/trpc/react";
 import Button from "~/components/Button";
 import { ToastContainer, toast } from "react-toastify";
@@ -95,57 +96,25 @@ export default function AdminGallery() {
     return name.replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
+  const { uploadImages } = useCloudinaryUpload();
+
   const handleSubmit = async () => {
     if (!eventName || !eventDate || images.length === 0) {
       toast.error("Please fill all fields and upload images.");
       return;
     }
 
-    const totalImages = images.length;
-    const uploadToastId = toast.info(`Encoding images... (0/${totalImages})`, {
-      autoClose: false,
-      progress: 0,
-    });
-
     try {
-      let completed = 0;
-      const base64Images = await Promise.all(
-        images.map(
-          (file) =>
-            new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.readAsDataURL(file);
-              reader.onload = () => {
-                completed++;
-                toast.update(uploadToastId, {
-                  render: `Encoding images... (${completed}/${totalImages})`,
-                  progress: completed / totalImages,
-                });
-                resolve(reader.result as string);
-              };
-              reader.onerror = reject;
-            }),
-        ),
-      );
-
-      toast.update(uploadToastId, {
-        render: "Uploading gallery...",
-        progress: undefined,
-      });
+      const folderName = `${eventName} - ${eventDate}`;
+      const urls = await uploadImages(images, folderName);
 
       uploadGallery.mutate({
         eventName,
         eventDate,
-        images: base64Images,
+        images: urls,
       });
     } catch (error) {
-      console.error("Error encoding images:", error);
-      toast.update(uploadToastId, {
-        render: "Error processing images.",
-        type: "error",
-        autoClose: 3000,
-        progress: undefined,
-      });
+      console.error(error);
     }
   };
 
