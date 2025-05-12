@@ -293,12 +293,12 @@ const GalleryPage = () => {
                 >
                   <div className="flex w-11/12 max-w-sm flex-col overflow-hidden rounded-lg shadow-lg transition-transform">
                     {/* Image Section */}
-                    <div className="relative flex w-full items-center justify-center overflow-hidden md:-mt-20">
-                        <img
-                          src={selectedImage.url}
-                          alt="Full-Screen Image"
-                          className="rounded-t-lg pt-[17.5%]"
-                        />
+                    <div className="relative w-full overflow-hidden">
+                      <img
+                        src={selectedImage.url}
+                        alt="Full-Screen Image"
+                        className="w-full object-cover"
+                      />
                     </div>
 
                     {/* Actions Section */}
@@ -323,6 +323,7 @@ const GalleryPage = () => {
                       >
                         <FaShareAlt /> Share
                       </button>
+
                       <button
                         className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-green-500 md:flex-row"
                         onClick={handleDownload}
