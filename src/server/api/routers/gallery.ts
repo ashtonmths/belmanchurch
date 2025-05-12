@@ -59,12 +59,18 @@ export const galleryRouter = createTRPCRouter({
           const response = (await cloudinary.v2.api.resources({
             type: "upload",
             prefix: folder.cloudinaryFolder,
-            max_results: 1, // Fetch only the first image
-          })) as { resources: { secure_url: string }[] };
+            max_results: 100, // Ensure you get enough to sort
+          })) as { resources: { secure_url: string; created_at: string }[] };
+
+          const sorted = response.resources.sort(
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
+          );
 
           return {
             ...folder,
-            previewImage: response.resources[0]?.secure_url ?? null, // First image or null
+            previewImage: sorted[0]?.secure_url ?? null, // First uploaded
           };
         } catch (error) {
           console.error(
