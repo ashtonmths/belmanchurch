@@ -5,7 +5,6 @@ import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
-import Zoom from "react-medium-image-zoom";
 import { FaHeart, FaShareAlt, FaDownload } from "react-icons/fa";
 import Image from "next/image";
 import Button from "../../../components/Button";
@@ -295,13 +294,11 @@ const GalleryPage = () => {
                   <div className="flex w-11/12 max-w-sm flex-col overflow-hidden rounded-lg shadow-lg transition-transform">
                     {/* Image Section */}
                     <div className="relative flex w-full items-center justify-center overflow-hidden md:-mt-20">
-                      <Zoom>
                         <img
                           src={selectedImage.url}
                           alt="Full-Screen Image"
                           className="rounded-t-lg pt-[17.5%]"
                         />
-                      </Zoom>
                     </div>
 
                     {/* Actions Section */}

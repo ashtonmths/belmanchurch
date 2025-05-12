@@ -6,29 +6,6 @@ import { motion } from "framer-motion";
 import "react-medium-image-zoom/dist/styles.css";
 import { useRouter } from "next/navigation";
 
-function formatDateToIST(date: string | Date) {
-  let dateString: string;
-
-  // If the date is a string, replace the space with "T" to make it ISO 8601
-  if (typeof date === "string") {
-    dateString = date.replace(" ", "T");
-  } else {
-    // If it's already a Date object, convert it to string
-    dateString = date.toISOString();
-  }
-
-  // Parse the ISO string and convert to the desired time zone (Asia/Kolkata)
-  const dateInIST = new Date(dateString);
-  return dateInIST.toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
 export default function Gallery() {
   const { data: folders, isLoading, error } = api.gallery.getFolders.useQuery();
   const router = useRouter();
@@ -62,7 +39,11 @@ export default function Gallery() {
                   {folder.eventName}
                 </div>
                 <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-lg font-bold text-textcolor">
-                  {formatDateToIST(folder.eventDate)} IST
+                    {new Date(folder.eventDate).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    })}
                 </div>
               </motion.div>
             ))
