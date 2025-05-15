@@ -23,20 +23,29 @@ export const galleryRouter = createTRPCRouter({
 
       const cloudinaryFolder = `${eventName} - ${eventDate}`;
 
-      const gallery = await db.gallery.create({
-        data: {
-          eventName,
-          eventDate: new Date(eventDate),
-          cloudinaryFolder,
-        },
+      let gallery = await db.gallery.findFirst({
+        where: { cloudinaryFolder },
       });
 
+      // If not, create it
+      if (!gallery) {
+        gallery = await db.gallery.create({
+          data: {
+            eventName,
+            eventDate: new Date(eventDate),
+            cloudinaryFolder,
+          },
+        });
+      }
+
+      // Then insert images into the existing or new gallery
       await db.galleryImage.createMany({
         data: images.map((url) => ({
           url,
           galleryId: gallery.id,
           uploadedById: ctx.session.user.id,
         })),
+        skipDuplicates: true,
       });
 
       return { success: true, cloudinaryFolder };
