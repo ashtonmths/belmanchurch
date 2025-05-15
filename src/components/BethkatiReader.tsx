@@ -22,7 +22,7 @@ export default function BethkatiViewer({ file, onClose }: BethkatiViewerProps) {
   useEffect(() => {
     const updateWidth = () => {
       const isMobile = window.innerWidth <= 768;
-      setWidth(isMobile ? 330 : 380);
+      setWidth(isMobile ? 330 : 350);
     };
 
     updateWidth(); // Set on mount

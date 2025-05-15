@@ -12,7 +12,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { useSession } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
 
-const GalleryPage = () => {
+const GalleryAlbum = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const { data: session } = useSession();
@@ -362,4 +362,4 @@ const GalleryPage = () => {
   );
 };
 
-export default GalleryPage;
+export default GalleryAlbum;
