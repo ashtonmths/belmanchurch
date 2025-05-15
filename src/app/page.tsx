@@ -84,14 +84,9 @@ export default function Home() {
               <div>
                 <h2 className="mb-1 text-lg underline">Mass Timings</h2>
                 <p>Weekdays: 6:30 AM</p>
-                <p>
-                  Friday: 4:00 PM{" "}
-                  <span className="text-sm font-normal">
-                    (Mass and Adoration)
-                  </span>
-                </p>
                 <p>Saturday: 4:00 PM</p>
-                <p>Sunday: 7:30 AM & 10:30 AM</p>
+                <p>Sunday: 7:30 AM & (10:30 AM)*</p>
+                <p className="text-base">*Subject to changes (10:00 AM during no Catechism)</p>
               </div>
 
               <div className="border-t border-primary" />
