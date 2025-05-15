@@ -1,7 +1,10 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { db } from "~/server/db";
-import cloudinary from "cloudinary";
 
 export const miscRouter = createTRPCRouter({
   // Create Event
@@ -29,24 +32,18 @@ export const miscRouter = createTRPCRouter({
   createBethkati: protectedProcedure
     .input(
       z.object({
-        pdfBase64: z.string(), // PDF as base64
+        pdfUrl: z.string().url(), // directly passing the uploaded PDF URL
         year: z.number().int().min(2000),
         month: z.string(),
-        fileName: z.string(), // useful for naming
+        fileName: z.string(), // still useful for logging or display
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { pdfBase64, year, month, fileName } = input;
-
-      const uploadRes = await cloudinary.v2.uploader.upload(`data:application/pdf;base64,${pdfBase64}`, {
-        folder: "Bethkati",
-        public_id: fileName.replace(/\.pdf$/, ""),
-        resource_type: "raw",
-      });
+      const { pdfUrl, year, month } = input;
 
       return ctx.db.bethkati.create({
         data: {
-          url: uploadRes.secure_url,
+          url: pdfUrl,
           year,
           month,
         },
@@ -58,10 +55,9 @@ export const miscRouter = createTRPCRouter({
       orderBy: [{ year: "desc" }, { month: "desc" }],
     });
   }),
-    getAllEvents: publicProcedure.query(async () => {
-      return db.event.findMany({
-        orderBy: [{ date: "desc" }],
-      })
-    })
-    
+  getAllEvents: publicProcedure.query(async () => {
+    return db.event.findMany({
+      orderBy: [{ date: "desc" }],
+    });
+  }),
 });
