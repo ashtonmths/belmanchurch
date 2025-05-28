@@ -156,7 +156,8 @@ const About = () => {
     { name: "Rev. Fr. Ivan Martis", period: "2020 to 2021", image: "/priests/ivanM.png" },
     { name: "Rev. Fr. Anson Dsouza SVD", period: "2021 to 2022", image: "" },
     { name: "Rev. Fr. Ankith Dsouza", period: "2022 to 2023" },
-    { name: "Rev. Fr. Arnold Mathias SDB", period: "2023 to Till Date", image: "/priests/arnoldM.png" },
+    { name: "Rev. Fr. Arnold Mathias SDB", period: "2023 to 2025", image: "/priests/arnoldM.png" },
+    { name: "Rev. Fr. Oswald Vaz", period: "2025 to Till Date", image: "/priests/oswaldV.png" },
   ];
 
   return (
