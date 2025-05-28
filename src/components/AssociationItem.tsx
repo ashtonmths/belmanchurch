@@ -11,13 +11,14 @@ interface AssociationItemProps {
 const AssociationItem: React.FC<AssociationItemProps> = ({ name, image, onClick, isActive }) => {
   return (
     <div 
-      className={`association-item ${isActive ? 'active ring-accent' : ''}`}
+      className={`w-full h-48 bg-primary rounded-xl flex items-center justify-start gap-4 p-4 cursor-pointer transition-transform duration-200 hover:scale-105 
+        ${isActive ? 'ring-2 ring-accent' : ''}`}
       onClick={onClick}
     >
-      <div className="w-16 h-16 mb-2 flex items-center justify-center">
-        <img src={image} alt={name} className="max-w-full max-h-full object-contain bg-accent" />
+      <div className="w-32 h-32 flex items-center justify-center bg-accent rounded-full overflow-hidden">
+        <img src={image} alt={name} className="w-full h-full object-contain" />
       </div>
-      <h3 className="text-center font-semibold text-textcolor">{name}</h3>
+      <h3 className="text-textcolor font-semibold text-lg">{name}</h3>
     </div>
   );
 };

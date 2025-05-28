@@ -111,30 +111,6 @@
   }
 }
 
-/* Draggable associations styles */
-.association-container {
-  @apply flex flex-wrap justify-center items-center gap-6 my-8;
-}
-
-.association-item {
-  @apply rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl;
-  background: #EAC696;
-  width: 250px;
-  height: 250px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  transition: all 0.3s ease;
-}
-
-.association-item.active {
-  @apply shadow-2xl ring-4;
-  transform: translateY(-10px) scale(1.1);
-  z-index: 10;
-}
-
 .association-modal {
   @apply fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center;
   background-color: rgba(0,0,0,0.7);
