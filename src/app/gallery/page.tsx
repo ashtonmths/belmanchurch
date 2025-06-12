@@ -35,7 +35,7 @@ export default function Gallery() {
                     />
                   </div>
                 </div>
-                <div className="flex h-[20%] w-full items-center justify-center bg-primary p-2 font-cursive text-4xl font-bold text-textcolor">
+                <div className="flex h-[20%] w-full items-center justify-center bg-primary p-2 font-cursive text-3xl font-extrabold text-textcolor">
                   {folder.eventName}
                 </div>
                 <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-lg font-bold text-textcolor">
