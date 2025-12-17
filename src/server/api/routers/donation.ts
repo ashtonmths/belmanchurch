@@ -2,8 +2,8 @@ import { db } from "~/server/db";
 import { z } from "zod";
 import {
   createTRPCRouter,
-  protectedProcedure,
   publicProcedure,
+  adminProcedure,
 } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
@@ -127,10 +127,7 @@ export const donationRouter = createTRPCRouter({
       }
     }),
 
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+  getAll: adminProcedure.query(async ({ ctx }) => {
     return await ctx.db.donation.findMany({
       select: {
         id: true,
@@ -146,27 +143,21 @@ export const donationRouter = createTRPCRouter({
     });
   }),
 
-  getInbox: protectedProcedure.query(async ({ ctx }) => {
-    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+  getInbox: adminProcedure.query(async ({ ctx: _ctx }) => {
     return await db.donation.findMany({
       where: { receiptIssued: false },
       orderBy: { createdAt: "desc" },
     });
   }),
 
-  getHistory: protectedProcedure.query(async ({ ctx }) => {
-    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
-      throw new Error("Unauthorized");
-    }
+  getHistory: adminProcedure.query(async ({ ctx: _ctx }) => {
     return await db.donation.findMany({
       where: { receiptIssued: true },
       orderBy: { createdAt: "desc" },
     });
   }),
 
-  issueReceipt: protectedProcedure
+  issueReceipt: adminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -178,11 +169,7 @@ export const donationRouter = createTRPCRouter({
         }),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
-        throw new Error("Unauthorized");
-      }
-
+    .mutation(async ({ ctx: _ctx, input }) => {
       const buffer = Buffer.from(input.file.buffer, "base64");
 
       await sendReceipt(input.email, { name: input.file.name, buffer });

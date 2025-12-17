@@ -1,15 +1,15 @@
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
 import { z } from "zod";
 
 export const wardRouter = createTRPCRouter({
   /** ✅ Get all wards (sorted by name) */
-  getAllWards: protectedProcedure.query(({ ctx }) => {
+  getAllWards: adminProcedure.query(({ ctx }) => {
     return ctx.db.ward.findMany({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     });
   }),
-  getWardById: protectedProcedure
+  getWardById: adminProcedure
     .input(z.object({ wardId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.ward.findUnique({
@@ -21,7 +21,7 @@ export const wardRouter = createTRPCRouter({
     }),
 
   /** ✅ Add a new ward */
-  addWard: protectedProcedure
+  addWard: adminProcedure
     .input(
       z.object({
         name: z.string().min(1, "Ward name is required"),

@@ -6,6 +6,7 @@ import {
 } from "~/server/api/trpc";
 import cloudinary from "cloudinary";
 import { db } from "~/server/db";
+import { TRPCError } from "@trpc/server";
 
 cloudinary.v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
 
@@ -19,6 +20,9 @@ export const galleryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!['ADMIN', 'DEVELOPER', 'PHOTOGRAPHER'].includes(ctx.session.user.role)) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
+      }
       const { eventName, eventDate, images } = input;
 
       const cloudinaryFolder = `${eventName} - ${eventDate}`;
@@ -28,15 +32,13 @@ export const galleryRouter = createTRPCRouter({
       });
 
       // If not, create it
-      if (!gallery) {
-        gallery = await db.gallery.create({
-          data: {
-            eventName,
-            eventDate: new Date(eventDate),
-            cloudinaryFolder,
-          },
-        });
-      }
+      gallery ??= await db.gallery.create({
+        data: {
+          eventName,
+          eventDate: new Date(eventDate),
+          cloudinaryFolder,
+        },
+      });
 
       // Then insert images into the existing or new gallery
       await db.galleryImage.createMany({

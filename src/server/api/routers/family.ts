@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, adminProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const familyRouter = createTRPCRouter({
@@ -11,6 +11,9 @@ export const familyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (!['ADMIN', 'DEVELOPER', 'PARISHONER'].includes(ctx.session.user.role)) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
+      }
       const { parishonerId, mobile } = input;
 
       await ctx.db.parishoner.update({
@@ -48,7 +51,7 @@ export const familyRouter = createTRPCRouter({
 
       return { success: true, message: "Parishoner linked successfully!" };
     }),
-  getAllFamilies: protectedProcedure.query(({ ctx }) => {
+  getAllFamilies: adminProcedure.query(({ ctx }) => {
     return ctx.db.family.findMany({
       select: {
         id: true,
@@ -59,7 +62,7 @@ export const familyRouter = createTRPCRouter({
     });
   }),
 
-  addFamily: protectedProcedure
+  addFamily: adminProcedure
     .input(
       z.object({
         name: z.string().min(1, "Family name is required"),
@@ -76,7 +79,7 @@ export const familyRouter = createTRPCRouter({
     }),
 
   // Get family members by family ID
-  getFamilyMembers: protectedProcedure
+  getFamilyMembers: adminProcedure
     .input(z.object({ familyId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.db.parishoner.findMany({

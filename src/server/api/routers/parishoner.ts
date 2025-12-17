@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, adminProcedure } from "~/server/api/trpc";
 
 export const parishonerRouter = createTRPCRouter({
   getParishonerDetails: protectedProcedure.query(async ({ ctx }) => {
@@ -23,7 +23,7 @@ export const parishonerRouter = createTRPCRouter({
       return null; // ✅ Ensure backend doesn't crash
     }
   }),
-  updateParishoner: protectedProcedure
+  updateParishoner: adminProcedure
     .input(
       z.object({
         parishonerId: z.string(),
@@ -74,7 +74,7 @@ export const parishonerRouter = createTRPCRouter({
         },
       });
     }),
-  addParishoner: protectedProcedure
+  addParishoner: adminProcedure
     .input(
       z.object({
         name: z.string().min(1, "Name is required"),
@@ -95,7 +95,7 @@ export const parishonerRouter = createTRPCRouter({
         },
       });
     }),
-  getAllParishoners: protectedProcedure.query(({ ctx }) => {
+  getAllParishoners: adminProcedure.query(({ ctx }) => {
     return ctx.db.parishoner.findMany({
       select: {
         id: true,
@@ -107,7 +107,7 @@ export const parishonerRouter = createTRPCRouter({
       orderBy: { name: "asc" },
     });
   }),
-  assignParishonerToFamily: protectedProcedure
+  assignParishonerToFamily: adminProcedure
     .input(
       z.object({
         parishonerId: z.string(),
