@@ -33,12 +33,17 @@ export const authConfig = {
   adapter: PrismaAdapter(db),
   callbacks: {
     async session({ session, user }) {
+      const dbUser = await db.user.findUnique({
+        where: { id: user.id },
+        select: { role: true },
+      });
       return {
         ...session,
         user: {
           ...session.user,
           id: user.id,
           image: user.image ?? session.user.image,
+          role: dbUser?.role ?? "USER",
         },
       };
     },

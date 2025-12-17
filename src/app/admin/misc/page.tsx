@@ -29,7 +29,7 @@ export default function AdminMisc() {
 
   const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || file.type !== "application/pdf") {
+    if (file?.type !== "application/pdf") {
       toast.error("Only PDF files are allowed!");
       return;
     }

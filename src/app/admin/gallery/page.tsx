@@ -64,7 +64,7 @@ export default function AdminGallery() {
     const files = Array.from(e.target.files);
     const newFiles = files.filter(
       (file) =>
-        !images.some((img) => img.name === file.name && img.size === file.size),
+        !images.some((img) => img.name === file.name && img.size === file.size)
     );
 
     const totalImagesAfterUpload = images.length + newFiles.length;
@@ -90,10 +90,10 @@ export default function AdminGallery() {
             progress: completed / totalFiles,
           });
           return compressed;
-        }),
+        })
       );
 
-      setImages([...images, ...compressedFiles]);
+      setImages((prev) => [...prev, ...compressedFiles]);
       toast.update(toastId, {
         render: "Images compressed and added successfully!",
         type: "success",
@@ -124,9 +124,8 @@ export default function AdminGallery() {
     toast.warn("Upload discarded.");
   };
 
-  const formatEventName = (name: string) => {
-    return name.replace(/\b\w/g, (char) => char.toUpperCase());
-  };
+  const formatEventName = (name: string) =>
+    name.replace(/\b\w/g, (char) => char.toUpperCase());
 
   const { uploadImages } = useCloudinaryUpload();
 
@@ -152,23 +151,23 @@ export default function AdminGallery() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
-      <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
+      <div className="relative flex h-screen w-full items-center justify-center bg-[url('/bg/admin.jpg')] bg-cover bg-center">
         <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
           <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center overflow-y-auto rounded-xl border-2 border-primary bg-black/40 text-center">
             {showInstructions && (
-              <div className="absolute left-1/2 top-50 z-50 w-[90%] max-w-3xl -translate-x-1/2 rounded-xl border-2 border-primary bg-black/90 p-6 text-left text-primary font-semibold shadow-xl backdrop-blur-md md:text-lg">
+              <div className="absolute left-1/2 top-20 z-50 w-[90%] max-w-3xl -translate-x-1/2 rounded-xl border-2 border-primary bg-black/90 p-6 text-left font-semibold text-primary shadow-xl backdrop-blur-md md:text-lg">
                 <h2 className="mb-4 text-2xl font-bold text-white">
                   Instructions
                 </h2>
                 <ul className="list-disc space-y-2 pl-6">
-                  {instructions.map((inst, index) => (
-                    <li key={index}>{inst}</li>
+                  {instructions.map((inst, i) => (
+                    <li key={i}>{inst}</li>
                   ))}
                 </ul>
                 <div className="mt-6 flex justify-end">
                   <button
-                    className="rounded-full bg-primary px-6 py-2 text-black hover:bg-accent"
                     onClick={() => setShowInstructions(false)}
+                    className="rounded-full bg-primary px-6 py-2 text-black hover:bg-accent"
                   >
                     Close
                   </button>
@@ -177,19 +176,21 @@ export default function AdminGallery() {
             )}
 
             <div className="grid w-full max-w-5xl gap-4 p-4 md:grid-cols-3">
-              {/* Upload Box */}
+              {/* Upload box */}
               <div className="group relative flex h-80 w-full items-center justify-center">
                 <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-primary shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-cyan-500/10">
-                  <div className="relative flex h-full w-full flex-col items-center justify-center p-4">
-                    <div className="relative flex h-full w-full flex-col overflow-auto border-2 border-dashed border-accent bg-secondary/50 p-4 text-textcolor transition-colors group-hover/dropzone:border-cyan-500/50">
-                      <input
-                        type="file"
-                        className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0"
-                        multiple
-                        accept="image/png, image/jpeg"
-                        onChange={handleFileUpload}
-                      />
-                      <div className="grid grid-cols-2 gap-2 overflow-auto">
+                  <div className="flex h-full w-full flex-col items-center justify-center p-4">
+                    <div className="relative h-full w-full overflow-auto border-2 border-dashed border-accent bg-secondary/50 p-4 text-textcolor group-hover:border-cyan-500/50">
+                      <label className="absolute inset-0 z-10 cursor-pointer">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/jpeg, image/png"
+                          className="hidden"
+                          onChange={handleFileUpload}
+                        />
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 overflow-y-auto pr-1">
                         {images.length > 0 ? (
                           images.map((file, index) => (
                             <div
@@ -205,7 +206,7 @@ export default function AdminGallery() {
                                 <button
                                   onClick={() =>
                                     setFullscreenImage(
-                                      URL.createObjectURL(file),
+                                      URL.createObjectURL(file)
                                     )
                                   }
                                   className="rounded-full bg-white p-1"
@@ -222,8 +223,8 @@ export default function AdminGallery() {
                             </div>
                           ))
                         ) : (
-                          <div className="col-span-2 space-y-2 text-center">
-                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
+                          <div className="col-span-2 text-center flex justify-center items-center flex-col">
+                            <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
                               <svg
                                 className="h-10 w-10 text-textcolor"
                                 fill="none"
@@ -233,12 +234,12 @@ export default function AdminGallery() {
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  strokeWidth="2"
+                                  strokeWidth={2}
                                   d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                               </svg>
                             </div>
-                            <p className="text-base font-medium">
+                            <p className="font-medium">
                               Drop your files here or browse
                             </p>
                             <p className="text-sm">
@@ -261,17 +262,17 @@ export default function AdminGallery() {
                   onChange={(e) =>
                     setEventName(formatEventName(e.target.value))
                   }
-                  className="h-12 w-[80%] rounded-full border-2 border-accent/50 bg-primary p-4 text-xl placeholder-textcolor focus:border-accent focus:text-textcolor focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-12 w-[80%] rounded-full border-2 border-accent/50 bg-primary p-4 text-xl placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <input
                   type="date"
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
-                  className="h-12 w-[80%] rounded-full border-2 border-accent/50 bg-primary p-4 text-xl placeholder-textcolor focus:border-accent focus:text-textcolor focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-12 w-[80%] rounded-full border-2 border-accent/50 bg-primary p-4 text-xl placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
-              {/* Action Buttons */}
+              {/* Buttons */}
               <div className="flex h-80 flex-col items-center justify-center space-y-8">
                 <Button onClick={handleSubmit} className="h-12 w-40">
                   Publish
@@ -287,6 +288,7 @@ export default function AdminGallery() {
             </div>
           </div>
         </div>
+
         {fullscreenImage && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
@@ -299,6 +301,7 @@ export default function AdminGallery() {
             />
           </div>
         )}
+
         <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </ProtectedRoute>

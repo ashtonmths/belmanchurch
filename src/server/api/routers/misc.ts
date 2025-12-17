@@ -1,14 +1,14 @@
 import { z } from "zod";
 import {
   createTRPCRouter,
-  protectedProcedure,
   publicProcedure,
+  adminProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
 
 export const miscRouter = createTRPCRouter({
   // Create Event
-  createEvent: protectedProcedure
+  createEvent: adminProcedure
     .input(
       z.object({
         name: z.string().min(3),
@@ -29,7 +29,7 @@ export const miscRouter = createTRPCRouter({
     }),
 
   // Create Bethkati
-  createBethkati: protectedProcedure
+  createBethkati: adminProcedure
     .input(
       z.object({
         pdfUrl: z.string().url(), // directly passing the uploaded PDF URL
