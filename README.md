@@ -188,10 +188,6 @@ For questions or support, please contact:
 
 **Email**: [belmanchurch.in@gmail.com](mailto:belmanchurch.in@gmail.com)
 
-## 📄 License
-
-This project is proprietary and confidential.
-
 ## 🙏 Acknowledgments
 
 Built with ❤️ for Belman Church community
