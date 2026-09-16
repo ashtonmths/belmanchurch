@@ -132,8 +132,51 @@ A modern, full-stack church management system built with Next.js 15, tRPC, and P
 - `npm run db:push` - Push Prisma schema to database
 - `npm run db:generate` - Generate Prisma client
 - `npm run db:studio` - Open Prisma Studio
+- `npm run db:seed:content` - Load the priests and homepage carousel (only fills empty tables)
 - `npm run format:check` - Check code formatting
 - `npm run format:write` - Format code with Prettier
+
+## 🛠️ Admin Panel
+
+Sign in at **`/admin/login`** with the username and password set in the
+`ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables (set them in the
+Vercel project for production — never commit them). Admins can manage:
+
+- **Homepage carousel** — upload, caption, reorder and hide slides
+- **Events** — date, venue, details and a photo gallery for each event
+- **Notifications** — announcements with pinning and automatic expiry
+- **Gallery** and **Bethkati** — photo albums and monthly newsletter PDFs
+- **Priests** — parish and assistant priests, photos, and who is serving now
+- **Page content** — Mass timings, office hours, associations, commissions
+  (with Konkani text), institutions and places to visit
+- **Messages** — enquiries sent through the Contact page
+- **Donations** — the donation inbox, receipts and reports
+
+In production, uploads go straight from the browser to Cloudinary using the
+unsigned upload preset (`UPLOAD_STORAGE="cloudinary"`).
+
+### Database changes for this release
+
+This release adds the tables `CarouselSlide`, `Priest`, `Notification`,
+`ContactMessage` and `SiteContent`, and an optional `images` column on `Event`.
+The changes are additive — no existing data is modified. To deploy:
+
+1. **Back up the production database first.**
+2. Apply the schema: `DATABASE_URL="<production url>" npx prisma db push`
+3. Load the priests and carousel once: `DATABASE_URL="<production url>" npm run db:seed:content`
+   (safe to re-run: it only fills empty tables).
+
+### Running locally
+
+```bash
+npx prisma dev --name belman    # local Postgres; copy its postgres:// URL into DATABASE_URL
+npx prisma db push
+npm run db:seed:content
+npm run dev
+```
+
+For local development set `UPLOAD_STORAGE="local"` and
+`NEXT_PUBLIC_UPLOAD_STORAGE="local"` so uploads are saved in `public/uploads`.
 
 ## 🏗️ Project Structure
 

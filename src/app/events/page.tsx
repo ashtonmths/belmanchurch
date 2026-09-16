@@ -1,74 +1,61 @@
-"use client";
-import { api } from "~/trpc/react";
+import { CalendarDays } from "lucide-react";
+import EventCard from "~/components/EventCard";
+import Footer from "~/components/Footer";
+import PageHero from "~/components/PageHero";
+import { db } from "~/server/db";
 
-function formatDateToIST(date: string | Date) {
-  let dateString: string;
+export const dynamic = "force-dynamic";
 
-  // If the date is a string, replace the space with "T" to make it ISO 8601
-  if (typeof date === "string") {
-    dateString = date.replace(" ", "T");
-  } else {
-    // If it's already a Date object, convert it to string
-    dateString = date.toISOString();
-  }
+export default async function EventsPage() {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
 
-  // Parse the ISO string and convert to the desired time zone (Asia/Kolkata)
-  const dateInIST = new Date(dateString);
-  return dateInIST.toLocaleString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
-
-export default function Events() {
-  const { data: events } = api.misc.getAllEvents.useQuery();
-
-  if (events?.length === 0) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center text-4xl font-bold text-primary">
-            No events available
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const [upcoming, past] = await Promise.all([
+    db.event.findMany({ where: { date: { gte: startOfToday } }, orderBy: { date: "asc" } }),
+    db.event.findMany({ where: { date: { lt: startOfToday } }, orderBy: { date: "desc" }, take: 60 }),
+  ]);
 
   return (
     <>
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col flex-wrap items-center text-center">
-            {/* Scrollable Container */}
-            <div className="flex w-full items-start justify-center overflow-x-auto p-5">
-              <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 md:grid-cols-4">
-                {events?.map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex h-80 w-60 flex-col items-center justify-center gap-3 rounded-3xl bg-secondary p-4 text-textcolor transition-shadow hover:bg-secondary hover:shadow-2xl hover:shadow-primary"
-                  >
-                    <div className="flex h-40 w-52 items-center justify-center rounded-2xl bg-accent text-2xl font-bold text-primary">
-                      {event.name}
-                    </div>
-                    <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
-                      {formatDateToIST(event.date)} IST
-                    </div>
-                    <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
-                      {event.venue}
-                    </div>
-                  </div>
+      <PageHero
+        eyebrow="Parish calendar"
+        title="Events"
+        description="Feasts, celebrations and gatherings at St. Joseph's, with photos from past events."
+        image="/carousel/sunday-mass.jpg"
+      />
+      <main className="bg-cream px-6 py-20 md:py-24">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="font-serif text-4xl font-semibold text-ink">Upcoming</h2>
+          {upcoming.length === 0 ? (
+            <p className="mt-6 rounded-3xl border border-dashed border-accent/25 p-10 text-center text-textcolor/70">
+              <CalendarDays className="mx-auto mb-3 text-accent" aria-hidden />
+              No upcoming events have been announced yet.
+            </p>
+          ) : (
+            <ul className="mt-8 flex flex-wrap justify-center gap-6">
+              {upcoming.map((e) => (
+                <li key={e.id} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+                  <EventCard event={e} />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {past.length > 0 && (
+            <>
+              <h2 className="mt-20 font-serif text-4xl font-semibold text-ink">Past events</h2>
+              <ul className="mt-8 flex flex-wrap justify-center gap-6">
+                {past.map((e) => (
+                  <li key={e.id} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+                    <EventCard event={e} />
+                  </li>
                 ))}
-              </div>
-            </div>
-          </div>
+              </ul>
+            </>
+          )}
         </div>
-      </div>
+      </main>
+      <Footer />
     </>
   );
 }

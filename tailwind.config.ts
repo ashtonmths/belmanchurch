@@ -6,7 +6,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", ...fontFamily.sans],
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+        serif: ["var(--font-serif)", ...fontFamily.serif],
         cursive: ["'Great Vibes'", "cursive"],
       },
       colors: {
@@ -14,6 +15,8 @@ export default {
         secondary: "#C8AE7D",
         accent: "#765827",
         textcolor: "#65451F",
+        cream: "#FBF7F0",
+        ink: "#16110C",
       },
     },
   },

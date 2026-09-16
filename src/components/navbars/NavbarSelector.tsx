@@ -4,7 +4,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRole } from "~/hooks/useRole";
 import { useEffect, useState } from "react";
 import Navbar from "~/components/navbars/Navbar";
-import AdminNavbar from "~/components/navbars/AdminNavbar";
 
 export default function NavbarSelector() {
   const pathname = usePathname();
@@ -32,7 +31,9 @@ export default function NavbarSelector() {
     }
   }, [role, pathname, router, isAdminRoute, isGalleryRoute]);
 
+  // The admin area has its own sidebar (src/app/admin/layout.tsx).
+  if (isAdminRoute) return null;
   if (!isAllowed) return null; // Prevent unauthorized flicker
 
-  return isAdminRoute ? <AdminNavbar /> : <Navbar />;
+  return <Navbar />;
 }

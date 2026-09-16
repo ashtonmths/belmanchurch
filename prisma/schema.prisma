@@ -143,6 +143,7 @@ model Event {
   id        String   @id @default(cuid())
   name      String
   image     String   @default("")
+  images    String[] @default([])
   date      DateTime
   venue     String
   info      String? // Nullable for optional input
@@ -183,4 +184,68 @@ enum Role {
   PHOTOGRAPHER
   ADMIN
   DEVELOPER
+}
+
+
+// ---------------------------------------------------------------------------
+// Content managed from the admin panel. All additive: no existing table changes
+// beyond the optional Event.images column.
+// ---------------------------------------------------------------------------
+
+model CarouselSlide {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  title     String?
+  subtitle  String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+enum PriestRole {
+  PARISH_PRIEST
+  ASSISTANT_PRIEST
+}
+
+model Priest {
+  id        String     @id @default(cuid())
+  name      String
+  role      PriestRole
+  period    String
+  imageUrl  String?
+  isCurrent Boolean    @default(false)
+  order     Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  link        String?
+  pinned      Boolean   @default(false)
+  active      Boolean   @default(true)
+  publishedAt DateTime  @default(now())
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+/// Editable page content (mass timings, associations, commissions, ...),
+/// stored as JSON under a fixed key.
+model SiteContent {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
 }

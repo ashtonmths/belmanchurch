@@ -1,14 +1,12 @@
 import { z } from "zod";
 import {
+  adminProcedure,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import cloudinary from "cloudinary";
 import { db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
-
-cloudinary.v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
 
 export const galleryRouter = createTRPCRouter({
   uploadGallery: protectedProcedure
@@ -53,48 +51,35 @@ export const galleryRouter = createTRPCRouter({
       return { success: true, cloudinaryFolder };
     }),
 
-  getFolders: publicProcedure.query(async ({}) => {
+  getFolders: publicProcedure.query(async () => {
+    // Preview = first uploaded image, read from the database rather than
+    // listing Cloudinary, so it works with any storage backend.
     const folders = await db.gallery.findMany({
       select: {
         id: true,
         eventName: true,
         eventDate: true,
         cloudinaryFolder: true,
+        images: { select: { url: true }, orderBy: { createdAt: "asc" }, take: 1 },
+        _count: { select: { images: true } },
       },
       orderBy: { eventDate: "desc" },
     });
 
-    const folderPreviews = await Promise.all(
-      folders.map(async (folder) => {
-        try {
-          const response = (await cloudinary.v2.api.resources({
-            type: "upload",
-            prefix: folder.cloudinaryFolder,
-            max_results: 100, // Ensure you get enough to sort
-          })) as { resources: { secure_url: string; created_at: string }[] };
-
-          const sorted = response.resources.sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-
-          return {
-            ...folder,
-            previewImage: sorted[0]?.secure_url ?? null, // First uploaded
-          };
-        } catch (error) {
-          console.error(
-            `Error fetching preview for ${folder.cloudinaryFolder}:`,
-            error,
-          );
-          return { ...folder, previewImage: null };
-        }
-      }),
-    );
-
-    return folderPreviews;
+    return folders.map(({ images, _count, ...folder }) => ({
+      ...folder,
+      previewImage: images[0]?.url ?? null,
+      imageCount: _count.images,
+    }));
   }),
+
+  deleteImage: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ ctx, input }) => ctx.db.galleryImage.delete({ where: { id: input.id } })),
+
+  deleteGallery: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ ctx, input }) => ctx.db.gallery.delete({ where: { id: input.id } })),
 
   toggleLike: protectedProcedure
     .input(z.object({ imageId: z.string() }))

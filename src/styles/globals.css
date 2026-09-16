@@ -3,9 +3,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* A visible scrollbar matters now that the home page scrolls: it is the only
+   affordance telling a reader that the mass timings are below the hero. */
 ::-webkit-scrollbar {
-  width: 0px;
+  width: 10px;
   background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #765827;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #C8AE7D;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #765827 transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 
@@ -30,121 +53,6 @@
   animation: wave 15s infinite linear;
 }
 
-.timeline-container {
-  position: relative;
-  width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 1rem 0;
-}
-
-.timeline-container::after {
-  content: '';
-  position: absolute;
-  width: 4px;
-  background: #EAC696;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  margin-left: -2px;
-}
-
-.timeline-item {
-  padding: 1rem 2rem;
-  position: relative;
-  width: 50%;
-  box-sizing: border-box;
-}
-
-.timeline-item::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  right: -10px;
-  background-color: #765827;
-  border: 4px solid #EAC696;
-  top: 30px;
-  border-radius: 50%;
-  z-index: 1;
-}
-
-.left {
-  left: 0;
-}
-
-.right {
-  left: 50%;
-}
-
-.left::after {
-  left: calc(100% - 10px);
-}
-
-.right::after {
-  left: -10px;
-}
-
-@media screen and (max-width: 768px) {
-  .timeline-container::after {
-    left: 31px;
-  }
-  
-  .timeline-item {
-    width: 100%;
-    padding-left: 70px;
-    padding-right: 25px;
-  }
-  
-  .timeline-item::after {
-    left: 21px;
-    top: 30px;
-  }
-  
-  .left::after,
-  .right::after {
-    left: 21px;
-  }
-  
-  .right {
-    left: 0%;
-  }
-}
-
-.association-modal {
-  @apply fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center;
-  background-color: rgba(0,0,0,0.7);
-  backdrop-filter: blur(5px);
-  padding: 2rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.association-modal.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.modal-content {
-  @apply rounded-2xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative;
-}
-
-@media screen and (max-width: 640px) {
-  .association-item {
-    width: 150px;
-    height: 150px;
-  }
-}
-
-/* St. Anthony section styles */
-.st-anthony-container {
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/st-anthony-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  @apply py-12 px-4 relative;
-}
-
 /* Page transitions */
 .page-transition-enter {
   opacity: 0;
@@ -166,4 +74,22 @@
   opacity: 0;
   transform: translateY(-20px);
   transition: opacity 300ms, transform 300ms;
+}
+
+/* Slow settle of the home hero photo. */
+@keyframes slow-zoom {
+  from { transform: scale(1.1); }
+  to { transform: scale(1); }
+}
+
+/* Konkani text copied from the old parish website uses a legacy Kannada font
+   encoding (Nudi) and only reads correctly in that font. */
+@font-face {
+  font-family: "Konkani Legacy";
+  src: url("/fonts/konkani-legacy.woff2") format("woff2");
+  font-display: swap;
+}
+
+.font-konkani {
+  font-family: "Konkani Legacy", var(--font-sans), sans-serif;
 }
