@@ -182,7 +182,7 @@ export default function Home() {
                 <ScheduleBlock title="Catechism">
                   <p>Sunday — 9:15 AM to 10:30 AM</p>
                 </ScheduleBlock>
-                <ScheduleBlock title="St. Anthony Shrine, Pakala">
+                <ScheduleBlock title="St. Anthony Chapel, Pakala">
                   <p>Tuesday — 4:00 PM</p>
                   <p>First Tuesday — 3:00 PM</p>
                 </ScheduleBlock>
