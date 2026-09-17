@@ -67,7 +67,7 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`relative py-3 text-sm font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${
+              className={`relative py-3 text-base font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${
                 isActive(link.href)
                   ? "text-white after:scale-x-100"
                   : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"
@@ -79,7 +79,7 @@ export default function Navbar() {
           <div className="group relative">
             <button
               type="button"
-              className={`flex items-center gap-1 py-3 text-sm font-semibold tracking-wide transition-colors ${pathname.startsWith("/about") || pathname.startsWith("/st-anthony") ? "text-white" : "text-white/70 hover:text-white"}`}
+              className={`flex items-center gap-1 py-3 text-base font-semibold tracking-wide transition-colors ${pathname.startsWith("/about") || pathname.startsWith("/st-anthony") ? "text-white" : "text-white/70 hover:text-white"}`}
             >
               Our Parish
               <ChevronDown
@@ -107,14 +107,14 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`relative py-3 text-sm font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${isActive(link.href) ? "text-white after:scale-x-100" : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
+              className={`relative py-3 text-base font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${isActive(link.href) ? "text-white after:scale-x-100" : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/donate"
-            className="rounded-full border border-[#f0c878] bg-[#f0c878] px-5 py-3 text-sm font-bold text-[#2a1b10] shadow-[0_8px_30px_rgba(240,200,120,0.2)] transition hover:bg-transparent hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="rounded-full border border-[#f0c878] bg-[#f0c878] px-5 py-3 text-base font-bold text-[#2a1b10] shadow-[0_8px_30px_rgba(240,200,120,0.2)] transition hover:bg-transparent hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             Make a donation
           </Link>
