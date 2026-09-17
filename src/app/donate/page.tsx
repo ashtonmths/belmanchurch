@@ -7,6 +7,7 @@ import DonateButton from "~/components/DonateButton";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "~/components/ProtectRoute";
+import PageShell from "~/components/PageShell";
 
 function getNextWeekdayDate(weekday: number) {
   const today = dayjs();
@@ -76,170 +77,159 @@ export default function DonatePage() {
   };
 
   return (
-    <ProtectedRoute
-      allowedRoles={[
-        "DEVELOPER",
-        "ADMIN",
-      ]}
-    >
-      <div className="min-h-screen w-full bg-[url('/bg/home.jpg')] bg-cover bg-center">
+    <ProtectedRoute allowedRoles={["DEVELOPER", "ADMIN"]}>
+      <PageShell
+        eyebrow="Support the parish"
+        title="Make a donation"
+        contentClassName="mx-auto max-w-xl"
+      >
         <ToastContainer />
-        <div className="flex min-h-screen w-full items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-10 mt-[35%] w-[90%] max-w-xl rounded-2xl bg-[#C8AE7D] p-6 text-[#65451F] shadow-2xl sm:p-10 md:mt-36">
-            <h1 className="mb-6 text-center text-3xl font-extrabold">
-              Make a Donation
-            </h1>
+        <div className="rounded-3xl border border-white/10 bg-[#fffaf1] p-6 text-[#3b2919] shadow-2xl sm:p-10">
+          <div className="space-y-3">
+            {/* Donation Type */}
+            <div>
+              <label className="mb-1 block font-semibold">Donation Type:</label>
+              <select
+                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                value={selectedType}
+                onChange={(e) => handleTypeChange(e.target.value)}
+              >
+                <option value="" disabled>
+                  --- Select Donation Type ---
+                </option>
+                <option value="CHURCH">St Joseph - Church Donation</option>
+                <option value="CHAPEL">St Anthony - Chapel Donation</option>
+                <option value="THANKSGIVING">Thanksgiving Mass</option>
+              </select>
+            </div>
 
-            <div className="space-y-3">
-              {/* Donation Type */}
-              <div>
-                <label className="mb-1 block font-semibold">
-                  Donation Type:
-                </label>
+            {/* From */}
+            <div>
+              <label className="mb-1 block font-semibold">From:</label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                value={byWhom}
+                disabled={!!session?.user.name}
+                onChange={(e) => setByWhom(e.target.value)}
+              />
+            </div>
+
+            {/* For */}
+            <div>
+              <label className="mb-1 block font-semibold">For:</label>
+              {type === "THANKSGIVING" ? (
                 <select
                   className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                  value={selectedType}
-                  onChange={(e) => handleTypeChange(e.target.value)}
+                  value={forWhom}
+                  onChange={(e) => setForWhom(e.target.value)}
                 >
-                  <option value="" disabled>
-                    --- Select Donation Type ---
-                  </option>
-                  <option value="CHURCH">St Joseph - Church Donation</option>
-                  <option value="CHAPEL">St Anthony - Chapel Donation</option>
-                  <option value="THANKSGIVING">Thanksgiving Mass</option>
+                  <option value="">----- Select Occasion -----</option>
+                  <option value="Birthday">Birthday</option>
+                  <option value="Anniversary">Anniversary</option>
+                  <option value="Wedding">Wedding</option>
+                  <option value="Success">Success</option>
+                  <option value="Healing">Healing</option>
+                  <option value="Thanksgiving">General Thanksgiving</option>
                 </select>
-              </div>
-
-              {/* From */}
-              <div>
-                <label className="mb-1 block font-semibold">From:</label>
+              ) : (
                 <input
                   type="text"
                   className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                  value={byWhom}
-                  disabled={!!session?.user.name}
-                  onChange={(e) => setByWhom(e.target.value)}
+                  value={forWhom}
+                  disabled
+                  onChange={(e) => setForWhom(e.target.value)}
                 />
-              </div>
+              )}
+            </div>
 
-              {/* For */}
-              <div>
-                <label className="mb-1 block font-semibold">For:</label>
-                {type === "THANKSGIVING" ? (
-                  <select
-                    className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                    value={forWhom}
-                    onChange={(e) => setForWhom(e.target.value)}
-                  >
-                    <option value="">----- Select Occasion -----</option>
-                    <option value="Birthday">Birthday</option>
-                    <option value="Anniversary">Anniversary</option>
-                    <option value="Wedding">Wedding</option>
-                    <option value="Success">Success</option>
-                    <option value="Healing">Healing</option>
-                    <option value="Thanksgiving">General Thanksgiving</option>
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                    value={forWhom}
-                    disabled
-                    onChange={(e) => setForWhom(e.target.value)}
-                  />
-                )}
-              </div>
+            {/* Email */}
+            <div>
+              <label className="mb-1 block font-semibold">Email:</label>
+              <input
+                type="email"
+                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                value={email}
+                disabled={!!session?.user.email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-              {/* Email */}
-              <div>
-                <label className="mb-1 block font-semibold">Email:</label>
-                <input
-                  type="email"
+            {/* Mass Timing */}
+            <div>
+              <label className="mb-1 block font-semibold">Mass Timing:</label>
+              {type === "THANKSGIVING" ? (
+                <select
                   className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                  value={email}
-                  disabled={!!session?.user.email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              {/* Mass Timing */}
-              <div>
-                <label className="mb-1 block font-semibold">Mass Timing:</label>
-                {type === "THANKSGIVING" ? (
-                  <select
-                    className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                    value={massTiming}
-                    onChange={(e) => setMassTiming(e.target.value)}
+                  value={massTiming}
+                  onChange={(e) => setMassTiming(e.target.value)}
+                >
+                  <option value="">-- Select Mass Timing --</option>
+                  <option
+                    value={getNextWeekdayDate(6)
+                      .hour(16)
+                      .minute(0)
+                      .format("dddd, MMMM D - h:mmA")}
                   >
-                    <option value="">-- Select Mass Timing --</option>
-                    <option
-                      value={getNextWeekdayDate(6)
-                        .hour(16)
-                        .minute(0)
-                        .format("dddd, MMMM D - h:mmA")}
-                    >
-                      Saturday - 4:00PM (
-                      {getNextWeekdayDate(6).format("MMMM D")})
-                    </option>
-                    <option
-                      value={getNextWeekdayDate(0)
-                        .hour(7)
-                        .minute(30)
-                        .format("dddd, MMMM D - h:mmA")}
-                    >
-                      Sunday - 7:30AM ({getNextWeekdayDate(0).format("MMMM D")})
-                    </option>
-                    <option
-                      value={getNextWeekdayDate(0)
-                        .hour(10)
-                        .minute(30)
-                        .format("dddd, MMMM D - h:mmA")}
-                    >
-                      Sunday - 10:30AM ({getNextWeekdayDate(0).format("MMMM D")}
-                      )
-                    </option>
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none"
-                    value={massTiming}
-                    disabled
-                  />
-                )}
-              </div>
-
-              {/* Amount */}
-              <div>
-                <label className="mb-1 block font-semibold">Amount:</label>
+                    Saturday - 4:00PM ({getNextWeekdayDate(6).format("MMMM D")})
+                  </option>
+                  <option
+                    value={getNextWeekdayDate(0)
+                      .hour(7)
+                      .minute(30)
+                      .format("dddd, MMMM D - h:mmA")}
+                  >
+                    Sunday - 7:30AM ({getNextWeekdayDate(0).format("MMMM D")})
+                  </option>
+                  <option
+                    value={getNextWeekdayDate(0)
+                      .hour(10)
+                      .minute(30)
+                      .format("dddd, MMMM D - h:mmA")}
+                  >
+                    Sunday - 10:30AM ({getNextWeekdayDate(0).format("MMMM D")})
+                  </option>
+                </select>
+              ) : (
                 <input
-                  type="number"
-                  min={type === "THANKSGIVING" ? 300 : 100}
-                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                  value={amount}
-                  disabled={type === "THANKSGIVING"}
-                  onChange={(e) => setAmount(e.target.value)}
+                  type="text"
+                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none"
+                  value={massTiming}
+                  disabled
                 />
-              </div>
+              )}
+            </div>
 
-              {/* Donate Button */}
-              <div className="min-h-[0px]">
-                {type && (
-                  <DonateButton
-                    type={type}
-                    amount={amount}
-                    forWhom={forWhom}
-                    byWhom={byWhom}
-                    email={email}
-                    massTiming={massTiming}
-                    onValidate={validateForm}
-                  />
-                )}
-              </div>
+            {/* Amount */}
+            <div>
+              <label className="mb-1 block font-semibold">Amount:</label>
+              <input
+                type="number"
+                min={type === "THANKSGIVING" ? 300 : 100}
+                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                value={amount}
+                disabled={type === "THANKSGIVING"}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+
+            {/* Donate Button */}
+            <div className="min-h-[0px]">
+              {type && (
+                <DonateButton
+                  type={type}
+                  amount={amount}
+                  forWhom={forWhom}
+                  byWhom={byWhom}
+                  email={email}
+                  massTiming={massTiming}
+                  onValidate={validateForm}
+                />
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </PageShell>
     </ProtectedRoute>
   );
 }

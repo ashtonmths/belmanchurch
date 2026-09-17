@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { api } from "~/trpc/react";
 import ProtectedRoute from "~/components/ProtectRoute";
+import PageShell from "~/components/PageShell";
 
 type ReceiptUploaderProps = {
   id: string;
@@ -100,165 +101,60 @@ export default function DonationAdmin() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center overflow-auto rounded-xl border-4 border-primary bg-black/40 p-5 text-center">
-            <div className="mb-8 flex w-full justify-center gap-4">
-              <button
-                className={`rounded-lg px-4 py-2 font-semibold ${activeTab === "inbox" ? "bg-primary text-textcolor" : "bg-secondary text-textcolor"}`}
-                onClick={() => setActiveTab("inbox")}
-              >
-                Inbox
-              </button>
-              <button
-                className={`rounded-lg px-4 py-2 font-semibold ${activeTab === "history" ? "bg-primary text-textcolor" : "bg-secondary text-textcolor"}`}
-                onClick={() => setActiveTab("history")}
-              >
-                History
-              </button>
-              <input
-                type="text"
-                placeholder={`Search ${activeTab === "inbox" ? "Inbox" : "History"} by donor...`}
-                className="w-[25%] rounded-lg border border-accent bg-primary px-4 py-2 font-semibold text-textcolor placeholder-accent focus:outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      <PageShell admin eyebrow="Administration" title="Donations">
+        <div className="flex min-h-[65vh] flex-col items-center overflow-auto rounded-3xl border border-white/10 bg-black/30 p-4 text-center backdrop-blur-md sm:p-6">
+          <div className="mb-8 flex w-full flex-wrap justify-center gap-3">
+            <button
+              className={`rounded-lg px-4 py-2 font-semibold ${activeTab === "inbox" ? "bg-primary text-textcolor" : "bg-secondary text-textcolor"}`}
+              onClick={() => setActiveTab("inbox")}
+            >
+              Inbox
+            </button>
+            <button
+              className={`rounded-lg px-4 py-2 font-semibold ${activeTab === "history" ? "bg-primary text-textcolor" : "bg-secondary text-textcolor"}`}
+              onClick={() => setActiveTab("history")}
+            >
+              History
+            </button>
+            <input
+              type="text"
+              placeholder={`Search ${activeTab === "inbox" ? "Inbox" : "History"} by donor...`}
+              className="min-w-56 flex-1 rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-[#f0c878] sm:max-w-md"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-            {activeTab === "inbox" && (
-              <div className="flex h-full w-[70%] flex-col items-center gap-3 overflow-y-auto rounded p-3">
-                {inboxDonations.length === 0 ? (
-                  <p className="text-4xl font-extrabold text-primary">
-                    No pending receipts.
-                  </p>
-                ) : (
-                  <table className="w-full table-fixed border-collapse rounded-xl">
-                    <thead>
-                      <tr className="border-2 border-accent bg-primary text-textcolor">
-                        <th className="border-2 border-accent p-2">Type</th>
-                        <th className="border-2 border-accent p-2">For?</th>
-                        <th className="border-2 border-accent p-2">By?</th>
-                        <th className="border-2 border-accent p-2">Amount</th>
-                        <th className="border-2 border-accent p-2">Mass Timing</th>
-                        <th className="border-2 border-accent p-2">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredInboxDonations.map((donation) => (
-                        <React.Fragment key={donation.id}>
-                          {/* Row with donation details */}
-                          <tr className="border-2 border-accent bg-primary font-bold text-textcolor">
-                            <td className="border-2 border-accent p-2">
-                              {donation.type}
-                            </td>
-                            <td className="border-2 border-accent p-2">
-                              {donation.forWhom}
-                            </td>
-                            <td className="border-2 border-accent p-2">
-                              {donation.byWhom}
-                            </td>
-                            <td className="border-2 border-accent p-2">
-                              ₹{donation.amount}
-                            </td>
-                            <td className="border-2 border-accent p-2">
-                              {donation.massTiming}
-                            </td>
-                            <td className="p-2 text-center">
-                              <button
-                                className="rounded border-2 border-accent bg-primary px-4 py-2 text-textcolor transition-all duration-300 ease-in-out hover:bg-accent hover:text-primary"
-                                onClick={() =>
-                                  setExpandedRow((prev) =>
-                                    prev === donation.id ? null : donation.id,
-                                  )
-                                }
-                              >
-                                {expandedRow === donation.id
-                                  ? "Close"
-                                  : "Upload"}
-                              </button>
-                            </td>
-                          </tr>
-
-                          {expandedRow === donation.id && (
-                            <tr className="transition-all duration-300 ease-in-out">
-                              <td colSpan={5} className="border bg-primary p-3">
-                                {!receipt[donation.id] ? (
-                                  <ReceiptUploader id={donation.id} />
-                                ) : (
-                                  <div className="flex flex-col items-center">
-                                    <Image
-                                      src={
-                                        receipt[donation.id]?.data ??
-                                        "/favicon.webp"
-                                      }
-                                      alt="Scanned Receipt"
-                                      className="mt-2 h-40 w-auto rounded object-cover"
-                                      width={300}
-                                      height={200}
-                                    />
-                                    <div className="flex flex-row items-center justify-center gap-2">
-                                      <button
-                                        className="mt-2 rounded-full bg-green-500 px-4 py-2 text-white"
-                                        onClick={() =>
-                                          handleSend(
-                                            donation.id,
-                                            donation.email,
-                                          )
-                                        }
-                                      >
-                                        Send
-                                      </button>
-                                      <button
-                                        className="mt-2 rounded-full bg-red-500 px-4 py-2 text-white"
-                                        onClick={() =>
-                                          setReceipt((prev) => {
-                                            const updated = { ...prev };
-                                            delete updated[donation.id];
-                                            return updated;
-                                          })
-                                        }
-                                      >
-                                        Reset
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
-
-            {activeTab === "history" && (
-              <div className="flex h-full w-[70%] flex-col items-center gap-3 overflow-y-auto rounded p-3">
-                {filteredHistoryDonations.length === 0 ? (
-                  <p className="text-4xl font-extrabold text-primary">
-                    No receipts issued.
-                  </p>
-                ) : (
-                  <table className="w-full table-fixed border-collapse rounded-xl">
-                    <thead>
-                      <tr className="border-2 border-accent bg-primary text-textcolor">
-                        <th className="border-2 border-accent p-2">Type</th>
-                        <th className="border-2 border-accent p-2">By?</th>
-                        <th className="border-2 border-accent p-2">Amount</th>
-                        <th className="border-2 border-accent p-2">Mass Timing</th>
-                        <th className="border-2 border-accent p-2">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {historyDonations.map((donation) => (
-                        <tr
-                          key={donation.id}
-                          className="border-2 border-accent bg-primary font-semibold text-textcolor"
-                        >
+          {activeTab === "inbox" && (
+            <div className="flex h-full w-full max-w-5xl flex-col items-center gap-3 overflow-x-auto rounded p-1 sm:p-3">
+              {inboxDonations.length === 0 ? (
+                <p className="text-4xl font-extrabold text-primary">
+                  No pending receipts.
+                </p>
+              ) : (
+                <table className="w-full table-fixed border-collapse rounded-xl">
+                  <thead>
+                    <tr className="border-2 border-accent bg-primary text-textcolor">
+                      <th className="border-2 border-accent p-2">Type</th>
+                      <th className="border-2 border-accent p-2">For?</th>
+                      <th className="border-2 border-accent p-2">By?</th>
+                      <th className="border-2 border-accent p-2">Amount</th>
+                      <th className="border-2 border-accent p-2">
+                        Mass Timing
+                      </th>
+                      <th className="border-2 border-accent p-2">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredInboxDonations.map((donation) => (
+                      <React.Fragment key={donation.id}>
+                        {/* Row with donation details */}
+                        <tr className="border-2 border-accent bg-primary font-bold text-textcolor">
                           <td className="border-2 border-accent p-2">
                             {donation.type}
+                          </td>
+                          <td className="border-2 border-accent p-2">
+                            {donation.forWhom}
                           </td>
                           <td className="border-2 border-accent p-2">
                             {donation.byWhom}
@@ -269,19 +165,121 @@ export default function DonationAdmin() {
                           <td className="border-2 border-accent p-2">
                             {donation.massTiming}
                           </td>
-                          <td className="border-2 border-accent p-2 font-bold text-green-700">
-                            Receipt Issued ✅
+                          <td className="p-2 text-center">
+                            <button
+                              className="rounded border-2 border-accent bg-primary px-4 py-2 text-textcolor transition-all duration-300 ease-in-out hover:bg-accent hover:text-primary"
+                              onClick={() =>
+                                setExpandedRow((prev) =>
+                                  prev === donation.id ? null : donation.id,
+                                )
+                              }
+                            >
+                              {expandedRow === donation.id ? "Close" : "Upload"}
+                            </button>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
-          </div>
+
+                        {expandedRow === donation.id && (
+                          <tr className="transition-all duration-300 ease-in-out">
+                            <td colSpan={5} className="border bg-primary p-3">
+                              {!receipt[donation.id] ? (
+                                <ReceiptUploader id={donation.id} />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <Image
+                                    src={
+                                      receipt[donation.id]?.data ??
+                                      "/favicon.webp"
+                                    }
+                                    alt="Scanned Receipt"
+                                    className="mt-2 h-40 w-auto rounded object-cover"
+                                    width={300}
+                                    height={200}
+                                  />
+                                  <div className="flex flex-row items-center justify-center gap-2">
+                                    <button
+                                      className="mt-2 rounded-full bg-green-500 px-4 py-2 text-white"
+                                      onClick={() =>
+                                        handleSend(donation.id, donation.email)
+                                      }
+                                    >
+                                      Send
+                                    </button>
+                                    <button
+                                      className="mt-2 rounded-full bg-red-500 px-4 py-2 text-white"
+                                      onClick={() =>
+                                        setReceipt((prev) => {
+                                          const updated = { ...prev };
+                                          delete updated[donation.id];
+                                          return updated;
+                                        })
+                                      }
+                                    >
+                                      Reset
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+
+          {activeTab === "history" && (
+            <div className="flex h-full w-full max-w-5xl flex-col items-center gap-3 overflow-x-auto rounded p-1 sm:p-3">
+              {filteredHistoryDonations.length === 0 ? (
+                <p className="text-4xl font-extrabold text-primary">
+                  No receipts issued.
+                </p>
+              ) : (
+                <table className="w-full table-fixed border-collapse rounded-xl">
+                  <thead>
+                    <tr className="border-2 border-accent bg-primary text-textcolor">
+                      <th className="border-2 border-accent p-2">Type</th>
+                      <th className="border-2 border-accent p-2">By?</th>
+                      <th className="border-2 border-accent p-2">Amount</th>
+                      <th className="border-2 border-accent p-2">
+                        Mass Timing
+                      </th>
+                      <th className="border-2 border-accent p-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyDonations.map((donation) => (
+                      <tr
+                        key={donation.id}
+                        className="border-2 border-accent bg-primary font-semibold text-textcolor"
+                      >
+                        <td className="border-2 border-accent p-2">
+                          {donation.type}
+                        </td>
+                        <td className="border-2 border-accent p-2">
+                          {donation.byWhom}
+                        </td>
+                        <td className="border-2 border-accent p-2">
+                          ₹{donation.amount}
+                        </td>
+                        <td className="border-2 border-accent p-2">
+                          {donation.massTiming}
+                        </td>
+                        <td className="border-2 border-accent p-2 font-bold text-green-700">
+                          Receipt Issued ✅
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
         </div>
-      </div>
+      </PageShell>
     </ProtectedRoute>
   );
 }

@@ -5,53 +5,61 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import "react-medium-image-zoom/dist/styles.css";
 import { useRouter } from "next/navigation";
+import PageShell from "~/components/PageShell";
 
 export default function Gallery() {
   const { data: folders, isLoading, error } = api.gallery.getFolders.useQuery();
   const router = useRouter();
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>{error.message}</p>;
-
   return (
-    <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-      <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-        <div className="flex h-[81%] min-h-0 w-[90%] flex-col items-center gap-6 overflow-y-auto overflow-x-hidden p-6 text-center md:flex-row md:flex-wrap md:justify-center">
-          {folders && folders.length > 0 ? (
-            folders.map((folder) => (
-              <motion.div
-                key={folder.id}
-                className="relative flex h-80 w-64 flex-none cursor-pointer flex-col overflow-hidden rounded-lg bg-primary shadow-lg"
-                onClick={() => router.push(`/gallery/${folder.id}`)}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="relative flex h-[70%] w-full items-center justify-center overflow-hidden bg-primary p-4">
-                  <div className="relative h-full w-full overflow-hidden rounded-lg">
-                    <Image
-                      src={folder.previewImage ?? "/favicon.webp"}
-                      alt={folder.eventName}
-                      fill
-                      className="scale-110 object-cover"
-                    />
-                  </div>
-                </div>
-                <div className="flex h-[20%] w-full items-center justify-center bg-primary p-2 font-cursive text-3xl font-extrabold text-textcolor">
+    <PageShell
+      eyebrow="Parish life"
+      title="Gallery"
+      description="Moments of faith, fellowship and celebration from our community."
+    >
+      {isLoading ? (
+        <p className="text-white/65">Loading albums…</p>
+      ) : error ? (
+        <p className="rounded-2xl border border-red-300/20 bg-red-950/30 p-5 text-red-100">
+          {error.message}
+        </p>
+      ) : folders && folders.length > 0 ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {folders.map((folder) => (
+            <motion.div
+              key={folder.id}
+              className="group relative cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-white/[0.07] shadow-xl backdrop-blur-md"
+              onClick={() => router.push(`/gallery/${folder.id}`)}
+              whileHover={{ y: -4 }}
+            >
+              <div className="relative aspect-[4/3] w-full overflow-hidden">
+                <Image
+                  src={folder.previewImage ?? "/favicon.webp"}
+                  alt={folder.eventName}
+                  fill
+                  className="object-cover transition duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="p-5">
+                <h2 className="text-lg font-semibold text-white">
                   {folder.eventName}
-                </div>
-                <div className="-mt-2 mb-2 flex h-[10%] w-full items-center justify-center bg-primary p-2 text-lg font-bold text-textcolor">
-                    {new Date(folder.eventDate).toLocaleDateString("en-GB", {
+                </h2>
+                <p className="mt-2 text-sm text-white/55">
+                  {new Date(folder.eventDate).toLocaleDateString("en-GB", {
                     day: "2-digit",
-                    month: "2-digit",
+                    month: "long",
                     year: "numeric",
-                    })}
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <p className="text-4xl font-bold text-primary">No Folders Found.</p>
-          )}
+                  })}
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </div>
-    </div>
+      ) : (
+        <p className="rounded-3xl border border-white/10 bg-white/[0.06] p-10 text-center text-white/65">
+          No albums found.
+        </p>
+      )}
+    </PageShell>
   );
 }

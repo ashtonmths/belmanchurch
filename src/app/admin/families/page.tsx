@@ -6,6 +6,7 @@ import AddParishonerModal from "~/components/modals/AddParishonerModal";
 import AddFamilyModal from "~/components/modals/AddFamilyModal";
 import AddToFamilyModal from "~/components/modals/AddToFamilyModal";
 import ProtectedRoute from "~/components/ProtectRoute";
+import PageShell from "~/components/PageShell";
 
 type Member = {
   id: string;
@@ -35,13 +36,12 @@ export default function Families() {
   );
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>  
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-      <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center text-center">
+    <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+      <PageShell admin eyebrow="Administration" title="Families">
+        <div className="flex min-h-[65vh] flex-col items-center rounded-3xl border border-white/10 bg-black/30 p-4 text-center backdrop-blur-md sm:p-6">
           {/* Buttons and Search Bar */}
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex gap-3">
+          <div className="mb-6 flex w-full max-w-4xl flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-wrap gap-3">
               <button
                 className="rounded-lg bg-primary px-4 py-2 font-semibold text-textcolor"
                 onClick={() => setShowAddFamily(true)}
@@ -58,7 +58,7 @@ export default function Families() {
             <input
               type="text"
               placeholder="Search Family..."
-              className="ml-3 rounded-lg border bg-primary px-4 py-2 font-semibold text-textcolor placeholder-accent"
+              className="rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-[#f0c878]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -110,7 +110,7 @@ export default function Families() {
                         {members?.map((member) => (
                           <div
                             key={member.id}
-                            className="flex justify-between rounded-lg bg-accent p-3 text-primary font-semibold"
+                            className="flex justify-between rounded-lg bg-accent p-3 font-semibold text-primary"
                           >
                             <span>
                               {member.name} - {member.mobile} -{" "}
@@ -163,8 +163,7 @@ export default function Families() {
             />
           )}
         </div>
-      </div>
-    </div>
+      </PageShell>
     </ProtectedRoute>
   );
 }

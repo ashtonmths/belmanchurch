@@ -1,5 +1,7 @@
 "use client";
 import { api } from "~/trpc/react";
+import { CalendarDays, Clock3, MapPin } from "lucide-react";
+import PageShell from "~/components/PageShell";
 
 function formatDateToIST(date: string | Date) {
   let dateString: string;
@@ -24,51 +26,58 @@ function formatDateToIST(date: string | Date) {
   });
 }
 
-
 export default function Events() {
   const { data: events } = api.misc.getAllEvents.useQuery();
 
-  if (events?.length === 0) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center text-4xl font-bold text-primary">
-            No events available
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-        <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col flex-wrap items-center text-center">
-            {/* Scrollable Container */}
-            <div className="flex w-full items-start justify-center overflow-x-auto p-5">
-              <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 md:grid-cols-4">
-                {events?.map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex h-80 w-60 flex-col items-center justify-center gap-3 rounded-3xl bg-secondary p-4 text-textcolor transition-shadow hover:bg-secondary hover:shadow-2xl hover:shadow-primary"
-                  >
-                    <div className="flex h-40 w-52 items-center justify-center rounded-2xl bg-accent text-2xl font-bold text-primary">
-                      {event.name}
-                    </div>
-                    <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
-                      {formatDateToIST(event.date)} IST
-                    </div>
-                    <div className="w-full rounded-xl bg-accent p-2 px-6 text-sm font-extrabold text-primary">
-                      {event.venue}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+    <PageShell
+      eyebrow="Parish calendar"
+      title="Events"
+      description="Gather with the parish community for worship, celebrations and upcoming programmes."
+    >
+      {!events ? (
+        <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-10 text-center text-white/65 backdrop-blur-md">
+          Loading events…
         </div>
-      </div>
-    </>
+      ) : events.length === 0 ? (
+        <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-10 text-center backdrop-blur-md">
+          <CalendarDays className="mx-auto text-[#f0c878]" size={34} />
+          <p className="mt-4 text-lg font-semibold">No events scheduled yet</p>
+          <p className="mt-2 text-sm text-white/55">Please check back soon.</p>
+        </div>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((event) => (
+            <article
+              key={event.id}
+              className="rounded-3xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur-md transition hover:-translate-y-1 hover:border-[#f0c878]/50"
+            >
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f0c878] text-[#2a1b10]">
+                <CalendarDays size={21} />
+              </div>
+              <h2 className="mt-6 text-xl font-semibold text-white">
+                {event.name}
+              </h2>
+              <div className="mt-5 space-y-3 text-sm text-white/65">
+                <p className="flex items-start gap-3">
+                  <Clock3
+                    className="mt-0.5 shrink-0 text-[#f0c878]"
+                    size={17}
+                  />
+                  {formatDateToIST(event.date)} IST
+                </p>
+                <p className="flex items-start gap-3">
+                  <MapPin
+                    className="mt-0.5 shrink-0 text-[#f0c878]"
+                    size={17}
+                  />
+                  {event.venue}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </PageShell>
   );
 }

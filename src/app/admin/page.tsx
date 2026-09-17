@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import ProtectedRoute from "~/components/ProtectRoute";
+import PageShell from "~/components/PageShell";
 
 dayjs.extend(isBetween);
 
@@ -84,25 +85,24 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-    <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
-      <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
-        <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center text-center overflow-y-auto">
-          <div className="flex h-full w-full flex-col md:flex-row">
+      <PageShell admin eyebrow="Administration" title="Dashboard">
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-4 backdrop-blur-md sm:p-6">
+          <div className="flex min-h-[65vh] w-full flex-col gap-5 md:flex-row">
             {/* Left Panel */}
-            <div className="flex h-full w-full flex-col gap-5 p-5 text-white md:w-1/3">
-              <div className="flex h-1/2 md:h-1/3 items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
+            <div className="flex w-full flex-col gap-5 text-white md:w-1/3">
+              <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
                 <p>
                   Total Donations: <br />
                   <br />₹{totalDonations.toLocaleString()}
                 </p>
               </div>
-              <div className="flex h-1/2 md:h-1/3 items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
+              <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
                 <p>
                   Weekly Donations: <br />
                   <br />₹{weeklyDonations.toLocaleString()}
                 </p>
               </div>
-              <div className="flex h-1/2 md:h-1/3 items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary">
+              <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
                 <p>DUMMY</p>
               </div>
             </div>
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
             {/* Right Panel */}
             <div className="flex h-full w-full flex-col text-white md:w-2/3">
               {/* Graph Section */}
-              <div className="h-[50%] rounded-lg bg-black/50 border-4 border-primary p-5 md:h-[60%]">
+              <div className="h-80 rounded-2xl border border-white/10 bg-white/[0.06] p-3 sm:p-5 md:h-[60%]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={monthlyData}
@@ -135,14 +135,13 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </div>
               {/* Empty Div Below Graph */}
-              <div className="mt-5 flex h-[50%] items-center border-4 border-primary justify-center rounded-lg bg-black/50 text-2xl font-bold text-primary md:h-[40%]">
+              <div className="mt-5 flex min-h-40 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
                 <p>DUMMY</p>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </PageShell>
     </ProtectedRoute>
   );
 }

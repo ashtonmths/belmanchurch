@@ -5,6 +5,7 @@ import Button from "~/components/Button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "~/components/ProtectRoute";
+import PageShell from "~/components/PageShell";
 
 interface CloudinaryResponse {
   secure_url: string;
@@ -85,10 +86,7 @@ export default function AdminMisc() {
         "upload_preset",
         process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!,
       );
-      formData.append(
-        "folder",
-        `Bethkati/`,
-      );
+      formData.append("folder", `Bethkati/`);
       formData.append("public_id", pdfFile.name.replace(/\.pdf$/, ""));
 
       const response = await fetch(
@@ -145,89 +143,87 @@ export default function AdminMisc() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/admin.jpg')] bg-cover bg-center">
+      <PageShell admin eyebrow="Administration" title="Publishing">
         <ToastContainer />
-        <div className="flex h-screen w-full items-end justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mb-5 flex h-[81%] w-[90%] flex-col items-center justify-center overflow-auto text-center">
-            <div className="mt-10 grid h-full w-full grid-cols-4 grid-rows-4 gap-4">
-              <div className="col-span-4 col-start-1 row-span-2 row-start-1 flex h-full flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 p-6 md:col-span-2 md:row-span-4">
-                <h1 className="text-3xl font-semibold text-primary">
-                  EVENT DETAILS
-                </h1>
-                <input
-                  type="text"
-                  placeholder="Event Name"
-                  value={eventData.name}
-                  onChange={(e) =>
-                    setEventData({ ...eventData, name: e.target.value })
-                  }
-                  className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
-                />
-                <input
-                  type="datetime-local"
-                  value={eventData.date}
-                  onChange={(e) =>
-                    setEventData({ ...eventData, date: e.target.value })
-                  }
-                  className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Event Venue"
-                  value={eventData.venue}
-                  onChange={(e) =>
-                    setEventData({ ...eventData, venue: e.target.value })
-                  }
-                  className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
-                />
-                <textarea
-                  placeholder="Additional Info (optional)"
-                  value={eventData.info}
-                  onChange={(e) =>
-                    setEventData({ ...eventData, info: e.target.value })
-                  }
-                  className="mb-2 h-24 w-[60%] resize-none rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
-                />
-                <Button onClick={handlePublishEvent}>Publish</Button>
-              </div>
-              <div className="col-span-4 col-start-1 row-span-2 row-start-3 flex flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 md:col-span-2 md:col-start-3 md:row-span-4 md:row-start-1">
-                <h1 className="text-3xl font-semibold text-primary">
-                  BETHKATI DETAILS
-                </h1>
+        <div className="flex min-h-[65vh] flex-col items-center text-center">
+          <div className="grid w-full gap-5 md:grid-cols-2">
+            <div className="col-span-4 col-start-1 row-span-2 row-start-1 flex h-full flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 p-6 md:col-span-2 md:row-span-4">
+              <h1 className="text-3xl font-semibold text-primary">
+                EVENT DETAILS
+              </h1>
+              <input
+                type="text"
+                placeholder="Event Name"
+                value={eventData.name}
+                onChange={(e) =>
+                  setEventData({ ...eventData, name: e.target.value })
+                }
+                className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+              />
+              <input
+                type="datetime-local"
+                value={eventData.date}
+                onChange={(e) =>
+                  setEventData({ ...eventData, date: e.target.value })
+                }
+                className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Event Venue"
+                value={eventData.venue}
+                onChange={(e) =>
+                  setEventData({ ...eventData, venue: e.target.value })
+                }
+                className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+              />
+              <textarea
+                placeholder="Additional Info (optional)"
+                value={eventData.info}
+                onChange={(e) =>
+                  setEventData({ ...eventData, info: e.target.value })
+                }
+                className="mb-2 h-24 w-[60%] resize-none rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+              />
+              <Button onClick={handlePublishEvent}>Publish</Button>
+            </div>
+            <div className="col-span-4 col-start-1 row-span-2 row-start-3 flex flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 md:col-span-2 md:col-start-3 md:row-span-4 md:row-start-1">
+              <h1 className="text-3xl font-semibold text-primary">
+                BETHKATI DETAILS
+              </h1>
 
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handlePDFUpload}
-                  className="w-[50%] rounded-lg bg-secondary text-textcolor file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-primary hover:file:bg-accent/80"
-                />
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handlePDFUpload}
+                className="w-[50%] rounded-lg bg-secondary text-textcolor file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-primary hover:file:bg-accent/80"
+              />
 
-                <input
-                  type="number"
-                  placeholder="Bethkati Year"
-                  value={bethkatiData.year}
-                  onChange={(e) =>
-                    setBethkatiData({ ...bethkatiData, year: e.target.value })
-                  }
-                  className="w-[50%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
-                />
+              <input
+                type="number"
+                placeholder="Bethkati Year"
+                value={bethkatiData.year}
+                onChange={(e) =>
+                  setBethkatiData({ ...bethkatiData, year: e.target.value })
+                }
+                className="w-[50%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+              />
 
-                <input
-                  type="text"
-                  placeholder="Bethkati Month"
-                  value={bethkatiData.month}
-                  onChange={(e) =>
-                    setBethkatiData({ ...bethkatiData, month: e.target.value })
-                  }
-                  className="w-[50%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
-                />
+              <input
+                type="text"
+                placeholder="Bethkati Month"
+                value={bethkatiData.month}
+                onChange={(e) =>
+                  setBethkatiData({ ...bethkatiData, month: e.target.value })
+                }
+                className="w-[50%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+              />
 
-                <Button onClick={handlePublishBethkati}>Publish</Button>
-              </div>
+              <Button onClick={handlePublishBethkati}>Publish</Button>
             </div>
           </div>
         </div>
-      </div>
+      </PageShell>
     </ProtectedRoute>
   );
 }

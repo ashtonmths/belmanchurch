@@ -11,6 +11,7 @@ import Button from "../../../components/Button";
 import { ToastContainer, toast } from "react-toastify";
 import { useSession } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
+import PageShell from "~/components/PageShell";
 
 const GalleryAlbum = () => {
   const router = useRouter();
@@ -170,195 +171,191 @@ const GalleryAlbum = () => {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
-      <div className="flex h-screen w-full items-end justify-center bg-black/50 backdrop-blur-sm">
-        <div className="flex h-[81%] min-h-0 w-[90%] flex-col items-center gap-6 overflow-y-auto overflow-x-hidden p-6 text-center md:flex-row md:flex-wrap md:justify-center">
-          <AnimatePresence>
+    <PageShell>
+      <div className="flex min-h-[65vh] flex-col items-center gap-6 text-center md:flex-row md:flex-wrap md:justify-center">
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 z-20 flex h-full w-full flex-col items-center justify-center overflow-y-hidden bg-black/60 p-6 pt-[30%] md:pt-[8%]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+          >
+            {isFetching ? (
+              <p className="text-3xl font-semibold text-primary">
+                Loading images...
+              </p>
+            ) : imageslength > 0 ? (
+              <>
+                <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
+                  <Button
+                    className="relative z-30 h-9"
+                    onClick={() => {
+                      setSelectedImage(null);
+                      router.push("/gallery");
+                    }}
+                    variant="destructive"
+                  >
+                    Close
+                  </Button>
+                  <Button className="relative z-30 h-9" onClick={handleCopy}>
+                    Copy Link
+                  </Button>
+                </div>
+                <div className="relative mt-5 h-[80%] w-full overflow-y-auto p-4 md:w-[90%]">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                    {data?.map((img, index) => (
+                      <motion.div
+                        key={img.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        whileHover={{ scale: 1.05 }}
+                        className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedImage({
+                            id: img.id,
+                            url: img.url,
+                            likes: img.likes,
+                            uploadedBy: img.uploadedBy
+                              ? {
+                                  id: img.uploadedBy.id,
+                                  name: img.uploadedBy.name,
+                                  image:
+                                    img.uploadedBy.image ?? "/favicon.webp",
+                                }
+                              : null,
+                            isLiked: likes[img.id] ?? img.isLiked ?? false,
+                          });
+                          setLikes((prevLikes) => ({
+                            ...prevLikes,
+                            [img.id]: likes[img.id] ?? img.isLiked ?? false, // same defaulting here
+                          }));
+                        }}
+                      >
+                        <Image
+                          src={img.url}
+                          alt={`Image ${index + 1}`}
+                          layout="fill"
+                          loading="lazy"
+                          objectFit="cover"
+                          className="rounded-lg"
+                          unoptimized
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <Button
+                  className="relative z-30 mb-10"
+                  onClick={() => {
+                    setSelectedImage(null);
+                    router.push("/gallery");
+                  }}
+                >
+                  Close
+                </Button>
+                <p className="text-4xl font-semibold text-primary">
+                  No images found
+                </p>
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {selectedImage && (
             <motion.div
-              className="fixed inset-0 z-20 flex h-full w-full flex-col items-center justify-center overflow-y-hidden bg-black/60 p-6 pt-[30%] md:pt-[8%]"
+              className="fixed inset-0 bottom-0 z-30 flex h-full w-full flex-col items-center justify-center bg-black/90 pt-[30%] md:pt-[8%]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedImage(null)}
             >
-              {isFetching ? (
-                <p className="text-3xl font-semibold text-primary">
-                  Loading images...
-                </p>
-              ) : imageslength > 0 ? (
-                <>
-                  <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
-                    <Button
-                      className="relative z-30 h-9"
-                      onClick={() => {
-                        setSelectedImage(null);
-                        router.push("/gallery");
-                      }}
-                      variant="destructive"
-                    >
-                      Close
-                    </Button>
-                    <Button className="relative z-30 h-9" onClick={handleCopy}>
-                      Copy Link
-                    </Button>
-                  </div>
-                  <div className="relative mt-5 h-[80%] w-full overflow-y-auto p-4 md:w-[90%]">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                      {data?.map((img, index) => (
-                        <motion.div
-                          key={img.id}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                          whileHover={{ scale: 1.05 }}
-                          className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedImage({
-                              id: img.id,
-                              url: img.url,
-                              likes: img.likes,
-                              uploadedBy: img.uploadedBy
-                                ? {
-                                    id: img.uploadedBy.id,
-                                    name: img.uploadedBy.name,
-                                    image:
-                                      img.uploadedBy.image ?? "/favicon.webp",
-                                  }
-                                : null,
-                              isLiked: likes[img.id] ?? img.isLiked ?? false,
-                            });
-                            setLikes((prevLikes) => ({
-                              ...prevLikes,
-                              [img.id]: likes[img.id] ?? img.isLiked ?? false, // same defaulting here
-                            }));
-                          }}
-                        >
-                          <Image
-                            src={img.url}
-                            alt={`Image ${index + 1}`}
-                            layout="fill"
-                            loading="lazy"
-                            objectFit="cover"
-                            className="rounded-lg"
-                            unoptimized
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Button
-                    className="relative z-30 mb-10"
-                    onClick={() => {
-                      setSelectedImage(null);
-                      router.push("/gallery");
-                    }}
-                  >
-                    Close
-                  </Button>
-                  <p className="text-4xl font-semibold text-primary">
-                    No images found
-                  </p>
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {selectedImage && (
-              <motion.div
-                className="fixed inset-0 bottom-0 z-30 flex h-full w-full flex-col items-center justify-center bg-black/90 pt-[30%] md:pt-[8%]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+              {/* Close Button */}
+              <Button
+                className="relative z-20 mt-[34px]"
                 onClick={() => setSelectedImage(null)}
               >
-                {/* Close Button */}
-                <Button
-                  className="relative z-20 mt-[34px]"
-                  onClick={() => setSelectedImage(null)}
-                >
-                  Back to Folder
-                </Button>
+                Back to Folder
+              </Button>
 
-                <motion.div
-                  className="relative mt-12 flex h-full w-[80%] items-start justify-center overflow-y-auto"
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.8 }}
-                  onClick={(e) => e.stopPropagation()} // Prevent closing on click inside
-                >
-                  <div className="flex w-11/12 max-w-sm flex-col overflow-hidden rounded-lg shadow-lg transition-transform">
-                    {/* Image Section */}
-                    <div className="relative w-full overflow-hidden">
-                      <img
-                        src={selectedImage.url}
-                        alt="Full-Screen Image"
-                        className="w-full object-cover"
-                      />
-                    </div>
-
-                    {/* Actions Section */}
-                    <div className="flex w-full items-center justify-around bg-primary p-4 text-gray-700">
-                      <button
-                        className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-red-500 md:flex-row"
-                        onClick={() => handleLike(selectedImage.id)}
-                      >
-                        <FaHeart
-                          className={
-                            likes[selectedImage.id]
-                              ? "text-red-500"
-                              : "text-gray-400"
-                          }
-                        />
-                        {selectedImage.likes} Likes
-                      </button>
-
-                      <button
-                        className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-blue-500 md:flex-row"
-                        onClick={handleShare}
-                      >
-                        <FaShareAlt /> Share
-                      </button>
-
-                      <button
-                        className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-green-500 md:flex-row"
-                        onClick={handleDownload}
-                      >
-                        <FaDownload /> Download
-                      </button>
-                    </div>
-
-                    {/* Uploader Info */}
-                    <div className="flex w-full items-center justify-center gap-2 bg-secondary p-3 text-sm text-textcolor">
-                      Uploaded by{" "}
-                      <span className="font-semibold">
-                        {selectedImage.uploadedBy?.name}
-                      </span>
-                      {selectedImage.uploadedBy?.image && (
-                        <Image
-                          src={
-                            selectedImage.uploadedBy.image ?? "/favicon.webp"
-                          }
-                          alt={selectedImage.uploadedBy.name ?? "Uploader"}
-                          width={32}
-                          height={32}
-                          className="rounded-full border"
-                        />
-                      )}
-                    </div>
+              <motion.div
+                className="relative mt-12 flex h-full w-[80%] items-start justify-center overflow-y-auto"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.8 }}
+                onClick={(e) => e.stopPropagation()} // Prevent closing on click inside
+              >
+                <div className="flex w-11/12 max-w-sm flex-col overflow-hidden rounded-lg shadow-lg transition-transform">
+                  {/* Image Section */}
+                  <div className="relative w-full overflow-hidden">
+                    <img
+                      src={selectedImage.url}
+                      alt="Full-Screen Image"
+                      className="w-full object-cover"
+                    />
                   </div>
-                </motion.div>
+
+                  {/* Actions Section */}
+                  <div className="flex w-full items-center justify-around bg-primary p-4 text-gray-700">
+                    <button
+                      className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-red-500 md:flex-row"
+                      onClick={() => handleLike(selectedImage.id)}
+                    >
+                      <FaHeart
+                        className={
+                          likes[selectedImage.id]
+                            ? "text-red-500"
+                            : "text-gray-400"
+                        }
+                      />
+                      {selectedImage.likes} Likes
+                    </button>
+
+                    <button
+                      className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-blue-500 md:flex-row"
+                      onClick={handleShare}
+                    >
+                      <FaShareAlt /> Share
+                    </button>
+
+                    <button
+                      className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-green-500 md:flex-row"
+                      onClick={handleDownload}
+                    >
+                      <FaDownload /> Download
+                    </button>
+                  </div>
+
+                  {/* Uploader Info */}
+                  <div className="flex w-full items-center justify-center gap-2 bg-secondary p-3 text-sm text-textcolor">
+                    Uploaded by{" "}
+                    <span className="font-semibold">
+                      {selectedImage.uploadedBy?.name}
+                    </span>
+                    {selectedImage.uploadedBy?.image && (
+                      <Image
+                        src={selectedImage.uploadedBy.image ?? "/favicon.webp"}
+                        alt={selectedImage.uploadedBy.name ?? "Uploader"}
+                        width={32}
+                        height={32}
+                        className="rounded-full border"
+                      />
+                    )}
+                  </div>
+                </div>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
-    </div>
+    </PageShell>
   );
 };
 

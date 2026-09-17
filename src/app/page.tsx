@@ -30,7 +30,7 @@ export default function Home() {
         : null;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#17110c] text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#17110c] text-white">
       <div className="absolute inset-0 bg-[url('/bg/home.jpg')] bg-cover bg-center" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/25" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#17110c]/90 via-transparent to-black/25" />
@@ -151,7 +151,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              className="relative my-8 w-full max-w-3xl bg-[#fffaf1] p-6 text-[#3b2919] shadow-2xl sm:p-9"
+              className="relative my-4 max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto rounded-3xl bg-[#fffaf1] p-5 font-sans text-[#3b2919] shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)] sm:p-9"
               onClick={(event) => event.stopPropagation()}
             >
               <button
@@ -166,11 +166,11 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
                 Worship & parish office
               </p>
-              <h2 className="mt-2 pr-14 text-3xl font-bold sm:text-4xl">
+              <h2 className="mt-2 pr-14 text-2xl font-bold tracking-tight sm:text-4xl">
                 Weekly schedule
               </h2>
 
-              <div className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2">
+              <div className="mt-7 grid gap-x-10 gap-y-7 md:grid-cols-2">
                 <ScheduleBlock title="Mass timings">
                   <p>Weekdays — 6:30 AM</p>
                   <p>Saturday — 4:00 PM</p>
