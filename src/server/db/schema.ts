@@ -35,6 +35,11 @@ export const donationTypeEnum = pgEnum("DonationType", [
   "THANKSGIVING",
 ]);
 
+export const priestRoleEnum = pgEnum("PriestRole", [
+  "PARISH_PRIEST",
+  "ASSISTANT_PRIEST",
+]);
+
 export const users = pgTable(
   "User",
   {
@@ -204,6 +209,18 @@ export const bethkati = pgTable("Bethkati", {
   year: integer("year").notNull(),
   month: text("month").notNull(),
   createdAt: createdAt(),
+});
+
+export const priests = pgTable("Priest", {
+  id: id(),
+  name: text("name").notNull(),
+  role: priestRoleEnum("role").notNull(),
+  period: text("period").notNull(),
+  imageUrl: text("imageUrl"),
+  isCurrent: boolean("isCurrent").notNull().default(false),
+  order: integer("order").notNull().default(0),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const galleries = pgTable("Gallery", {
