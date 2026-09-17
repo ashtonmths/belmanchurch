@@ -1,193 +1,134 @@
 "use client";
-
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Menu, ShieldCheck, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRole } from "~/hooks/useRole";
 
-const adminLinks = [
+const allLinks = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/donation", label: "Donations" },
   { href: "/admin/families", label: "Families" },
-  { href: "/admin/misc", label: "Events & Bethkati" },
+  { href: "/admin/misc", label: "Publishing" },
+  { href: "/admin/mass", label: "Mass times" },
   { href: "/admin/gallery", label: "Gallery" },
 ];
-
 export default function AdminNavbar() {
   const pathname = usePathname();
   const role = useRole();
-  const [isOpen, setIsOpen] = useState(false);
-  const links =
-    role === "PHOTOGRAPHER"
-      ? adminLinks.filter((link) => link.href === "/admin/gallery")
-      : adminLinks;
-
-  useEffect(() => setIsOpen(false), [pathname]);
-
+  const [open, setOpen] = useState(false);
+  const links = role === "PHOTOGRAPHER" ? allLinks.slice(-1) : allLinks;
+  const active = (href: string) =>
+    href === "/admin" ? pathname === href : pathname.startsWith(href);
+  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
-
-  const isActive = (href: string) =>
-    href === "/admin" ? pathname === href : pathname.startsWith(href);
-
+  }, [open]);
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-5">
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-40">
+      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/85 to-transparent" />
       <nav
-        aria-label="Administration navigation"
-        className="pointer-events-auto mx-auto flex h-[4.75rem] max-w-7xl items-center rounded-2xl border border-white/10 bg-[#241a12]/90 px-3 shadow-[0_18px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl sm:px-4"
+        className="pointer-events-auto relative mx-auto flex h-24 max-w-[90rem] items-center px-5 sm:px-8 lg:px-12"
+        aria-label="Administration"
       >
         <Link
           href={role === "PHOTOGRAPHER" ? "/admin/gallery" : "/admin"}
-          className="group flex min-w-0 items-center gap-2.5 rounded-xl pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Belman Church administration"
+          className="flex items-center gap-3"
         >
-          <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/20">
-            <Image
-              alt="St. Joseph Church crest"
-              src="/Logo.png"
-              height={50}
-              width={50}
-              className="object-contain transition-transform duration-300 group-hover:scale-105"
-              priority
-            />
-          </span>
-          <span className="min-w-0 leading-tight">
-            <span className="flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary/70 sm:text-xs">
-              <ShieldCheck aria-hidden="true" size={13} />
-              Administration
+          <Image
+            src="/Logo.png"
+            alt="St. Joseph Church crest"
+            width={58}
+            height={58}
+            className="h-12 w-12 object-contain drop-shadow-lg sm:h-14 sm:w-14"
+            priority
+          />
+          <span className="border-l border-white/30 pl-3 leading-none">
+            <span className="block text-lg font-semibold tracking-wide text-white sm:text-xl">
+              St. Joseph Church
             </span>
-            <span className="block text-lg font-bold tracking-tight text-[#fffaf1] sm:text-xl">
-              Belman Parish
+            <span className="mt-1 block text-[0.7rem] font-bold uppercase tracking-[0.28em] text-[#f0c878]">
+              Administration
             </span>
           </span>
         </Link>
-
-        <div className="ml-auto hidden items-center gap-1 lg:flex">
+        <div className="ml-auto hidden items-center gap-5 xl:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              aria-current={isActive(link.href) ? "page" : undefined}
-              className={`rounded-full px-3 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                isActive(link.href)
-                  ? "bg-primary text-textcolor"
-                  : "text-[#fffaf1]/70 hover:bg-white/10 hover:text-[#fffaf1]"
-              }`}
+              className={`relative py-3 text-[0.95rem] font-semibold tracking-wide transition after:absolute after:inset-x-0 after:bottom-1 after:h-px after:bg-[#f0c878] ${active(link.href) ? "text-white after:scale-x-100" : "text-white/65 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/"
-            className="ml-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 px-3.5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-textcolor focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="ml-1 inline-flex items-center gap-2 rounded-full border border-[#f0c878] px-4 py-2.5 text-sm font-semibold text-[#f0c878] transition hover:bg-[#f0c878] hover:text-[#211811]"
           >
-            <ArrowLeft aria-hidden="true" size={16} />
-            View site
+            View site <ArrowUpRight size={16} />
           </Link>
         </div>
-
         <button
           type="button"
-          className="ml-auto grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:hidden"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpen(true)}
+          className="ml-auto grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-black/20 text-white xl:hidden"
           aria-label="Open administration menu"
-          aria-expanded={isOpen}
-          aria-controls="admin-mobile-navigation"
         >
-          <Menu aria-hidden="true" size={24} />
+          <Menu size={24} />
         </button>
       </nav>
-
       <AnimatePresence>
-        {isOpen && (
+        {open && (
           <motion.div
-            id="admin-mobile-navigation"
-            className="pointer-events-auto fixed inset-0 z-50 bg-black/60 p-3 backdrop-blur-md sm:p-5"
+            className="pointer-events-auto fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
+            onClick={() => setOpen(false)}
           >
             <motion.div
-              className="ml-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#241a12] p-5 shadow-2xl"
-              initial={{ opacity: 0, x: 32 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 32 }}
-              transition={{ type: "spring", damping: 28, stiffness: 320 }}
-              onClick={(event) => event.stopPropagation()}
+              className="ml-auto flex h-full w-[88%] max-w-sm flex-col bg-[#1d1510] px-6 py-6"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/15">
-                    <ShieldCheck className="text-primary" size={24} />
-                  </span>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/65">
-                      Administration
-                    </p>
-                    <p className="text-xl font-bold text-[#fffaf1]">
-                      {role ?? "Staff"}
-                    </p>
-                  </div>
-                </div>
+                <span className="text-lg font-semibold text-white">
+                  Administration
+                </span>
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-[#fffaf1] transition hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Close administration menu"
+                  onClick={() => setOpen(false)}
+                  className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white"
+                  aria-label="Close menu"
                 >
-                  <X aria-hidden="true" size={23} />
+                  <X size={20} />
                 </button>
               </div>
-
-              <motion.div
-                className="flex flex-1 flex-col justify-center gap-2 py-6"
-                initial="closed"
-                animate="open"
-                variants={{
-                  closed: {},
-                  open: {
-                    transition: { staggerChildren: 0.06, delayChildren: 0.12 },
-                  },
-                }}
-              >
+              <div className="flex flex-1 flex-col justify-center">
                 {links.map((link) => (
-                  <motion.div
+                  <Link
                     key={link.href}
-                    variants={{
-                      closed: { opacity: 0, x: 16 },
-                      open: { opacity: 1, x: 0 },
-                    }}
-                    transition={{ duration: 0.28, ease: "easeOut" }}
+                    href={link.href}
+                    className={`border-b border-white/10 py-4 text-lg font-medium ${active(link.href) ? "text-[#f0c878]" : "text-white/70"}`}
                   >
-                    <Link
-                      href={link.href}
-                      aria-current={isActive(link.href) ? "page" : undefined}
-                      className={`block rounded-full px-5 py-3.5 text-base font-medium transition ${
-                        isActive(link.href)
-                          ? "bg-primary text-textcolor"
-                          : "text-[#fffaf1]/80 hover:bg-white/10 hover:text-[#fffaf1]"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
+                    {link.label}
+                  </Link>
                 ))}
-              </motion.div>
-
+              </div>
               <Link
                 href="/"
-                className="flex items-center justify-center gap-2 rounded-full border border-primary/30 px-5 py-4 text-base font-bold text-primary"
+                className="flex items-center justify-center gap-2 rounded-full bg-[#f0c878] px-5 py-3.5 font-semibold text-[#211811]"
               >
-                <ArrowLeft aria-hidden="true" size={18} />
-                Return to website
+                View website <ArrowUpRight size={17} />
               </Link>
             </motion.div>
           </motion.div>

@@ -1,160 +1,146 @@
 "use client";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { api } from "~/trpc/react";
-import { useMemo } from "react";
 import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
-import ProtectedRoute from "~/components/ProtectRoute";
+import {
+  ArrowUpRight,
+  CalendarClock,
+  IndianRupee,
+  ReceiptText,
+} from "lucide-react";
+import Link from "next/link";
+import { useMemo } from "react";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import PageShell from "~/components/PageShell";
+import ProtectedRoute from "~/components/ProtectRoute";
+import { api } from "~/trpc/react";
 
-dayjs.extend(isBetween);
-
+const money = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 0,
+});
 export default function AdminDashboard() {
-  const { data: donations } = api.donation.getAll.useQuery();
-
-  const totalDonations = useMemo(() => {
-    return donations?.reduce((sum, donation) => sum + donation.amount, 0) ?? 0;
-  }, [donations]);
-
-  const weeklyDonations = useMemo(() => {
-    if (!donations || !Array.isArray(donations)) return 0;
-
-    const today = dayjs();
-    const dayOfWeek = today.day(); // 0 = Sunday, 6 = Saturday
-
-    // Get the most recent Saturday (start of the week)
-    const startOfWeek = today
-      .subtract((dayOfWeek + 1) % 7, "day")
-      .startOf("day");
-
-    // Get the upcoming Friday (end of the week)
-    const endOfWeek = startOfWeek.add(6, "day").endOf("day");
-    console.log(
-      "Start of Week (Saturday):",
-      startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
-    );
-    console.log(
-      "End of Week (Friday):",
-      endOfWeek.format("YYYY-MM-DD HH:mm:ss"),
-    );
-
-    return donations
-      .filter((donation) => {
-        const donationDate = dayjs(donation.createdAt);
-        return donationDate.isBetween(startOfWeek, endOfWeek, "day", "[]"); // Inclusive range
-      })
-      .reduce((sum, donation) => sum + donation.amount, 0);
-  }, [donations]);
-
-  const monthlyData = useMemo(() => {
-    if (!donations || !Array.isArray(donations)) return [];
-
-    const currentYear = dayjs().year();
-
-    // Filter donations to only include those from the current year
-    const filteredDonations = donations.filter((donation) => {
-      return dayjs(donation.createdAt).year() === currentYear;
-    });
-
-    // Group by month index (0-11)
-    const grouped = filteredDonations.reduce(
-      (acc, donation) => {
-        const monthIndex = dayjs(donation.createdAt).month(); // Get month index (0 for Jan, 11 for Dec)
-        acc[monthIndex] = (acc[monthIndex] ?? 0) + donation.amount;
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
-
-    // Convert to array and sort by month index
-    return Object.entries(grouped)
-      .map(([monthIndex, donations]) => ({
-        month: dayjs().month(Number(monthIndex)).format("MMM"), // Convert index to short month name
-        monthIndex: Number(monthIndex), // Keep the numeric index for sorting
-        donations,
-      }))
-      .sort((a, b) => a.monthIndex - b.monthIndex); // Sort numerically
-  }, [donations]);
-
+  const { data: donations = [], isLoading } = api.donation.getAll.useQuery();
+  const total = donations.reduce((sum, item) => sum + item.amount, 0);
+  const thisMonth = donations
+    .filter((item) => dayjs(item.createdAt).isSame(dayjs(), "month"))
+    .reduce((sum, item) => sum + item.amount, 0);
+  const chart = useMemo(
+    () =>
+      Array.from({ length: 6 }, (_, i) => dayjs().subtract(5 - i, "month")).map(
+        (month) => ({
+          month: month.format("MMM"),
+          amount: donations
+            .filter((item) => dayjs(item.createdAt).isSame(month, "month"))
+            .reduce((sum, item) => sum + item.amount, 0),
+        }),
+      ),
+    [donations],
+  );
+  const stats = [
+    { label: "Total received", value: money.format(total), icon: IndianRupee },
+    {
+      label: "This month",
+      value: money.format(thisMonth),
+      icon: CalendarClock,
+    },
+    {
+      label: "Donation records",
+      value: String(donations.length),
+      icon: ReceiptText,
+    },
+  ];
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin title="Dashboard">
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-4 backdrop-blur-md sm:p-6">
-          <div className="flex min-h-[65vh] w-full flex-col gap-5 md:flex-row">
-            {/* Left Panel */}
-            <div className="flex w-full flex-col gap-5 text-white md:w-1/3">
-              <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
-                <p>
-                  Total Donations: <br />
-                  <br />₹{totalDonations.toLocaleString()}
+      <PageShell
+        admin
+        title="Overview"
+        description="A clear view of parish giving and recent activity."
+      >
+        <div className="grid gap-4 sm:grid-cols-3">
+          {stats.map(({ label, value, icon: Icon }) => (
+            <section
+              key={label}
+              className="rounded-2xl border border-white/10 bg-[#211811]/90 p-5 sm:p-6"
+            >
+              <Icon size={20} className="text-[#f0c878]" />
+              <p className="mt-5 text-sm text-white/50">{label}</p>
+              <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+                {isLoading ? "—" : value}
+              </p>
+            </section>
+          ))}
+        </div>
+        <div className="mt-5 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+          <section className="rounded-3xl border border-white/10 bg-[#211811]/90 p-5 sm:p-7">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold">Giving over six months</h2>
+              <p className="mt-1 text-sm text-white/45">
+                Completed donations, grouped by month.
+              </p>
+            </div>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chart}>
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    stroke="#ffffff66"
+                  />
+                  <Tooltip
+                    cursor={{ fill: "#ffffff08" }}
+                    contentStyle={{
+                      background: "#17110c",
+                      border: "1px solid #ffffff1a",
+                      borderRadius: 12,
+                    }}
+                    formatter={(value: number) => money.format(value)}
+                  />
+                  <Bar dataKey="amount" fill="#f0c878" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+          <section className="rounded-3xl border border-white/10 bg-[#211811]/90 p-5 sm:p-7">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Recent donations</h2>
+                <p className="mt-1 text-sm text-white/45">
+                  Latest completed records.
                 </p>
               </div>
-              <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
-                <p>
-                  Weekly Donations: <br />
-                  <br />₹{weeklyDonations.toLocaleString()}
+              <Link
+                href="/admin/donation"
+                className="text-[#f0c878]"
+                aria-label="View donations"
+              >
+                <ArrowUpRight />
+              </Link>
+            </div>
+            <div className="mt-5 divide-y divide-white/10">
+              {donations.slice(0, 5).map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between gap-4 py-4"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{item.byWhom}</p>
+                    <p className="mt-1 text-xs text-white/40">
+                      {dayjs(item.createdAt).format("D MMM YYYY")}
+                    </p>
+                  </div>
+                  <p className="shrink-0 font-semibold text-[#f0c878]">
+                    {money.format(item.amount)}
+                  </p>
+                </div>
+              ))}
+              {!isLoading && donations.length === 0 && (
+                <p className="py-10 text-center text-sm text-white/40">
+                  No donations recorded yet.
                 </p>
-              </div>
-              <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
-                <div>
-                  <p className="text-sm font-medium text-white/50">
-                    Donation records
-                  </p>
-                  <p className="mt-3 text-3xl text-[#f0c878]">
-                    {donations?.length ?? 0}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
-
-            {/* Right Panel */}
-            <div className="flex h-full w-full flex-col text-white md:w-2/3">
-              {/* Graph Section */}
-              <div className="h-80 rounded-2xl border border-white/10 bg-white/[0.06] p-3 sm:p-5 md:h-[60%]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={monthlyData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <XAxis dataKey="month" stroke="#EAC696" />
-                    <YAxis stroke="#EAC696" />
-                    <Tooltip
-                      cursor={{ fill: "rgb(0 0 0 / 0.5)" }}
-                      contentStyle={{
-                        backgroundColor: "#222",
-                        borderRadius: "5px",
-                        color: "#EAC696",
-                      }}
-                    />
-                    <Bar
-                      dataKey="donations"
-                      fill="#EAC696"
-                      radius={[5, 5, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              {/* Empty Div Below Graph */}
-              <div className="mt-5 flex min-h-40 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
-                <div className="p-6 text-left">
-                  <p className="text-lg font-medium text-white">
-                    Monthly giving overview
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-white/50">
-                    Completed donations from the current calendar year are
-                    reflected in the chart above.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          </section>
         </div>
       </PageShell>
     </ProtectedRoute>
