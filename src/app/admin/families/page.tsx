@@ -43,13 +43,13 @@ export default function Families() {
           <div className="mb-6 flex w-full max-w-4xl flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
             <div className="flex flex-wrap gap-3">
               <button
-                className="rounded-lg bg-primary px-4 py-2 font-semibold text-textcolor"
+                className="rounded-full bg-[#f0c878] px-5 py-2.5 text-sm font-semibold text-[#211811]"
                 onClick={() => setShowAddFamily(true)}
               >
                 Add a Family
               </button>
               <button
-                className="rounded-lg bg-primary px-4 py-2 font-semibold text-textcolor"
+                className="rounded-full border border-[#f0c878]/40 px-5 py-2.5 text-sm font-semibold text-[#f0c878]"
                 onClick={() => setShowAddParishoner(true)}
               >
                 Add a Parishoner
@@ -75,7 +75,7 @@ export default function Families() {
                 filteredFamilies?.map((family) => (
                   <div
                     key={family.id}
-                    className="mb-4 rounded-xl bg-secondary p-4 text-textcolor"
+                    className="mb-4 rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-white"
                   >
                     <button
                       onClick={() =>

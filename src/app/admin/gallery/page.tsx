@@ -178,9 +178,9 @@ export default function AdminGallery() {
           <div className="grid w-full max-w-5xl gap-4 p-4 md:grid-cols-3">
             {/* Upload box */}
             <div className="group relative flex h-80 w-full items-center justify-center">
-              <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-primary shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-cyan-500/10">
+              <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] shadow-2xl transition-all duration-300">
                 <div className="flex h-full w-full flex-col items-center justify-center p-4">
-                  <div className="relative h-full w-full overflow-auto border-2 border-dashed border-accent bg-secondary/50 p-4 text-textcolor group-hover:border-cyan-500/50">
+                  <div className="relative h-full w-full overflow-auto border border-dashed border-white/20 bg-black/20 p-4 text-white group-hover:border-[#f0c878]/50">
                     <label className="absolute inset-0 z-10 cursor-pointer">
                       <input
                         type="file"

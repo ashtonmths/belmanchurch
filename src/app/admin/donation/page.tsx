@@ -105,13 +105,13 @@ export default function DonationAdmin() {
         <div className="flex min-h-[65vh] flex-col items-center overflow-auto rounded-3xl border border-white/10 bg-black/30 p-4 text-center backdrop-blur-md sm:p-6">
           <div className="mb-8 flex w-full flex-wrap justify-center gap-3">
             <button
-              className={`rounded-lg px-4 py-2 font-semibold ${activeTab === "inbox" ? "bg-primary text-textcolor" : "bg-secondary text-textcolor"}`}
+              className={`rounded-full px-5 py-2.5 text-sm font-semibold ${activeTab === "inbox" ? "bg-[#f0c878] text-[#211811]" : "border border-white/15 text-white/65"}`}
               onClick={() => setActiveTab("inbox")}
             >
               Inbox
             </button>
             <button
-              className={`rounded-lg px-4 py-2 font-semibold ${activeTab === "history" ? "bg-primary text-textcolor" : "bg-secondary text-textcolor"}`}
+              className={`rounded-full px-5 py-2.5 text-sm font-semibold ${activeTab === "history" ? "bg-[#f0c878] text-[#211811]" : "border border-white/15 text-white/65"}`}
               onClick={() => setActiveTab("history")}
             >
               History

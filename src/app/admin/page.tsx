@@ -103,7 +103,14 @@ export default function AdminDashboard() {
                 </p>
               </div>
               <div className="flex min-h-36 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
-                <p>DUMMY</p>
+                <div>
+                  <p className="text-sm font-medium text-white/50">
+                    Donation records
+                  </p>
+                  <p className="mt-3 text-3xl text-[#f0c878]">
+                    {donations?.length ?? 0}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -136,7 +143,15 @@ export default function AdminDashboard() {
               </div>
               {/* Empty Div Below Graph */}
               <div className="mt-5 flex min-h-40 flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-2xl font-bold text-[#f0c878]">
-                <p>DUMMY</p>
+                <div className="p-6 text-left">
+                  <p className="text-lg font-medium text-white">
+                    Monthly giving overview
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/50">
+                    Completed donations from the current calendar year are
+                    reflected in the chart above.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

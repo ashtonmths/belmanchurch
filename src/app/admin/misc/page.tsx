@@ -147,10 +147,10 @@ export default function AdminMisc() {
         <ToastContainer />
         <div className="flex min-h-[65vh] flex-col items-center text-center">
           <div className="grid w-full gap-5 md:grid-cols-2">
-            <div className="col-span-4 col-start-1 row-span-2 row-start-1 flex h-full flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 p-6 md:col-span-2 md:row-span-4">
-              <h1 className="text-3xl font-semibold text-primary">
-                EVENT DETAILS
-              </h1>
+            <div className="flex h-full flex-col items-center justify-center space-y-4 rounded-3xl border border-white/10 bg-white/[0.05] p-6 sm:p-8">
+              <h2 className="text-2xl font-semibold text-white">
+                Publish an event
+              </h2>
               <input
                 type="text"
                 placeholder="Event Name"
@@ -187,10 +187,10 @@ export default function AdminMisc() {
               />
               <Button onClick={handlePublishEvent}>Publish</Button>
             </div>
-            <div className="col-span-4 col-start-1 row-span-2 row-start-3 flex flex-col items-center justify-center space-y-4 rounded-md border-2 border-primary bg-black/30 md:col-span-2 md:col-start-3 md:row-span-4 md:row-start-1">
-              <h1 className="text-3xl font-semibold text-primary">
-                BETHKATI DETAILS
-              </h1>
+            <div className="flex flex-col items-center justify-center space-y-4 rounded-3xl border border-white/10 bg-white/[0.05] p-6 sm:p-8">
+              <h2 className="text-2xl font-semibold text-white">
+                Publish Bethkati
+              </h2>
 
               <input
                 type="file"
