@@ -223,6 +223,18 @@ export const priests = pgTable("Priest", {
   updatedAt: updatedAt(),
 });
 
+export const massSchedules = pgTable("MassSchedule", {
+  id: id(),
+  dayOfWeek: integer("dayOfWeek").notNull(),
+  label: text("label").notNull(),
+  hour: integer("hour").notNull(),
+  minute: integer("minute").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  sortOrder: integer("sortOrder").notNull().default(0),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
 export const galleries = pgTable("Gallery", {
   id: id(),
   eventName: text("eventName").notNull(),

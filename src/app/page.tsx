@@ -16,10 +16,54 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "~/components/Button";
 import { useRole } from "~/hooks/useRole";
+import { api } from "~/trpc/react";
 
 type NextMass = { day: string; time: string; countdown: string };
+type MassTime = {
+  dayOfWeek: number;
+  hour: number;
+  minute: number;
+  label: string;
+  active: boolean;
+};
 
-function calculateNextMass(): NextMass {
+const fallbackSchedule: MassTime[] = [
+  ...[1, 2, 3, 4, 5].map((dayOfWeek) => ({
+    dayOfWeek,
+    hour: 6,
+    minute: 30,
+    label: "Weekday Mass",
+    active: true,
+  })),
+  { dayOfWeek: 6, hour: 16, minute: 0, label: "Evening Mass", active: true },
+  { dayOfWeek: 0, hour: 7, minute: 30, label: "Morning Mass", active: true },
+  {
+    dayOfWeek: 0,
+    hour: 10,
+    minute: 30,
+    label: "After catechism",
+    active: true,
+  },
+];
+const dayNames = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+function formatTime(hour: number, minute: number) {
+  return new Date(2000, 0, 1, hour, minute).toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function calculateNextMass(schedule: MassTime[]): NextMass | null {
   const indiaNow = new Date(
     new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
   );
@@ -28,19 +72,12 @@ function calculateNextMass(): NextMass {
   for (let offset = 0; offset <= 7; offset += 1) {
     const day = new Date(indiaNow);
     day.setDate(indiaNow.getDate() + offset);
-    const weekday = day.getDay();
-    const times =
-      weekday === 0
-        ? [
-            [7, 30],
-            [10, 30],
-          ]
-        : weekday === 6
-          ? [[16, 0]]
-          : [[6, 30]];
-    times.forEach(([hour, minute]) => {
+    const times = schedule.filter(
+      (mass) => mass.active && mass.dayOfWeek === day.getDay(),
+    );
+    times.forEach(({ hour, minute }) => {
       const date = new Date(day);
-      date.setHours(hour ?? 0, minute ?? 0, 0, 0);
+      date.setHours(hour, minute, 0, 0);
       if (date > indiaNow)
         candidates.push({
           date,
@@ -55,7 +92,8 @@ function calculateNextMass(): NextMass {
 
   const next = candidates.sort(
     (a, b) => a.date.getTime() - b.date.getTime(),
-  )[0]!;
+  )[0];
+  if (!next) return null;
   const seconds = Math.max(
     0,
     Math.floor((next.date.getTime() - indiaNow.getTime()) / 1000),
@@ -74,15 +112,17 @@ function calculateNextMass(): NextMass {
 export default function Home() {
   const router = useRouter();
   const role = useRole();
+  const { data: storedSchedule } = api.misc.getMassSchedule.useQuery();
+  const schedule = storedSchedule?.length ? storedSchedule : fallbackSchedule;
   const [massModal, setMassModal] = useState(false);
   const [nextMass, setNextMass] = useState<NextMass | null>(null);
 
   useEffect(() => {
-    const update = () => setNextMass(calculateNextMass());
+    const update = () => setNextMass(calculateNextMass(schedule));
     update();
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [schedule]);
 
   const accountAction =
     role === "ADMIN" || role === "DEVELOPER"
@@ -187,28 +227,27 @@ export default function Home() {
                 Holy Mass
               </p>
               <div className="mt-4 space-y-3 border-y border-white/15 py-4">
-                <div className="flex items-start gap-3">
-                  <Clock3
-                    className="mt-0.5 shrink-0 text-[#f0c878]"
-                    size={19}
-                  />
-                  <div>
-                    <p className="font-semibold text-white">7:30 AM</p>
-                    <p className="mt-1 text-sm text-white/55">Morning Mass</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Clock3
-                    className="mt-0.5 shrink-0 text-[#f0c878]"
-                    size={19}
-                  />
-                  <div>
-                    <p className="font-semibold text-white">10:30 AM</p>
-                    <p className="mt-1 text-sm text-white/55">
-                      After catechism
-                    </p>
-                  </div>
-                </div>
+                {schedule
+                  .filter((mass) => mass.active && mass.dayOfWeek === 0)
+                  .map((mass) => (
+                    <div
+                      key={`${mass.hour}-${mass.minute}`}
+                      className="flex items-start gap-3"
+                    >
+                      <Clock3
+                        className="mt-0.5 shrink-0 text-[#f0c878]"
+                        size={19}
+                      />
+                      <div>
+                        <p className="font-semibold text-white">
+                          {formatTime(mass.hour, mass.minute)}
+                        </p>
+                        <p className="mt-1 text-sm text-white/55">
+                          {mass.label}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 <div className="flex items-start gap-3">
                   <MapPin
                     className="mt-0.5 shrink-0 text-[#f0c878]"
@@ -270,12 +309,15 @@ export default function Home() {
 
               <div className="mt-7 grid gap-x-10 gap-y-7 md:grid-cols-2">
                 <ScheduleBlock title="Mass timings">
-                  <p>Weekdays — 6:30 AM</p>
-                  <p>Saturday — 4:00 PM</p>
-                  <p>Sunday — 7:30 AM & 10:30 AM</p>
-                  <p className="mt-2 text-sm text-white/50">
-                    10:00 AM when there is no catechism
-                  </p>
+                  {schedule
+                    .filter((mass) => mass.active)
+                    .map((mass) => (
+                      <p key={`${mass.dayOfWeek}-${mass.hour}-${mass.minute}`}>
+                        {dayNames[mass.dayOfWeek]} —{" "}
+                        {formatTime(mass.hour, mass.minute)}
+                        <span className="text-white/40"> · {mass.label}</span>
+                      </p>
+                    ))}
                 </ScheduleBlock>
                 <ScheduleBlock title="Catechism">
                   <p>Sunday — 9:15 AM to 10:30 AM</p>

@@ -5,10 +5,50 @@ import {
   adminProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { asc, desc } from "drizzle-orm";
-import { bethkati, events, priests } from "~/server/db/schema";
+import { asc, desc, eq } from "drizzle-orm";
+import { bethkati, events, massSchedules, priests } from "~/server/db/schema";
 
 export const miscRouter = createTRPCRouter({
+  getMassSchedule: publicProcedure.query(async ({ ctx }) => {
+    return ctx.db.query.massSchedules.findMany({
+      orderBy: [asc(massSchedules.dayOfWeek), asc(massSchedules.sortOrder)],
+    });
+  }),
+  updateMassSchedule: adminProcedure
+    .input(
+      z.array(
+        z.object({
+          id: z.string(),
+          label: z.string().trim().min(2).max(80),
+          dayOfWeek: z.number().int().min(0).max(6),
+          hour: z.number().int().min(0).max(23),
+          minute: z.number().int().min(0).max(59),
+          active: z.boolean(),
+          sortOrder: z.number().int().min(0),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (tx) => {
+        for (const item of input) {
+          await tx
+            .update(massSchedules)
+            .set({
+              label: item.label,
+              dayOfWeek: item.dayOfWeek,
+              hour: item.hour,
+              minute: item.minute,
+              active: item.active,
+              sortOrder: item.sortOrder,
+              updatedAt: new Date(),
+            })
+            .where(eq(massSchedules.id, item.id));
+        }
+        return tx.query.massSchedules.findMany({
+          orderBy: [asc(massSchedules.dayOfWeek), asc(massSchedules.sortOrder)],
+        });
+      });
+    }),
   // Create Event
   createEvent: adminProcedure
     .input(

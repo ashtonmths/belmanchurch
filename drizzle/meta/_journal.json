@@ -15,6 +15,13 @@
       "when": 1789652436428,
       "tag": "0001_neat_maria_hill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789661251439,
+      "tag": "0002_third_killmonger",
+      "breakpoints": true
     }
   ]
 }
