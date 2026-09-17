@@ -1,302 +1,195 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import imageCompression from "browser-image-compression";
+import { ImagePlus, Info, Trash2, Upload } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import PageShell from "~/components/PageShell";
+import ProtectedRoute from "~/components/ProtectRoute";
 import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
 import { api } from "~/trpc/react";
-import Button from "~/components/Button";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import imageCompression from "browser-image-compression";
-import ProtectedRoute from "~/components/ProtectRoute";
-import { Eye, Trash2 } from "lucide-react";
-import PageShell from "~/components/PageShell";
-
-const instructions = [
-  "Upload a maximum of 200 photos per event.",
-  "Avoid uploading personal photos (e.g., posed shots taken on request).",
-  "Use a PC and a stable Wi-Fi connection for optimal upload speed.",
-  "Coordinate with fellow photographers. For example, one person uploads the first 50 images, another uploads the next 50, and so on.",
-  "If someone has already uploaded photos for the event, use the *exact same event name and date*, matching the casing.",
-  "Capitalize the first letter of every word in the event name.",
-  "After publishing, you can copy the gallery link by navigating to the homepage, opening the event folder, and clicking 'Copy Link'.",
-  "For any issues, contact ashtonmths@outlook.com or WhatsApp +91 8150947796.",
-];
 
 export default function AdminGallery() {
-  const [images, setImages] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
-  const [showInstructions, setShowInstructions] = useState(true);
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-
-  const router = useRouter();
-
-  const uploadGallery = api.gallery.uploadGallery.useMutation({
+  const previews = useMemo(
+    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
+    [files],
+  );
+  const { uploadImages } = useCloudinaryUpload();
+  const publish = api.gallery.uploadGallery.useMutation({
     onSuccess: () => {
-      toast.success("Gallery uploaded successfully!");
-      router.refresh();
-      setImages([]);
+      toast.success("Gallery published");
+      setFiles([]);
       setEventName("");
       setEventDate("");
     },
-    onError: (error) => {
-      toast.error(error.message || "Failed to upload gallery.");
-    },
+    onError: (e) => toast.error(e.message),
   });
-
-  const compressImage = async (file: File): Promise<File> => {
-    try {
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1024,
-        useWebWorker: true,
-      };
-      return await imageCompression(file, options);
-    } catch (error) {
-      console.error("Compression error:", error);
-      return file;
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const files = Array.from(e.target.files);
-    const newFiles = files.filter(
-      (file) =>
-        !images.some((img) => img.name === file.name && img.size === file.size),
+  const addFiles = async (incoming: FileList | null) => {
+    if (!incoming) return;
+    const next = Array.from(incoming).filter((file) =>
+      file.type.startsWith("image/"),
     );
-
-    const totalImagesAfterUpload = images.length + newFiles.length;
-    if (totalImagesAfterUpload > 200) {
-      toast.error("You can upload a maximum of 200 images per event.");
+    if (files.length + next.length > 200) {
+      toast.error("A gallery can contain up to 200 photographs");
       return;
     }
-
-    const totalFiles = newFiles.length;
-    const toastId = toast.info(`Compressing images... (0/${totalFiles})`, {
-      autoClose: false,
-      progress: 0,
-    });
-
+    const id = toast.loading(`Preparing ${next.length} photographs…`);
     try {
-      let completed = 0;
-      const compressedFiles: File[] = await Promise.all(
-        newFiles.map(async (file) => {
-          const compressed = await compressImage(file);
-          completed++;
-          toast.update(toastId, {
-            render: `Compressing images... (${completed}/${totalFiles})`,
-            progress: completed / totalFiles,
-          });
-          return compressed;
-        }),
+      const compressed = await Promise.all(
+        next.map((file) =>
+          imageCompression(file, {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1600,
+            useWebWorker: true,
+          }),
+        ),
       );
-
-      setImages((prev) => [...prev, ...compressedFiles]);
-      toast.update(toastId, {
-        render: "Images compressed and added successfully!",
+      setFiles((current) => [...current, ...compressed]);
+      toast.update(id, {
+        render: `${compressed.length} photographs ready`,
         type: "success",
-        autoClose: 3000,
-        progress: undefined,
+        isLoading: false,
+        autoClose: 2500,
       });
-    } catch (error) {
-      console.error("Image compression failed:", error);
-      toast.update(toastId, {
-        render: "Failed to compress images.",
+    } catch {
+      toast.update(id, {
+        render: "Could not prepare the photographs",
         type: "error",
+        isLoading: false,
         autoClose: 3000,
-        progress: undefined,
       });
     }
   };
-
-  const handleRemoveImage = (index: number) => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
-  };
-
-  const handleDiscard = () => {
-    setImages([]);
-    setEventName("");
-    setEventDate("");
-    toast.warn("Upload discarded.");
-  };
-
-  const formatEventName = (name: string) =>
-    name.replace(/\b\w/g, (char) => char.toUpperCase());
-
-  const { uploadImages } = useCloudinaryUpload();
-
-  const handleSubmit = async () => {
-    if (!eventName || !eventDate || images.length === 0) {
-      toast.error("Please fill all fields and upload images.");
+  const submit = async () => {
+    if (!eventName.trim() || !eventDate || !files.length) {
+      toast.error("Add the event name, date and photographs");
       return;
     }
-
     try {
-      const folderName = `${eventName} - ${eventDate}`;
-      const urls = await uploadImages(images, folderName);
-
-      uploadGallery.mutate({
-        eventName,
-        eventDate,
-        images: urls,
-      });
-    } catch (error) {
-      console.error(error);
+      const urls = await uploadImages(files, `${eventName} - ${eventDate}`);
+      publish.mutate({ eventName: eventName.trim(), eventDate, images: urls });
+    } catch {
+      toast.error("Upload did not complete. Please try again.");
     }
   };
-
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
-      <PageShell admin title="Gallery upload">
-        <div className="relative flex min-h-[65vh] flex-col items-center justify-center overflow-y-auto rounded-3xl border border-white/10 bg-black/30 text-center backdrop-blur-md">
-          {showInstructions && (
-            <div className="absolute left-1/2 top-20 z-50 w-[90%] max-w-3xl -translate-x-1/2 rounded-xl border-2 border-primary bg-black/90 p-6 text-left font-semibold text-primary shadow-xl backdrop-blur-md md:text-lg">
-              <h2 className="mb-4 text-2xl font-bold text-white">
-                Instructions
-              </h2>
-              <ul className="list-disc space-y-2 pl-6">
-                {instructions.map((inst, i) => (
-                  <li key={i}>{inst}</li>
-                ))}
-              </ul>
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setShowInstructions(false)}
-                  className="rounded-full bg-primary px-6 py-2 text-black hover:bg-accent"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="grid w-full max-w-5xl gap-4 p-4 md:grid-cols-3">
-            {/* Upload box */}
-            <div className="group relative flex h-80 w-full items-center justify-center">
-              <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] shadow-2xl transition-all duration-300">
-                <div className="flex h-full w-full flex-col items-center justify-center p-4">
-                  <div className="relative h-full w-full overflow-auto border border-dashed border-white/20 bg-black/20 p-4 text-white group-hover:border-[#f0c878]/50">
-                    <label className="absolute inset-0 z-10 cursor-pointer">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/jpeg, image/png"
-                        className="hidden"
-                        onChange={handleFileUpload}
+      <PageShell
+        admin
+        title="Gallery"
+        description="Prepare and publish a complete event album from one place."
+      >
+        <ToastContainer />
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_24rem]">
+          <section className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/90">
+            <label className="flex min-h-56 cursor-pointer flex-col items-center justify-center border-b border-dashed border-white/15 p-8 text-center transition hover:bg-white/[0.03]">
+              <input
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={(e) => void addFiles(e.target.files)}
+              />
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-[#f0c878]/10 text-[#f0c878]">
+                <ImagePlus />
+              </span>
+              <span className="mt-4 text-xl font-semibold">
+                Choose photographs
+              </span>
+              <span className="mt-2 max-w-md text-sm leading-6 text-white/45">
+                JPG, PNG or WebP. Images are compressed before upload. You can
+                add more in several batches.
+              </span>
+            </label>
+            {previews.length ? (
+              <div className="p-4 sm:p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="text-sm text-white/55">
+                    {files.length} of 200 photographs
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFiles([])}
+                    className="text-sm text-white/55 hover:text-white"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div className="grid max-h-[34rem] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
+                  {previews.map(({ file, url }, index) => (
+                    <figure
+                      key={`${file.name}-${index}`}
+                      className="group relative aspect-square overflow-hidden rounded-xl bg-black/30"
+                    >
+                      <img
+                        src={url}
+                        alt=""
+                        className="h-full w-full object-cover"
                       />
-                    </label>
-                    <div className="grid grid-cols-2 gap-2 overflow-y-auto pr-1">
-                      {images.length > 0 ? (
-                        images.map((file, index) => (
-                          <div
-                            key={index}
-                            className="group/image relative h-32 overflow-hidden rounded-md border border-white"
-                          >
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={`preview-${index}`}
-                              className="h-full w-full object-cover"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/50 opacity-0 transition-opacity group-hover/image:opacity-100">
-                              <button
-                                onClick={() =>
-                                  setFullscreenImage(URL.createObjectURL(file))
-                                }
-                                className="rounded-full bg-white p-1"
-                              >
-                                <Eye className="text-black" />
-                              </button>
-                              <button
-                                onClick={() => handleRemoveImage(index)}
-                                className="rounded-full bg-red-600 p-1"
-                              >
-                                <Trash2 className="text-white" />
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="col-span-2 flex flex-col items-center justify-center text-center">
-                          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
-                            <svg
-                              className="h-10 w-10 text-textcolor"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                              />
-                            </svg>
-                          </div>
-                          <p className="font-medium">
-                            Drop your files here or browse
-                          </p>
-                          <p className="text-sm">
-                            Supported: JPG, PNG | Max 8MB
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFiles((current) =>
+                            current.filter((_, i) => i !== index),
+                          )
+                        }
+                        className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-black/70 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </figure>
+                  ))}
                 </div>
               </div>
-            </div>
-
-            {/* Event Info */}
-            <div className="flex h-80 flex-col items-center justify-center space-y-8 p-4">
+            ) : null}
+          </section>
+          <aside className="h-fit rounded-3xl border border-white/10 bg-[#211811]/90 p-5 sm:p-7">
+            <h2 className="text-xl font-semibold">Album details</h2>
+            <label className="mt-6 block text-sm text-white/55">
+              Event name
               <input
-                type="text"
-                placeholder="Event Name"
                 value={eventName}
-                onChange={(e) => setEventName(formatEventName(e.target.value))}
-                className="h-12 w-full max-w-xl rounded-full border-2 border-accent/50 bg-primary p-4 text-base placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary sm:text-xl"
+                onChange={(e) =>
+                  setEventName(
+                    e.target.value.replace(/\b\w/g, (c) => c.toUpperCase()),
+                  )
+                }
+                placeholder="Parish feast"
+                className="mt-2 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
               />
+            </label>
+            <label className="mt-5 block text-sm text-white/55">
+              Event date
               <input
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="h-12 w-full max-w-xl rounded-full border-2 border-accent/50 bg-primary p-4 text-base placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary sm:text-xl"
+                className="mt-2 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
               />
+            </label>
+            <div className="mt-6 flex gap-3 rounded-2xl bg-white/[0.04] p-4 text-sm leading-6 text-white/50">
+              <Info className="mt-0.5 shrink-0 text-[#f0c878]" size={18} />
+              <p>
+                Use the same event name and date when adding photographs to an
+                existing album.
+              </p>
             </div>
-
-            {/* Buttons */}
-            <div className="flex h-80 flex-col items-center justify-center space-y-8">
-              <Button onClick={handleSubmit} className="h-12 w-40">
-                Publish
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDiscard}
-                className="h-12 w-40"
-              >
-                Discard
-              </Button>
-            </div>
-          </div>
+            <button
+              type="button"
+              disabled={publish.isPending}
+              onClick={() => void submit()}
+              className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0c878] px-5 font-semibold text-[#211811] disabled:opacity-50"
+            >
+              <Upload size={18} />
+              {publish.isPending ? "Publishing…" : "Publish album"}
+            </button>
+          </aside>
         </div>
-        {fullscreenImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
-            onClick={() => setFullscreenImage(null)}
-          >
-            <img
-              src={fullscreenImage}
-              className="max-h-[90%] max-w-[90%] rounded-xl"
-              alt="Full View"
-            />
-          </div>
-        )}
-
-        <ToastContainer position="top-right" autoClose={3000} />
       </PageShell>
     </ProtectedRoute>
   );
