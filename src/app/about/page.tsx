@@ -310,14 +310,21 @@ export default function About() {
           <h2 className="text-2xl font-semibold sm:text-3xl">
             Through the years
           </h2>
-          <div className="relative mt-10 overflow-x-auto pb-5">
-            <div className="absolute left-0 right-0 top-[4.35rem] h-px bg-white/20" />
-            <div className="relative flex min-w-max gap-5">
-              {history.map(([year, title, text]) => (
-                <article key={year} className="w-72 shrink-0 pt-1 sm:w-80">
-                  <p className="text-sm font-semibold text-[#f0c878]">{year}</p>
-                  <span className="mt-5 block h-3 w-3 rounded-full bg-[#f0c878] ring-4 ring-[#17110c]" />
-                  <div className="mt-6 min-h-52 rounded-2xl border border-white/10 bg-[#211811] p-6">
+          <div className="relative mt-10">
+            <div className="absolute bottom-0 left-2 top-0 w-px bg-white/20 md:left-1/2" />
+            <div className="space-y-6 md:space-y-0">
+              {history.map(([year, title, text], index) => (
+                <article
+                  key={year}
+                  className={`relative pl-9 md:flex md:min-h-56 md:w-1/2 md:pl-0 ${index % 2 === 0 ? "md:pr-10" : "md:ml-auto md:pl-10"}`}
+                >
+                  <span
+                    className={`absolute left-[0.18rem] top-7 h-3 w-3 rounded-full bg-[#f0c878] ring-4 ring-[#17110c] md:left-auto ${index % 2 === 0 ? "md:-right-[0.4rem]" : "md:-left-[0.35rem]"}`}
+                  />
+                  <div className="w-full rounded-2xl border border-white/10 bg-[#211811] p-6">
+                    <p className="text-sm font-semibold text-[#f0c878]">
+                      {year}
+                    </p>
                     <h3 className="text-xl font-medium text-white">{title}</h3>
                     <p className="mt-3 leading-7 text-white/60">{text}</p>
                   </div>

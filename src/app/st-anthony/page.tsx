@@ -10,7 +10,7 @@ export default function StAnthonyChapel() {
           alt="St. Anthony Chapel, Pakala"
           fill
           priority
-          className="object-cover"
+          className="object-contain object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#17110c] via-black/30 to-black/45" />
         <div className="relative mx-auto w-full max-w-6xl">
@@ -23,12 +23,12 @@ export default function StAnthonyChapel() {
 
       <div className="mx-auto max-w-6xl px-5 pb-20 sm:px-8 lg:px-12">
         <section className="grid gap-10 border-b border-white/15 py-16 md:grid-cols-[0.7fr_1.3fr] md:gap-20 md:py-24">
-          <div className="relative min-h-96 overflow-hidden rounded-2xl">
+          <div className="relative min-h-[32rem] overflow-hidden rounded-2xl bg-black/20">
             <Image
               src="/bg/st-anthony-statue.png"
               alt="The miraculous statue of St. Anthony"
               fill
-              className="object-cover"
+              className="object-contain object-center p-4"
             />
           </div>
           <div>
