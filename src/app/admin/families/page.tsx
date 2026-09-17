@@ -37,7 +37,7 @@ export default function Families() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin eyebrow="Administration" title="Families">
+      <PageShell admin title="Families">
         <div className="flex min-h-[65vh] flex-col items-center rounded-3xl border border-white/10 bg-black/30 p-4 text-center backdrop-blur-md sm:p-6">
           {/* Buttons and Search Bar */}
           <div className="mb-6 flex w-full max-w-4xl flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">

@@ -85,7 +85,7 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin eyebrow="Administration" title="Dashboard">
+      <PageShell admin title="Dashboard">
         <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-4 backdrop-blur-md sm:p-6">
           <div className="flex min-h-[65vh] w-full flex-col gap-5 md:flex-row">
             {/* Left Panel */}

@@ -13,7 +13,7 @@ export default function Bethkati() {
 
   if (selectedFile) {
     return (
-      <PageShell title="Bethkati" eyebrow="Parish newsletter">
+      <PageShell title="Bethkati">
         <div className="min-h-[65vh] overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-3 backdrop-blur-md sm:p-6">
           <BethkatiViewer
             file={selectedFile}
@@ -26,7 +26,6 @@ export default function Bethkati() {
 
   return (
     <PageShell
-      eyebrow="Parish newsletter"
       title="Bethkati"
       description="Read the latest news, reflections and updates from St. Joseph Church."
     >

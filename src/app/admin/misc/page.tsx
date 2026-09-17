@@ -143,7 +143,7 @@ export default function AdminMisc() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin eyebrow="Administration" title="Publishing">
+      <PageShell admin title="Publishing">
         <ToastContainer />
         <div className="flex min-h-[65vh] flex-col items-center text-center">
           <div className="grid w-full gap-5 md:grid-cols-2">

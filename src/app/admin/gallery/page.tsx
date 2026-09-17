@@ -152,7 +152,7 @@ export default function AdminGallery() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
-      <PageShell admin eyebrow="Administration" title="Gallery upload">
+      <PageShell admin title="Gallery upload">
         <div className="relative flex min-h-[65vh] flex-col items-center justify-center overflow-y-auto rounded-3xl border border-white/10 bg-black/30 text-center backdrop-blur-md">
           {showInstructions && (
             <div className="absolute left-1/2 top-20 z-50 w-[90%] max-w-3xl -translate-x-1/2 rounded-xl border-2 border-primary bg-black/90 p-6 text-left font-semibold text-primary shadow-xl backdrop-blur-md md:text-lg">

@@ -14,11 +14,7 @@ export default function Profile() {
         "DEVELOPER",
       ]}
     >
-      <PageShell
-        eyebrow="Your account"
-        title="Profile"
-        contentClassName="mx-auto max-w-4xl"
-      >
+      <PageShell title="Profile" contentClassName="mx-auto max-w-4xl">
         <div className="text-center">
           <ProfileCard />
         </div>

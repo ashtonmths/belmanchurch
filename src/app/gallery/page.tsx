@@ -13,7 +13,6 @@ export default function Gallery() {
 
   return (
     <PageShell
-      eyebrow="Parish life"
       title="Gallery"
       description="Moments of faith, fellowship and celebration from our community."
     >

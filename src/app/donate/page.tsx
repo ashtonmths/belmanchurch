@@ -78,11 +78,7 @@ export default function DonatePage() {
 
   return (
     <ProtectedRoute allowedRoles={["DEVELOPER", "ADMIN"]}>
-      <PageShell
-        eyebrow="Support the parish"
-        title="Make a donation"
-        contentClassName="mx-auto max-w-xl"
-      >
+      <PageShell title="Make a donation" contentClassName="mx-auto max-w-xl">
         <ToastContainer />
         <div className="rounded-3xl border border-white/10 bg-[#fffaf1] p-6 text-[#3b2919] shadow-2xl sm:p-10">
           <div className="space-y-3">
