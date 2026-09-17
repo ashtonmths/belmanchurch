@@ -2,7 +2,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Link2, X } from "lucide-react";
+import { Download, Link2, Share2, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
@@ -62,31 +62,50 @@ export default function GalleryBrowser({
       ) : folders?.length ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {folders.map((folder) => (
-            <button
-              type="button"
+            <article
               key={folder.id}
-              onClick={() => openAlbum(folder.id)}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] text-left transition hover:border-[#f0c878]/45 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
+              className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-[#f0c878]/45"
             >
-              <div className="relative aspect-[4/3]">
-                <Image
-                  src={folder.previewImage ?? "/favicon.webp"}
-                  alt={folder.eventName}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                />
+              <button
+                type="button"
+                onClick={() => openAlbum(folder.id)}
+                className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#f0c878]"
+              >
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src={folder.previewImage ?? "/favicon.webp"}
+                    alt={folder.eventName}
+                    fill
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="px-5 pb-3 pt-5">
+                  <h2 className="font-medium text-white">{folder.eventName}</h2>
+                  <p className="mt-2 text-sm text-white/50">
+                    {new Date(folder.eventDate).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </button>
+              <div className="px-5 pb-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = `${window.location.origin}/gallery/${folder.id}`;
+                    void navigator.clipboard.writeText(url);
+                    toast.success("Album link copied");
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3.5 py-2 text-xs font-medium text-white/65 transition hover:border-[#f0c878]/50 hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
+                  aria-label={`Copy link to ${folder.eventName}`}
+                >
+                  <Share2 size={14} />
+                  Share album
+                </button>
               </div>
-              <div className="p-5">
-                <h2 className="font-medium text-white">{folder.eventName}</h2>
-                <p className="mt-2 text-sm text-white/50">
-                  {new Date(folder.eventDate).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-            </button>
+            </article>
           ))}
         </div>
       ) : (
