@@ -23,7 +23,7 @@ export default function ProtectedRoute({
 
     if (status === "unauthenticated") {
       router.push("/api/auth/signin");
-    } else if (role && !allowedRoles.includes(role as UserRole)) {
+    } else if (role && !allowedRoles.includes(role)) {
       router.push("/unauthorized");
     }
   }, [status, role, allowedRoles, router]);

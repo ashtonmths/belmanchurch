@@ -43,7 +43,7 @@ export const authConfig = {
     // Auth.js types require these unique keys to be declared as primary keys,
     // while the existing Prisma schema uses a separate Session id and unique constraints.
     sessionsTable: sessions as never,
-    verificationTokensTable: verificationTokens as never,
+    verificationTokensTable: verificationTokens,
   }),
   callbacks: {
     async session({ session, user }) {
