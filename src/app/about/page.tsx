@@ -1,200 +1,215 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
-import Timeline from "~/components/Timeline";
-import PriestTimeline from "~/components/PriestTimeline";
-import AssociationsSection from "~/components/AssociationsSection";
-import StAnthonySection from "~/components/StAnthonySection";
+
 import { api } from "~/trpc/react";
-import PageShell from "~/components/PageShell";
 
-const About = () => {
-  // Updated Timeline data with more historical events
-  const parishHistory = [
-    {
-      year: "16th Century",
-      title: "Early Christianity",
-      content:
-        "Christianity set its foot in the district and grew to considerable strength in the 17th and 18th centuries. The Mathias family was one of the earliest Christian families in the region.",
-    },
-    {
-      year: "1784",
-      title: "Tippu's Captivity",
-      content:
-        "The Mathias family, along with other Christians, were taken captive by Tippu's soldiers. This was a challenging period for Christianity in the region.",
-    },
-    {
-      year: "1789",
-      title: "Return and Settlement",
-      content:
-        "After their release, the Mathias family returned to Belman and settled around Naniltar. They became one of the most prominent and wealthy families in the area.",
-    },
-    {
-      year: "Pre-1886",
-      title: "Early Parish Structure",
-      content:
-        "Belman was initially part of Shirva parish, which had two churches - N.S. De Saude (under Padroado regime with Bishop in Goa) and St. Francis Xaviers' (under Propaganda congregation of Rome). Most Belman families belonged to St. Francis Xaviers' Church.",
-    },
-    {
-      year: "1886",
-      title: "Episcopal Sanction",
-      content:
-        "On November 29, Bishop N.M. Pagani, S.J. of Mangalore granted permission for the erection of a chapel in Belman, recognizing the spiritual needs of Christians in the area.",
-    },
-    {
-      year: "1887",
-      title: "Chapel Construction Begins",
-      content:
-        "Construction of St. Joseph's chapel began on land belonging to the Brahmin family 'Madkamane'. The Mathias family financed the construction work.",
-    },
-    {
-      year: "1894",
-      title: "Parish Establishment",
-      content:
-        "On September 10, Bishop Pagani officially established Belman as a separate parish. Rev. Fr. N. Carneiro was appointed as the first parish priest. The chapel was blessed and opened with mud walls and a hay thatched roof.",
-    },
-    {
-      year: "1894-1900",
-      title: "Early Parish Life",
-      content:
-        "The chapel was administered from Shirva. Sunday mass was at 7:00 a.m., and the parish priest received Rs.2/- as traveling expenses. The church had no priest's house or belfry.",
-    },
-    {
-      year: "1900",
-      title: "Parish Growth",
-      content:
-        "On December 12, the territorial boundary between Kirem and Belman was officially settled. Many families from N.S. De Saude and N.S. Remedies, Kirem transferred to Belman parish.",
-    },
-    {
-      year: "Early 1900s",
-      title: "Community Formation",
-      content:
-        "The Christian community grew to include prominent families like the D'Mellos at Bibinal, Mudartha's at Balegundi, Aranha's at Bola and Cardoza's around Indar, alongside the established Mathias family.",
-    },
-    {
-      year: "1933",
-      title: "New Church Building",
-      content:
-        "A new church building was constructed, modeled after the Gloria Church in Byculla, Mumbai, by Fr. Denis R. Lewis. The church featured an impressive facade in art deco style and was elevated on a small hillock.",
-    },
-    {
-      year: "2019",
-      title: "Church Restoration",
-      content:
-        "Under Fr. Edwin D'Souza's leadership, the church underwent a major restoration project costing Rs. 1.5 crore. The project preserved the church's heritage while enhancing its beauty. Original architectural elements were carefully restored, including the facade, pillars, and belfry. The project received support from the Karnataka government and generous donations from parishioners.",
-    },
-    {
-      year: "Present Day",
-      title: "Modern Parish",
-      content:
-        "Today, Belman Parish has grown to include 2,156 Catholics across 581 families, divided into 21 wards. The parish publishes its own newsletter 'San Zuzechi Betkati' and has produced notable clergy including Bishop Baptist Mudartha (Bishop of Jhansi).",
-    },
-  ];
+const history = [
+  [
+    "1886",
+    "Permission was granted by Bishop N. M. Pagani to build a chapel in Belman.",
+  ],
+  [
+    "1887",
+    "Work began on St. Joseph's Chapel on land that belonged to the Madkamane family.",
+  ],
+  [
+    "1894",
+    "Belman became a separate parish, with Fr. N. Carneiro serving as its first parish priest.",
+  ],
+  [
+    "1900",
+    "The parish boundary with Kirem was settled and more local Catholic families joined Belman parish.",
+  ],
+  [
+    "1933",
+    "The present church was built under Fr. Denis R. Lewis, drawing inspiration from Gloria Church in Mumbai.",
+  ],
+  [
+    "2019",
+    "A major restoration preserved the church facade, pillars and belfry while renewing the building for parish use.",
+  ],
+] as const;
 
+const associations = [
+  "ICYM and YCS",
+  "Altar Servers",
+  "Marian Sodality",
+  "Missionary Childhood Association",
+  "Catholic Sabha",
+  "Secular Franciscan Order",
+  "St. Vincent de Paul Society",
+  "Women's Association",
+  "Bethkati UAE and Kuwait",
+];
+
+export default function About() {
   const { data: priests = [] } = api.misc.getAllPriests.useQuery();
-  const parishPriests = priests.filter(
-    (priest) => priest.role === "PARISH_PRIEST",
-  );
+  const parishPriests = priests.filter(({ role }) => role === "PARISH_PRIEST");
   const assistantPriests = priests.filter(
-    (priest) => priest.role === "ASSISTANT_PRIEST",
+    ({ role }) => role === "ASSISTANT_PRIEST",
   );
 
   return (
-    <PageShell>
-      <div className="min-h-screen">
-        {/* Hero Section */}
-        <section className="px-4 py-12">
-          <div className="container mx-auto max-w-6xl">
-            <h1 className="mb-6 text-center text-4xl font-bold text-primary md:text-5xl">
-              About Belman Parish
-            </h1>
-            <div className="mx-auto max-w-3xl rounded-lg bg-primary p-6 font-semibold text-textcolor backdrop-blur-sm">
-              <p className="mb-4 text-lg">
-                Belman parish was established in 1894 with a current Catholic
-                population of around 2,156 individuals across 581 families. The
-                parish is divided into 21 wards and publishes &apos;San Zuzechi
-                Betkati&apos; as its newsletter.
-              </p>
-              <p className="text-lg">
-                Located 48 km north of Mangalore on the Padubidri-Kudremukh
-                State Highway, this parish is surrounded by natural beauty and
-                rich history, serving as a spiritual home for generations of
-                believers.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Location Section */}
-        <section className="px-4 py-12 font-semibold text-primary">
-          <div className="container mx-auto max-w-6xl">
-            <div className="rounded-lg border-l-4 border-accent bg-primary p-6 md:p-10">
-              <h2 className="mb-4 text-3xl font-bold text-textcolor">
-                Location & Background
-              </h2>
-              <div className="grid gap-8 text-accent md:grid-cols-2">
-                <div>
-                  <h3 className="mb-3 text-xl font-semibold">Location</h3>
-                  <p className="mb-4">
-                    This church is situated at a distance of 48 kms north of
-                    Mangalore, on Padubidri-Kudremukh State Highway and is
-                    surrounded by Mukamar, Parapady, Pernal, Mundkur, Kelmbet,
-                    Mudarangady and Palimar parishes.
-                  </p>
-
-                  <h3 className="mb-3 text-xl font-semibold">The Name</h3>
-                  <p className="mb-4">
-                    The word Belmannu came from &apos;bili mannu&apos; in
-                    Kannada meaning white soil. Belman was once a part of Shirva
-                    parish before becoming its own parish in 1894.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="mb-3 text-xl font-semibold">The Setting</h3>
-                  <p className="mb-4">
-                    Belman is a village in coastal Karnataka in Udupi District,
-                    between Padubidri and Karkala. It has its natural scenic
-                    beauty with paddy fields, coconut gardens, hills and
-                    valleys. Agriculture is the main occupation of its people.
-                  </p>
-
-                  <p>
-                    Since many years, Belmanites have been moving out of the
-                    village to many parts of India, specially to Mumbai and now
-                    to gulf countries. Christianity set its foot in our District
-                    in the 16th century and grew to considerable strength in the
-                    17th and 18th centuries.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Parish History Timeline */}
-        <Timeline events={parishHistory} title="Parish History Timeline" />
-
-        {/* Parish Priests Timeline */}
-        <div className="py-10">
-          <div className="container mx-auto max-w-6xl">
-            <PriestTimeline
-              priests={parishPriests}
-              title="Parish Priests Through History"
-            />
-            <PriestTimeline
-              priests={assistantPriests}
-              title="Assistant Parish Priests"
-            />
-          </div>
+    <main className="bg-[#f4f1ea] font-sans text-[#28231e]">
+      <header className="relative flex min-h-[62vh] items-end overflow-hidden bg-[#17110c] px-5 pb-12 pt-28 text-white sm:px-8 sm:pb-16 lg:px-12">
+        <div className="absolute inset-0 bg-[url('/bg/home.jpg')] bg-cover bg-center" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/30" />
+        <div className="relative mx-auto w-full max-w-6xl">
+          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            St. Joseph Church, Belman
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">
+            A Catholic parish serving Belman and the surrounding villages since
+            1894.
+          </p>
         </div>
+      </header>
 
-        {/* Associations Section */}
-        <AssociationsSection />
+      <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+        <section className="grid gap-10 border-b border-[#28231e]/20 pb-14 md:grid-cols-[1.4fr_0.6fr] md:gap-16">
+          <div>
+            <h2 className="text-2xl font-semibold sm:text-3xl">The parish</h2>
+            <div className="mt-6 space-y-5 text-base leading-8 text-[#514a43]">
+              <p>
+                Belman parish was established on 10 September 1894. Today it
+                serves about 2,156 Catholics in 581 families across 21 wards.
+                The parish also publishes the newsletter San Zuzechi Bethkati.
+              </p>
+              <p>
+                The church stands on the Padubidri–Kudremukh State Highway,
+                about 48 kilometres north of Mangaluru. The name Belman comes
+                from the Kannada words “bili mannu”, meaning white soil.
+              </p>
+            </div>
+          </div>
+          <dl className="border-t border-[#28231e]/20 text-sm md:border-t-0">
+            <Fact label="Established" value="10 September 1894" />
+            <Fact label="Families" value="581" />
+            <Fact label="Wards" value="21" />
+            <Fact label="Diocese" value="Udupi" />
+          </dl>
+        </section>
 
-        {/* St. Anthony Section */}
-        <StAnthonySection />
+        <section className="border-b border-[#28231e]/20 py-14 sm:py-20">
+          <h2 className="text-2xl font-semibold sm:text-3xl">
+            A short history
+          </h2>
+          <div className="mt-8">
+            {history.map(([year, text]) => (
+              <div
+                key={year}
+                className="grid gap-2 border-t border-[#28231e]/15 py-5 sm:grid-cols-[8rem_1fr] sm:gap-8"
+              >
+                <p className="font-semibold text-[#765827]">{year}</p>
+                <p className="leading-7 text-[#514a43]">{text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <PriestSection title="Parish priests" priests={parishPriests} />
+        <PriestSection
+          title="Assistant parish priests"
+          priests={assistantPriests}
+        />
+
+        <section className="border-b border-[#28231e]/20 py-14 sm:py-20">
+          <h2 className="text-2xl font-semibold sm:text-3xl">
+            Parish associations
+          </h2>
+          <ul className="mt-8 grid border-t border-[#28231e]/15 sm:grid-cols-2 lg:grid-cols-3">
+            {associations.map((name) => (
+              <li
+                key={name}
+                className="border-b border-[#28231e]/15 py-4 text-[#514a43] sm:mr-8"
+              >
+                {name}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="py-14 sm:py-20">
+          <div className="grid gap-10 md:grid-cols-[0.7fr_1.3fr] md:gap-16">
+            <div>
+              <h2 className="text-2xl font-semibold sm:text-3xl">
+                St. Anthony&apos;s Shrine
+              </h2>
+              <p className="mt-3 text-sm text-[#765827]">
+                Pakala, Manjarapalke
+              </p>
+            </div>
+            <div className="space-y-5 text-base leading-8 text-[#514a43]">
+              <p>
+                The shrine began with a wooden statue of St. Anthony found in a
+                bundle of firewood and kept with reverence by the D&apos;Silva
+                family of Pakala. Devotion grew among people from Belman and
+                nearby villages, who came to pray and offer candles.
+              </p>
+              <p>
+                A public place of worship was later built with the support of
+                the local community and the parish. The present shrine was
+                blessed and opened on 13 July 1974. Its annual feast is observed
+                on 13 June.
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
-    </PageShell>
+    </main>
   );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-6 border-b border-[#28231e]/20 py-4">
+      <dt className="text-[#6b645d]">{label}</dt>
+      <dd className="text-right font-medium">{value}</dd>
+    </div>
+  );
+}
+
+type Priest = {
+  id: string;
+  name: string;
+  period: string;
+  imageUrl: string | null;
 };
 
-export default About;
+function PriestSection({
+  title,
+  priests,
+}: {
+  title: string;
+  priests: Priest[];
+}) {
+  if (!priests.length) return null;
+
+  return (
+    <section className="border-b border-[#28231e]/20 py-14 sm:py-20">
+      <h2 className="text-2xl font-semibold sm:text-3xl">{title}</h2>
+      <div className="mt-8 grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+        {priests.map((priest) => (
+          <article
+            key={priest.id}
+            className="flex items-center gap-4 border-t border-[#28231e]/15 py-4"
+          >
+            {priest.imageUrl ? (
+              <img
+                src={priest.imageUrl}
+                alt=""
+                className="h-12 w-12 rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-12 w-12 rounded-full bg-[#ded8cc]" />
+            )}
+            <div>
+              <h3 className="font-medium">{priest.name}</h3>
+              <p className="mt-1 text-sm text-[#6b645d]">{priest.period}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
