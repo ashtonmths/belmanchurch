@@ -4,6 +4,12 @@ import { miscRouter } from "./routers/misc";
 import { parishonerRouter } from "./routers/parishoner";
 import { wardRouter } from "./routers/wards";
 import { galleryRouter } from "./routers/gallery";
+import { carouselRouter } from "./routers/carousel";
+import { priestRouter } from "./routers/priests";
+import { noticeRouter } from "./routers/notices";
+import { eventRouter } from "./routers/events";
+import { contactRouter } from "./routers/contact";
+import { contentRouter } from "./routers/content";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -17,7 +23,13 @@ export const appRouter = createTRPCRouter({
   misc: miscRouter,
   ward: wardRouter,
   parishoner: parishonerRouter,
-  gallery: galleryRouter
+  gallery: galleryRouter,
+  carousel: carouselRouter,
+  priest: priestRouter,
+  notice: noticeRouter,
+  event: eventRouter,
+  contact: contactRouter,
+  content: contentRouter,
 });
 
 // export type definition of API

@@ -1,8 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Role } from "@prisma/client";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
+import { checkAdminLogin } from "~/server/auth/admin-login";
 import { db } from "~/server/db";
 
 /**
@@ -21,29 +23,71 @@ declare module "next-auth" {
   }
 }
 
+/** Internal account that backs the username/password admin login. */
+const ADMIN_EMAIL = "admin@belmanchurch.in";
+
 export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
+    // Kept so existing Google-linked admins and photographers can still sign in.
+    // There is no public login button; parishioners do not need accounts.
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
       allowDangerousEmailAccountLinking: true,
     }),
+    CredentialsProvider({
+      id: "admin",
+      name: "Admin",
+      credentials: {
+        username: { label: "Username" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const username =
+          typeof credentials?.username === "string" ? credentials.username : "";
+        const password =
+          typeof credentials?.password === "string" ? credentials.password : "";
+
+        if (!(await checkAdminLogin(username.trim(), password))) {
+          // Slow down guessing.
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          return null;
+        }
+
+        // A real row, so records that reference the uploader stay valid.
+        const user = await db.user.upsert({
+          where: { email: ADMIN_EMAIL },
+          update: { role: "ADMIN" },
+          create: { email: ADMIN_EMAIL, name: "Parish Admin", role: "ADMIN" },
+        });
+        return { id: user.id, name: user.name, email: user.email };
+      },
+    }),
   ],
   adapter: PrismaAdapter(db),
+  // Credentials sign-in requires JWT sessions.
+  session: { strategy: "jwt" },
+  pages: { signIn: "/admin/login" },
   callbacks: {
-    async session({ session, user }) {
-      const dbUser = await db.user.findUnique({
-        where: { id: user.id },
-        select: { role: true },
-      });
+    async jwt({ token, user }) {
+      if (user?.id) {
+        const dbUser = await db.user.findUnique({
+          where: { id: user.id },
+          select: { role: true },
+        });
+        token.id = user.id;
+        token.role = dbUser?.role ?? "USER";
+      }
+      return token;
+    },
+    session({ session, token }) {
       return {
         ...session,
         user: {
           ...session.user,
-          id: user.id,
-          image: user.image ?? session.user.image,
-          role: dbUser?.role ?? "USER",
+          id: typeof token.id === "string" ? token.id : "",
+          role: (token.role as Role | undefined) ?? "USER",
         },
       };
     },

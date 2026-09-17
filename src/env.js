@@ -24,6 +24,12 @@ export const env = createEnv({
     SMTP_USER: z.string(),
     SMTP_PASS: z.string(),
     DATABASE_URL: z.string().url(),
+    // Admin panel login. Leave unset to disable username/password login.
+    ADMIN_USERNAME: z.string().min(3).optional(),
+    ADMIN_PASSWORD: z.string().min(10).optional(),
+    // "local" stores uploads in public/uploads (development only);
+    // anything else uploads to Cloudinary.
+    UPLOAD_STORAGE: z.enum(["local", "cloudinary"]).default("cloudinary"),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -57,6 +63,9 @@ export const env = createEnv({
     SMTP_USER: process.env.SMTP_USER,
     SMTP_PASS: process.env.SMTP_PASS,
     DATABASE_URL: process.env.DATABASE_URL,
+    ADMIN_USERNAME: process.env.ADMIN_USERNAME,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+    UPLOAD_STORAGE: process.env.UPLOAD_STORAGE,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**

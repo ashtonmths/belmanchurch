@@ -32,16 +32,8 @@ const GalleryAlbum = () => {
   const imageslength = data?.length ?? 0;
 
   const handleLike = (imageId: string) => {
-    if (!session) {
-      toast.error("Please log in to like images.", {
-        position: "top-right",
-        autoClose: 2000,
-      });
-      setTimeout(() => {
-        router.push("/api/auth/signin");
-      }, 2000);
-      return;
-    }
+    // Likes are tied to an account; there is no public sign-in.
+    if (!session) return;
 
     const isLiked = likes[imageId] ?? false;
 
@@ -303,6 +295,7 @@ const GalleryAlbum = () => {
 
                     {/* Actions Section */}
                     <div className="flex w-full items-center justify-around bg-primary p-4 text-gray-700">
+                      {session && (
                       <button
                         className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-red-500 md:flex-row"
                         onClick={() => handleLike(selectedImage.id)}
@@ -316,6 +309,7 @@ const GalleryAlbum = () => {
                         />
                         {selectedImage.likes} Likes
                       </button>
+                      )}
 
                       <button
                         className="flex flex-col items-center justify-center gap-2 text-textcolor hover:text-blue-500 md:flex-row"

@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import DonateButton from "~/components/DonateButton";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProtectedRoute from "~/components/ProtectRoute";
 
 function getNextWeekdayDate(weekday: number) {
   const today = dayjs();
@@ -76,12 +75,7 @@ export default function DonatePage() {
   };
 
   return (
-    <ProtectedRoute
-      allowedRoles={[
-        "DEVELOPER",
-        "ADMIN",
-      ]}
-    >
+    <>
       <div className="min-h-screen w-full bg-[url('/bg/home.jpg')] bg-cover bg-center">
         <ToastContainer />
         <div className="flex min-h-screen w-full items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -240,6 +234,6 @@ export default function DonatePage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
+    </>
   );
 }

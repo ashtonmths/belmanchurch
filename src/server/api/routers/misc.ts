@@ -32,7 +32,7 @@ export const miscRouter = createTRPCRouter({
   createBethkati: adminProcedure
     .input(
       z.object({
-        pdfUrl: z.string().url(), // directly passing the uploaded PDF URL
+        pdfUrl: z.string().regex(/^(\/|https:\/\/)/), // uploaded PDF (local path or URL)
         year: z.number().int().min(2000),
         month: z.string(),
         fileName: z.string(), // still useful for logging or display
@@ -49,6 +49,10 @@ export const miscRouter = createTRPCRouter({
         },
       });
     }),
+
+  deleteBethkati: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ ctx, input }) => ctx.db.bethkati.delete({ where: { id: input.id } })),
 
   getAllBethkati: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.bethkati.findMany({
