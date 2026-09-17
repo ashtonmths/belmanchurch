@@ -1,7 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import DonateButton from "~/components/DonateButton";
 import { toast, ToastContainer } from "react-toastify";
@@ -32,25 +32,17 @@ export default function DonatePage() {
     if (value === "CHURCH") {
       setForWhom("St Joseph Church, Belman");
       setAmount("");
+      setMassTiming("Not applicable");
     } else if (value === "CHAPEL") {
-      setForWhom("St Anthony Church, Manjarpalke");
+      setForWhom("St Anthony Chapel, Manjarpalke");
       setAmount("");
+      setMassTiming("Not applicable");
     } else if (value === "THANKSGIVING") {
       setForWhom("");
       setAmount("300");
+      setMassTiming("");
     }
   };
-
-  useEffect(() => {
-    if (type === "CHURCH" || type === "CHAPEL") {
-      const nextSat = getNextWeekdayDate(6).hour(16).minute(0);
-      const nextSun730 = getNextWeekdayDate(0).hour(7).minute(30);
-      const nextSun1030 = getNextWeekdayDate(0).hour(10).minute(30);
-      const allMasses = [nextSat, nextSun730, nextSun1030];
-      const nextMass = allMasses.find((mass) => mass.isAfter(dayjs()))!;
-      setMassTiming(nextMass.format("dddd, MMMM D - h:mmA"));
-    }
-  }, [type]);
 
   const validateForm = () => {
     if (!type) {
@@ -65,7 +57,7 @@ export default function DonatePage() {
       toast.error("Please enter your email.");
       return false;
     }
-    if (!massTiming.trim()) {
+    if (type === "THANKSGIVING" && !massTiming.trim()) {
       toast.error("Please select a mass timing.");
       return false;
     }
@@ -81,10 +73,10 @@ export default function DonatePage() {
       <PageShell
         title="Make a donation"
         description="Choose where your offering should go and complete the details below."
-        contentClassName="mx-auto max-w-3xl"
+        contentClassName="w-full"
       >
         <ToastContainer />
-        <div className="rounded-3xl border border-white/10 bg-[#211811]/90 p-5 text-white shadow-2xl backdrop-blur-md sm:p-8">
+        <div className="min-h-[calc(100dvh-15rem)] w-full rounded-3xl border border-white/10 bg-[#211811]/90 p-5 text-white shadow-2xl backdrop-blur-md sm:p-8 lg:p-10">
           <fieldset>
             <legend className="mb-4 text-sm font-medium text-white/65">
               Choose a purpose
@@ -92,8 +84,8 @@ export default function DonatePage() {
             <div className="grid gap-3 sm:grid-cols-3">
               {(
                 [
-                  ["CHURCH", "St. Joseph Church"],
-                  ["CHAPEL", "St. Anthony Chapel"],
+                  ["CHURCH", "Donation for St. Joseph Church"],
+                  ["CHAPEL", "Donation for St. Anthony Chapel"],
                   ["THANKSGIVING", "Thanksgiving Mass"],
                 ] as const
               ).map(([value, label]) => (
@@ -109,7 +101,7 @@ export default function DonatePage() {
             </div>
           </fieldset>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {/* From */}
             <div>
               <label className="mb-2 block text-sm font-medium text-white/65">
@@ -146,7 +138,7 @@ export default function DonatePage() {
               ) : (
                 <input
                   type="text"
-                  className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none disabled:text-white/50"
+                  className="w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white/45 outline-none"
                   value={forWhom}
                   disabled
                   onChange={(e) => setForWhom(e.target.value)}
@@ -208,7 +200,7 @@ export default function DonatePage() {
               ) : (
                 <input
                   type="text"
-                  className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none disabled:text-white/50"
+                  className="w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white/45 outline-none"
                   value={massTiming}
                   disabled
                 />
@@ -231,7 +223,7 @@ export default function DonatePage() {
             </div>
 
             {/* Donate Button */}
-            <div className="flex items-end sm:justify-end">
+            <div className="flex items-end md:justify-end xl:col-span-2">
               {type && (
                 <DonateButton
                   type={type}
