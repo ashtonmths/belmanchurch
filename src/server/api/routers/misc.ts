@@ -5,6 +5,8 @@ import {
   adminProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
+import { desc } from "drizzle-orm";
+import { bethkati, events } from "~/server/db/schema";
 
 export const miscRouter = createTRPCRouter({
   // Create Event
@@ -18,14 +20,16 @@ export const miscRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.event.create({
-        data: {
+      const [event] = await ctx.db
+        .insert(events)
+        .values({
           name: input.name,
           date: new Date(input.date),
           venue: input.venue,
           info: input.info ?? null,
-        },
-      });
+        })
+        .returning();
+      return event;
     }),
 
   // Create Bethkati
@@ -41,23 +45,25 @@ export const miscRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { pdfUrl, year, month } = input;
 
-      return ctx.db.bethkati.create({
-        data: {
+      const [entry] = await ctx.db
+        .insert(bethkati)
+        .values({
           url: pdfUrl,
           year,
           month,
-        },
-      });
+        })
+        .returning();
+      return entry;
     }),
 
   getAllBethkati: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.bethkati.findMany({
-      orderBy: [{ year: "desc" }, { month: "desc" }],
+    return ctx.db.query.bethkati.findMany({
+      orderBy: [desc(bethkati.year), desc(bethkati.month)],
     });
   }),
   getAllEvents: publicProcedure.query(async () => {
-    return db.event.findMany({
-      orderBy: [{ date: "desc" }],
+    return db.query.events.findMany({
+      orderBy: desc(events.date),
     });
   }),
 });

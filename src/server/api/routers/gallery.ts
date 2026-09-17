@@ -7,6 +7,8 @@ import {
 import cloudinary from "cloudinary";
 import { db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
+import { desc, eq } from "drizzle-orm";
+import { galleries, galleryImages } from "~/server/db/schema";
 
 cloudinary.v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
 
@@ -20,48 +22,59 @@ export const galleryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (!['ADMIN', 'DEVELOPER', 'PHOTOGRAPHER'].includes(ctx.session.user.role)) {
+      if (
+        !["ADMIN", "DEVELOPER", "PHOTOGRAPHER"].includes(ctx.session.user.role)
+      ) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
       }
       const { eventName, eventDate, images } = input;
 
       const cloudinaryFolder = `${eventName} - ${eventDate}`;
 
-      let gallery = await db.gallery.findFirst({
-        where: { cloudinaryFolder },
+      let gallery = await db.query.galleries.findFirst({
+        where: eq(galleries.cloudinaryFolder, cloudinaryFolder),
       });
 
       // If not, create it
-      gallery ??= await db.gallery.create({
-        data: {
-          eventName,
-          eventDate: new Date(eventDate),
-          cloudinaryFolder,
-        },
-      });
+      if (!gallery) {
+        [gallery] = await db
+          .insert(galleries)
+          .values({
+            eventName,
+            eventDate: new Date(eventDate),
+            cloudinaryFolder,
+          })
+          .returning();
+      }
+
+      if (!gallery) throw new Error("Failed to create gallery");
 
       // Then insert images into the existing or new gallery
-      await db.galleryImage.createMany({
-        data: images.map((url) => ({
-          url,
-          galleryId: gallery.id,
-          uploadedById: ctx.session.user.id,
-        })),
-        skipDuplicates: true,
-      });
+      if (images.length > 0) {
+        await db
+          .insert(galleryImages)
+          .values(
+            images.map((url) => ({
+              url,
+              galleryId: gallery.id,
+              uploadedById: ctx.session.user.id,
+            })),
+          )
+          .onConflictDoNothing({ target: galleryImages.url });
+      }
 
       return { success: true, cloudinaryFolder };
     }),
 
   getFolders: publicProcedure.query(async ({}) => {
-    const folders = await db.gallery.findMany({
-      select: {
+    const folders = await db.query.galleries.findMany({
+      columns: {
         id: true,
         eventName: true,
         eventDate: true,
         cloudinaryFolder: true,
       },
-      orderBy: { eventDate: "desc" },
+      orderBy: desc(galleries.eventDate),
     });
 
     const folderPreviews = await Promise.all(
@@ -103,9 +116,9 @@ export const galleryRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
 
       // Fetch image
-      const image = await ctx.db.galleryImage.findUnique({
-        where: { id: imageId },
-        select: { likedBy: true },
+      const image = await ctx.db.query.galleryImages.findFirst({
+        where: eq(galleryImages.id, imageId),
+        columns: { likedBy: true },
       });
 
       if (!image) throw new Error("Image not found");
@@ -115,10 +128,10 @@ export const galleryRouter = createTRPCRouter({
         : [...image.likedBy, userId]; // Like
 
       // Update DB
-      await ctx.db.galleryImage.update({
-        where: { id: imageId },
-        data: { likedBy: updatedLikedBy },
-      });
+      await ctx.db
+        .update(galleryImages)
+        .set({ likedBy: updatedLikedBy })
+        .where(eq(galleryImages.id, imageId));
 
       return {
         likes: updatedLikedBy.length,
@@ -129,23 +142,25 @@ export const galleryRouter = createTRPCRouter({
   getImagesByID: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const gallery = await db.gallery.findFirst({
-        where: { id: input.id }, // Find by gallery ID
-        select: { id: true },
+      const gallery = await db.query.galleries.findFirst({
+        where: eq(galleries.id, input.id),
+        columns: { id: true },
       });
 
       if (!gallery) throw new Error("Gallery not found");
 
       // Fetch images linked to this gallery
-      const images = await db.galleryImage.findMany({
-        where: { galleryId: gallery.id },
-        select: {
+      const images = await db.query.galleryImages.findMany({
+        where: eq(galleryImages.galleryId, gallery.id),
+        columns: {
           id: true,
           url: true,
           likedBy: true,
-          uploadedBy: { select: { id: true, name: true, image: true } },
         },
-        orderBy: { createdAt: "desc" },
+        with: {
+          uploadedBy: { columns: { id: true, name: true, image: true } },
+        },
+        orderBy: desc(galleryImages.createdAt),
       });
 
       const userId = ctx.session?.user?.id;

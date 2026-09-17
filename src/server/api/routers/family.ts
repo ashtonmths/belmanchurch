@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, adminProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  adminProcedure,
+} from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { asc, eq } from "drizzle-orm";
+import { families, parishoners, users } from "~/server/db/schema";
 
 export const familyRouter = createTRPCRouter({
   updateMobile: protectedProcedure
@@ -11,15 +17,17 @@ export const familyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (!['ADMIN', 'DEVELOPER', 'PARISHONER'].includes(ctx.session.user.role)) {
+      if (
+        !["ADMIN", "DEVELOPER", "PARISHONER"].includes(ctx.session.user.role)
+      ) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
       }
       const { parishonerId, mobile } = input;
 
-      await ctx.db.parishoner.update({
-        where: { id: parishonerId },
-        data: { mobile },
-      });
+      await ctx.db
+        .update(parishoners)
+        .set({ mobile })
+        .where(eq(parishoners.id, parishonerId));
 
       return { success: true };
     }),
@@ -27,8 +35,8 @@ export const familyRouter = createTRPCRouter({
   verifyMobile: protectedProcedure
     .input(z.object({ mobile: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const parishoner = await ctx.db.parishoner.findUnique({
-        where: { mobile: input.mobile },
+      const parishoner = await ctx.db.query.parishoners.findFirst({
+        where: eq(parishoners.mobile, input.mobile),
       });
 
       if (!parishoner) {
@@ -39,26 +47,29 @@ export const familyRouter = createTRPCRouter({
       }
 
       // ✅ Link Parishoner to the User if found
-      await ctx.db.parishoner.update({
-        where: { id: parishoner.id },
-        data: { userId: ctx.session.user.id, name: ctx.session.user.name },
-      });
+      await ctx.db
+        .update(parishoners)
+        .set({
+          userId: ctx.session.user.id,
+          name: ctx.session.user.name,
+        })
+        .where(eq(parishoners.id, parishoner.id));
 
-      await ctx.db.user.update({
-        where: { id: ctx.session.user.id },
-        data: { role: "PARISHONER" },
-      });
+      await ctx.db
+        .update(users)
+        .set({ role: "PARISHONER" })
+        .where(eq(users.id, ctx.session.user.id));
 
       return { success: true, message: "Parishoner linked successfully!" };
     }),
   getAllFamilies: adminProcedure.query(({ ctx }) => {
-    return ctx.db.family.findMany({
-      select: {
+    return ctx.db.query.families.findMany({
+      columns: {
         id: true,
         name: true,
-        head: { select: { id: true, name: true } }, // Include Family Head
       },
-      orderBy: { name: "asc" },
+      with: { head: { columns: { id: true, name: true } } },
+      orderBy: asc(families.name),
     });
   }),
 
@@ -70,29 +81,32 @@ export const familyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.family.create({
-        data: {
+      const [family] = await ctx.db
+        .insert(families)
+        .values({
           name: input.name,
-          head: input.headId ? { connect: { id: input.headId } } : undefined,
-        },
-      });
+          headId: input.headId,
+        })
+        .returning();
+      return family;
     }),
 
   // Get family members by family ID
   getFamilyMembers: adminProcedure
     .input(z.object({ familyId: z.string() }))
     .query(({ ctx, input }) => {
-      return ctx.db.parishoner.findMany({
-        where: { familyId: input.familyId },
-        select: {
+      return ctx.db.query.parishoners.findMany({
+        where: eq(parishoners.familyId, input.familyId),
+        columns: {
           id: true,
           name: true,
           mobile: true,
-          ward: { select: { id: true, name: true } },
-          familyHead: { select: { id: true } },
         },
-        orderBy: { name: "asc" },
+        with: {
+          ward: { columns: { id: true, name: true } },
+          familyHead: { columns: { id: true } },
+        },
+        orderBy: asc(parishoners.name),
       });
     }),
-  
 });

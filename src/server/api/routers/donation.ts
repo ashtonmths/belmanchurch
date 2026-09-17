@@ -9,6 +9,8 @@ import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 import { sendReceipt } from "~/server/utils/mail";
+import { desc, eq } from "drizzle-orm";
+import { donations, orders } from "~/server/db/schema";
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -45,17 +47,15 @@ export const donationRouter = createTRPCRouter({
           throw new Error("Failed to create Razorpay order");
         }
 
-        await db.order.create({
-          data: {
-            razorpayOrderId: razorpayOrder.id,
-            type: input.type,
-            amount: input.amount,
-            forWhom: input.forWhom,
-            byWhom: input.byWhom,
-            email: input.email,
-            status: "PENDING",
-            massTiming: input.massTiming ?? null,
-          },
+        await db.insert(orders).values({
+          razorpayOrderId: razorpayOrder.id,
+          type: input.type,
+          amount: input.amount,
+          forWhom: input.forWhom,
+          byWhom: input.byWhom,
+          email: input.email,
+          status: "PENDING",
+          massTiming: input.massTiming ?? null,
         });
 
         return { razorpayOrderId: razorpayOrder.id };
@@ -98,23 +98,24 @@ export const donationRouter = createTRPCRouter({
           });
         }
 
-        const updatedOrder = await db.order.update({
-          where: { razorpayOrderId: input.razorpay_order_id },
-          data: { status: "SUCCESS", paymentId: input.razorpay_payment_id },
-        });
+        const [updatedOrder] = await db
+          .update(orders)
+          .set({ status: "SUCCESS", paymentId: input.razorpay_payment_id })
+          .where(eq(orders.razorpayOrderId, input.razorpay_order_id))
+          .returning();
 
-        await db.donation.create({
-          data: {
-            paymentId: input.razorpay_payment_id,
-            type: updatedOrder.type,
-            amount: updatedOrder.amount,
-            forWhom: updatedOrder.forWhom,
-            byWhom: updatedOrder.byWhom,
-            email: updatedOrder.email,
-            massTiming: updatedOrder.massTiming,
-            receiptIssued: false,
-            orderId: updatedOrder.id,
-          },
+        if (!updatedOrder) throw new Error("Order not found");
+
+        await db.insert(donations).values({
+          paymentId: input.razorpay_payment_id,
+          type: updatedOrder.type,
+          amount: updatedOrder.amount,
+          forWhom: updatedOrder.forWhom,
+          byWhom: updatedOrder.byWhom,
+          email: updatedOrder.email,
+          massTiming: updatedOrder.massTiming,
+          receiptIssued: false,
+          orderId: updatedOrder.id,
         });
 
         return { success: true };
@@ -128,8 +129,8 @@ export const donationRouter = createTRPCRouter({
     }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    return await ctx.db.donation.findMany({
-      select: {
+    return await ctx.db.query.donations.findMany({
+      columns: {
         id: true,
         type: true,
         amount: true,
@@ -144,16 +145,16 @@ export const donationRouter = createTRPCRouter({
   }),
 
   getInbox: adminProcedure.query(async ({ ctx: _ctx }) => {
-    return await db.donation.findMany({
-      where: { receiptIssued: false },
-      orderBy: { createdAt: "desc" },
+    return await db.query.donations.findMany({
+      where: eq(donations.receiptIssued, false),
+      orderBy: desc(donations.createdAt),
     });
   }),
 
   getHistory: adminProcedure.query(async ({ ctx: _ctx }) => {
-    return await db.donation.findMany({
-      where: { receiptIssued: true },
-      orderBy: { createdAt: "desc" },
+    return await db.query.donations.findMany({
+      where: eq(donations.receiptIssued, true),
+      orderBy: desc(donations.createdAt),
     });
   }),
 
@@ -174,10 +175,10 @@ export const donationRouter = createTRPCRouter({
 
       await sendReceipt(input.email, { name: input.file.name, buffer });
 
-      await db.donation.update({
-        where: { id: input.id },
-        data: { receiptIssued: true },
-      });
+      await db
+        .update(donations)
+        .set({ receiptIssued: true })
+        .where(eq(donations.id, input.id));
 
       return { success: true };
     }),

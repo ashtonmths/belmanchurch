@@ -1,9 +1,16 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { Role } from "@prisma/client";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { db } from "~/server/db";
+import {
+  accounts,
+  sessions,
+  users,
+  verificationTokens,
+  type Role,
+} from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -30,12 +37,19 @@ export const authConfig = {
       allowDangerousEmailAccountLinking: true,
     }),
   ],
-  adapter: PrismaAdapter(db),
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    // Auth.js types require these unique keys to be declared as primary keys,
+    // while the existing Prisma schema uses a separate Session id and unique constraints.
+    sessionsTable: sessions as never,
+    verificationTokensTable: verificationTokens as never,
+  }),
   callbacks: {
     async session({ session, user }) {
-      const dbUser = await db.user.findUnique({
-        where: { id: user.id },
-        select: { role: true },
+      const dbUser = await db.query.users.findFirst({
+        where: eq(users.id, user.id),
+        columns: { role: true },
       });
       return {
         ...session,

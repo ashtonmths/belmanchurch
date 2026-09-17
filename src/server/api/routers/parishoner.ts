@@ -1,15 +1,21 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, adminProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  adminProcedure,
+} from "~/server/api/trpc";
+import { asc, eq } from "drizzle-orm";
+import { families, parishoners } from "~/server/db/schema";
 
 export const parishonerRouter = createTRPCRouter({
   getParishonerDetails: protectedProcedure.query(async ({ ctx }) => {
     try {
-      const parishoner = await ctx.db.parishoner.findUnique({
-        where: { userId: ctx.session.user.id },
-        include: {
+      const parishoner = await ctx.db.query.parishoners.findFirst({
+        where: eq(parishoners.userId, ctx.session.user.id),
+        with: {
           ward: true, // ✅ Include ward details
           family: {
-            include: {
+            with: {
               members: true,
               head: true,
             },
@@ -35,9 +41,9 @@ export const parishonerRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Fetch the parishoner's family ID
-      const parishoner = await ctx.db.parishoner.findUnique({
-        where: { id: input.parishonerId },
-        select: { familyId: true },
+      const parishoner = await ctx.db.query.parishoners.findFirst({
+        where: eq(parishoners.id, input.parishonerId),
+        columns: { familyId: true },
       });
 
       if (!parishoner) {
@@ -52,27 +58,29 @@ export const parishonerRouter = createTRPCRouter({
         }
 
         // Directly update the family table to set the new head
-        await ctx.db.family.update({
-          where: { id: parishoner.familyId },
-          data: { headId: input.parishonerId },
-        });
+        await ctx.db
+          .update(families)
+          .set({ headId: input.parishonerId })
+          .where(eq(families.id, parishoner.familyId));
       } else {
         // If removing the head, set headId to null
-        await ctx.db.family.updateMany({
-          where: { headId: input.parishonerId },
-          data: { headId: null },
-        });
+        await ctx.db
+          .update(families)
+          .set({ headId: null })
+          .where(eq(families.headId, input.parishonerId));
       }
 
       // Update the parishoner details without touching familyHead directly
-      return ctx.db.parishoner.update({
-        where: { id: input.parishonerId },
-        data: {
+      const [updated] = await ctx.db
+        .update(parishoners)
+        .set({
           name: input.name,
           mobile: input.mobile,
           wardId: input.wardId,
-        },
-      });
+        })
+        .where(eq(parishoners.id, input.parishonerId))
+        .returning();
+      return updated;
     }),
   addParishoner: adminProcedure
     .input(
@@ -84,27 +92,29 @@ export const parishonerRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.parishoner.create({
-        data: {
+      const [parishoner] = await ctx.db
+        .insert(parishoners)
+        .values({
           name: input.name,
           mobile: input.mobile,
-          ward: input.wardId ? { connect: { id: input.wardId } } : undefined,
-          family: input.familyId
-            ? { connect: { id: input.familyId } }
-            : undefined,
-        },
-      });
+          wardId: input.wardId,
+          familyId: input.familyId,
+        })
+        .returning();
+      return parishoner;
     }),
   getAllParishoners: adminProcedure.query(({ ctx }) => {
-    return ctx.db.parishoner.findMany({
-      select: {
+    return ctx.db.query.parishoners.findMany({
+      columns: {
         id: true,
         name: true,
         mobile: true,
-        ward: { select: { id: true, name: true } }, // Include ward name
-        family: { select: { id: true, name: true } }, // Include family name
       },
-      orderBy: { name: "asc" },
+      with: {
+        ward: { columns: { id: true, name: true } },
+        family: { columns: { id: true, name: true } },
+      },
+      orderBy: asc(parishoners.name),
     });
   }),
   assignParishonerToFamily: adminProcedure
@@ -115,9 +125,11 @@ export const parishonerRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.parishoner.update({
-        where: { id: input.parishonerId },
-        data: { familyId: input.familyId },
-      });
+      const [parishoner] = await ctx.db
+        .update(parishoners)
+        .set({ familyId: input.familyId })
+        .where(eq(parishoners.id, input.parishonerId))
+        .returning();
+      return parishoner;
     }),
 });
