@@ -2,8 +2,17 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Link2, Share2, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Heart,
+  Link2,
+  Share2,
+  X,
+} from "lucide-react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import PageShell from "~/components/PageShell";
@@ -16,13 +25,20 @@ export default function GalleryBrowser({
   initialAlbumId?: string | null;
 }) {
   const [albumId, setAlbumId] = useState(initialAlbumId);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [likeState, setLikeState] = useState<
+    Record<string, { liked: boolean; count: number }>
+  >({});
+  const { data: session } = useSession();
+  const toggleLike = api.gallery.toggleLike.useMutation();
   const { data: folders, isLoading, error } = api.gallery.getFolders.useQuery();
   const { data: images, isFetching } = api.gallery.getImagesByID.useQuery(
     { id: albumId ?? "" },
     { enabled: !!albumId },
   );
   const activeFolder = folders?.find((folder) => folder.id === albumId);
+  const selectedImage =
+    selectedIndex === null ? null : (images?.[selectedIndex] ?? null);
 
   useEffect(() => {
     const syncFromUrl = () =>
@@ -44,9 +60,53 @@ export default function GalleryBrowser({
   };
   const closeAlbum = () => {
     window.history.pushState({}, "", "/gallery");
-    setSelectedImage(null);
+    setSelectedIndex(null);
     setAlbumId(null);
   };
+
+  const moveImage = (direction: -1 | 1) => {
+    if (selectedIndex === null || !images?.length) return;
+    setSelectedIndex(
+      (selectedIndex + direction + images.length) % images.length,
+    );
+  };
+
+  const handleLike = () => {
+    if (!selectedImage) return;
+    if (!session) {
+      toast.error("Sign in to like photographs");
+      return;
+    }
+    const current = likeState[selectedImage.id] ?? {
+      liked: selectedImage.isLiked ?? false,
+      count: selectedImage.likes,
+    };
+    setLikeState((state) => ({
+      ...state,
+      [selectedImage.id]: {
+        liked: !current.liked,
+        count: current.count + (current.liked ? -1 : 1),
+      },
+    }));
+    toggleLike.mutate(
+      { imageId: selectedImage.id },
+      {
+        onError: () =>
+          setLikeState((state) => ({ ...state, [selectedImage.id]: current })),
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") moveImage(-1);
+      if (event.key === "ArrowRight") moveImage(1);
+      if (event.key === "Escape") setSelectedIndex(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   return (
     <PageShell
@@ -160,7 +220,7 @@ export default function GalleryBrowser({
                       <button
                         type="button"
                         key={image.id}
-                        onClick={() => setSelectedImage(image.url)}
+                        onClick={() => setSelectedIndex(index)}
                         className="relative aspect-square overflow-hidden rounded-xl bg-white/5"
                       >
                         <Image
@@ -170,6 +230,10 @@ export default function GalleryBrowser({
                           unoptimized
                           className="object-cover transition hover:scale-105"
                         />
+                        <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/65 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
+                          <Heart size={12} />
+                          {likeState[image.id]?.count ?? image.likes}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -191,22 +255,66 @@ export default function GalleryBrowser({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedImage(null)}
+            onClick={() => setSelectedIndex(null)}
           >
-            <div
-              className="relative flex max-h-full max-w-6xl flex-col items-center"
+            <motion.div
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -70) moveImage(1);
+                if (info.offset.x > 70) moveImage(-1);
+              }}
+              className="relative flex h-full w-full max-w-6xl flex-col items-center justify-center"
               onClick={(event) => event.stopPropagation()}
             >
+              <p className="mb-3 text-center text-xs text-white/45 sm:hidden">
+                Swipe left or right for more
+              </p>
+              <button
+                type="button"
+                onClick={() => moveImage(-1)}
+                aria-label="Previous photograph"
+                className="absolute left-1 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm sm:left-4"
+              >
+                <ChevronLeft size={24} />
+              </button>
               <img
-                src={selectedImage}
+                src={selectedImage.url}
                 alt="Selected gallery photograph"
-                className="max-h-[80vh] max-w-full object-contain"
+                className="max-h-[76vh] max-w-full select-none object-contain"
+                draggable={false}
               />
+              <button
+                type="button"
+                onClick={() => moveImage(1)}
+                aria-label="Next photograph"
+                className="absolute right-1 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm sm:right-4"
+              >
+                <ChevronRight size={24} />
+              </button>
               <div className="mt-4 flex flex-wrap justify-center gap-3">
                 <button
                   type="button"
+                  onClick={handleLike}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm ${(likeState[selectedImage.id]?.liked ?? selectedImage.isLiked) ? "bg-red-500 text-white" : "bg-white/10 text-white"}`}
+                >
+                  <Heart
+                    size={16}
+                    fill={
+                      (likeState[selectedImage.id]?.liked ??
+                      selectedImage.isLiked)
+                        ? "currentColor"
+                        : "none"
+                    }
+                  />
+                  {likeState[selectedImage.id]?.count ?? selectedImage.likes}{" "}
+                  likes
+                </button>
+                <button
+                  type="button"
                   onClick={() => {
-                    void navigator.clipboard.writeText(selectedImage);
+                    void navigator.clipboard.writeText(selectedImage.url);
                     toast.success("Image link copied");
                   }}
                   className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white"
@@ -215,22 +323,19 @@ export default function GalleryBrowser({
                   Copy link
                 </button>
                 <a
-                  href={selectedImage}
+                  href={selectedImage.url}
                   download
                   className="flex items-center gap-2 rounded-full bg-[#f0c878] px-4 py-2 text-sm font-medium text-[#211811]"
                 >
                   <Download size={16} />
                   Download
                 </a>
-                <button
-                  type="button"
-                  onClick={() => setSelectedImage(null)}
-                  className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white"
-                >
-                  <X size={18} />
-                </button>
+                <span className="self-center text-xs text-white/40">
+                  {(selectedIndex ?? 0) + 1} of {images?.length ?? 0} · use
+                  arrow keys
+                </span>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
