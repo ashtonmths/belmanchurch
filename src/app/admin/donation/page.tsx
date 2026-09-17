@@ -1,284 +1,157 @@
 "use client";
-import Image from "next/image";
-import React, { useState } from "react";
-import { api } from "~/trpc/react";
-import ProtectedRoute from "~/components/ProtectRoute";
+import dayjs from "dayjs";
+import { CheckCircle2, ReceiptText, Search, Upload } from "lucide-react";
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import PageShell from "~/components/PageShell";
-
-type ReceiptUploaderProps = {
-  id: string;
-};
+import ProtectedRoute from "~/components/ProtectRoute";
+import { api } from "~/trpc/react";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DonationAdmin() {
-  const { data: inboxDonations = [], refetch: refetchInbox } =
+  const [tab, setTab] = useState<"inbox" | "history">("inbox");
+  const [search, setSearch] = useState("");
+  const [sending, setSending] = useState<string | null>(null);
+  const { data: inbox = [], refetch: reloadInbox } =
     api.donation.getInbox.useQuery();
-  const { data: historyDonations = [], refetch: refetchHistory } =
+  const { data: history = [], refetch: reloadHistory } =
     api.donation.getHistory.useQuery();
-
-  const issueReceipt = api.donation.issueReceipt.useMutation({
-    onSuccess: async () => {
-      await refetchInbox(); // Refresh Inbox
-      await refetchHistory(); // Refresh History
-    },
-  });
-  const [receipt, setReceipt] = useState<
-    Record<
-      string,
-      {
-        data: string;
-        method: "upload";
-        type: string;
-      }
-    >
-  >({});
-
-  const [activeTab, setActiveTab] = useState<"inbox" | "history">("inbox");
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredInboxDonations = inboxDonations.filter((donation) =>
-    donation.byWhom.toLowerCase().includes(searchQuery.toLowerCase()),
+  const issue = api.donation.issueReceipt.useMutation();
+  const records = (tab === "inbox" ? inbox : history).filter((item) =>
+    `${item.byWhom} ${item.email}`.toLowerCase().includes(search.toLowerCase()),
   );
-
-  const filteredHistoryDonations = historyDonations.filter((donation) =>
-    donation.byWhom.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const ReceiptUploader: React.FC<ReceiptUploaderProps> = ({ id }) => {
-    const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        if (!e.target?.result) return;
-
-        const buffer = Buffer.from(e.target.result as ArrayBuffer).toString(
-          "base64",
-        );
-
-        setReceipt((prev) => ({
-          ...prev,
-          [id]: {
-            data: `data:${file.type};base64,${buffer}`,
-            method: "upload",
-            type: file.type,
-          },
-        }));
-      };
-      reader.readAsArrayBuffer(file);
-    };
-
-    return (
-      <div>
-        <input type="file" accept=".pdf,.png,.jpg" onChange={handleUpload} />
-      </div>
-    );
-  };
-
-  const handleSend = async (id: string, email: string) => {
-    if (!receipt[id]) {
-      alert("No receipt found for this donation.");
-      return;
-    }
-
+  const upload = async (id: string, email: string, file?: File) => {
+    if (!file) return;
+    setSending(id);
     try {
-      await issueReceipt.mutateAsync({
+      const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () =>
+          typeof reader.result === "string"
+            ? resolve(reader.result)
+            : reject(new Error());
+        reader.onerror = () => reject(new Error());
+        reader.readAsDataURL(file);
+      });
+      await issue.mutateAsync({
         id,
         email,
-        method: receipt[id].method,
+        method: "upload",
         file: {
-          name: `receipt_${id}.${receipt[id].type.split("/")[1]}`,
-          buffer: receipt[id].data,
+          name: `receipt_${id}.${file.name.split(".").pop() ?? "pdf"}`,
+          buffer: data,
         },
       });
-
-      alert("Receipt sent successfully!");
-    } catch (error) {
-      console.error("Error sending receipt:", error);
+      await Promise.all([reloadInbox(), reloadHistory()]);
+      toast.success("Receipt sent");
+    } catch {
+      toast.error("Receipt could not be sent");
+    } finally {
+      setSending(null);
     }
   };
-
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin title="Donations">
-        <div className="flex min-h-[65vh] flex-col items-center overflow-auto rounded-3xl border border-white/10 bg-black/30 p-4 text-center backdrop-blur-md sm:p-6">
-          <div className="mb-8 flex w-full flex-wrap justify-center gap-3">
-            <button
-              className={`rounded-full px-5 py-2.5 text-sm font-semibold ${activeTab === "inbox" ? "bg-[#f0c878] text-[#211811]" : "border border-white/15 text-white/65"}`}
-              onClick={() => setActiveTab("inbox")}
-            >
-              Inbox
-            </button>
-            <button
-              className={`rounded-full px-5 py-2.5 text-sm font-semibold ${activeTab === "history" ? "bg-[#f0c878] text-[#211811]" : "border border-white/15 text-white/65"}`}
-              onClick={() => setActiveTab("history")}
-            >
-              History
-            </button>
-            <input
-              type="text"
-              placeholder={`Search ${activeTab === "inbox" ? "Inbox" : "History"} by donor...`}
-              className="min-w-56 flex-1 rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-[#f0c878] sm:max-w-md"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      <PageShell
+        admin
+        title="Donations"
+        description="Review completed offerings and send receipts without leaving the queue."
+      >
+        <ToastContainer />
+        <section className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/90">
+          <div className="flex flex-col gap-4 border-b border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTab("inbox")}
+                className={`rounded-full px-5 py-2.5 text-sm font-semibold ${tab === "inbox" ? "bg-[#f0c878] text-[#211811]" : "border border-white/15 text-white/60"}`}
+              >
+                Needs receipt{" "}
+                <span className="ml-1 opacity-60">{inbox.length}</span>
+              </button>
+              <button
+                onClick={() => setTab("history")}
+                className={`rounded-full px-5 py-2.5 text-sm font-semibold ${tab === "history" ? "bg-[#f0c878] text-[#211811]" : "border border-white/15 text-white/60"}`}
+              >
+                Sent
+              </button>
+            </div>
+            <label className="flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-4 text-white/50 sm:w-80">
+              <Search size={17} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search donor or email"
+                className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none"
+              />
+            </label>
           </div>
-
-          {activeTab === "inbox" && (
-            <div className="flex h-full w-full max-w-5xl flex-col items-center gap-3 overflow-x-auto rounded p-1 sm:p-3">
-              {inboxDonations.length === 0 ? (
-                <p className="text-4xl font-extrabold text-primary">
-                  No pending receipts.
+          <div className="divide-y divide-white/10">
+            {records.map((item) => (
+              <article
+                key={item.id}
+                className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[1.3fr_1fr_auto] lg:items-center"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <ReceiptText size={17} className="text-[#f0c878]" />
+                    <h2 className="font-semibold">{item.byWhom}</h2>
+                  </div>
+                  <p className="mt-2 text-sm text-white/45">
+                    {item.email} · {dayjs(item.createdAt).format("D MMM YYYY")}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-white/40">Purpose</p>
+                    <p className="mt-1 text-white/80">{item.type}</p>
+                  </div>
+                  <div>
+                    <p className="text-white/40">Amount</p>
+                    <p className="mt-1 font-semibold text-[#f0c878]">
+                      ₹{item.amount.toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                  {item.massTiming && (
+                    <div className="col-span-2">
+                      <p className="text-white/40">Mass</p>
+                      <p className="mt-1 text-white/80">{item.massTiming}</p>
+                    </div>
+                  )}
+                </div>
+                {tab === "inbox" ? (
+                  <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-[#f0c878]/50 px-5 text-sm font-semibold text-[#f0c878] hover:bg-[#f0c878] hover:text-[#211811]">
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      className="sr-only"
+                      disabled={sending === item.id}
+                      onChange={(e) =>
+                        void upload(item.id, item.email, e.target.files?.[0])
+                      }
+                    />
+                    <Upload size={16} />
+                    {sending === item.id ? "Sending…" : "Upload receipt"}
+                  </label>
+                ) : (
+                  <span className="inline-flex items-center gap-2 text-sm text-emerald-300">
+                    <CheckCircle2 size={18} />
+                    Receipt sent
+                  </span>
+                )}
+              </article>
+            ))}
+            {records.length === 0 && (
+              <div className="p-14 text-center">
+                <ReceiptText className="mx-auto text-white/20" size={34} />
+                <p className="mt-4 text-white/45">
+                  {tab === "inbox"
+                    ? "No receipts are waiting."
+                    : "No sent receipts match this search."}
                 </p>
-              ) : (
-                <table className="w-full table-fixed border-collapse rounded-xl">
-                  <thead>
-                    <tr className="border-2 border-accent bg-primary text-textcolor">
-                      <th className="border-2 border-accent p-2">Type</th>
-                      <th className="border-2 border-accent p-2">For?</th>
-                      <th className="border-2 border-accent p-2">By?</th>
-                      <th className="border-2 border-accent p-2">Amount</th>
-                      <th className="border-2 border-accent p-2">
-                        Mass Timing
-                      </th>
-                      <th className="border-2 border-accent p-2">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredInboxDonations.map((donation) => (
-                      <React.Fragment key={donation.id}>
-                        {/* Row with donation details */}
-                        <tr className="border-2 border-accent bg-primary font-bold text-textcolor">
-                          <td className="border-2 border-accent p-2">
-                            {donation.type}
-                          </td>
-                          <td className="border-2 border-accent p-2">
-                            {donation.forWhom}
-                          </td>
-                          <td className="border-2 border-accent p-2">
-                            {donation.byWhom}
-                          </td>
-                          <td className="border-2 border-accent p-2">
-                            ₹{donation.amount}
-                          </td>
-                          <td className="border-2 border-accent p-2">
-                            {donation.massTiming}
-                          </td>
-                          <td className="p-2 text-center">
-                            <button
-                              className="rounded border-2 border-accent bg-primary px-4 py-2 text-textcolor transition-all duration-300 ease-in-out hover:bg-accent hover:text-primary"
-                              onClick={() =>
-                                setExpandedRow((prev) =>
-                                  prev === donation.id ? null : donation.id,
-                                )
-                              }
-                            >
-                              {expandedRow === donation.id ? "Close" : "Upload"}
-                            </button>
-                          </td>
-                        </tr>
-
-                        {expandedRow === donation.id && (
-                          <tr className="transition-all duration-300 ease-in-out">
-                            <td colSpan={5} className="border bg-primary p-3">
-                              {!receipt[donation.id] ? (
-                                <ReceiptUploader id={donation.id} />
-                              ) : (
-                                <div className="flex flex-col items-center">
-                                  <Image
-                                    src={
-                                      receipt[donation.id]?.data ??
-                                      "/favicon.webp"
-                                    }
-                                    alt="Scanned Receipt"
-                                    className="mt-2 h-40 w-auto rounded object-cover"
-                                    width={300}
-                                    height={200}
-                                  />
-                                  <div className="flex flex-row items-center justify-center gap-2">
-                                    <button
-                                      className="mt-2 rounded-full bg-green-500 px-4 py-2 text-white"
-                                      onClick={() =>
-                                        handleSend(donation.id, donation.email)
-                                      }
-                                    >
-                                      Send
-                                    </button>
-                                    <button
-                                      className="mt-2 rounded-full bg-red-500 px-4 py-2 text-white"
-                                      onClick={() =>
-                                        setReceipt((prev) => {
-                                          const updated = { ...prev };
-                                          delete updated[donation.id];
-                                          return updated;
-                                        })
-                                      }
-                                    >
-                                      Reset
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          )}
-
-          {activeTab === "history" && (
-            <div className="flex h-full w-full max-w-5xl flex-col items-center gap-3 overflow-x-auto rounded p-1 sm:p-3">
-              {filteredHistoryDonations.length === 0 ? (
-                <p className="text-4xl font-extrabold text-primary">
-                  No receipts issued.
-                </p>
-              ) : (
-                <table className="w-full table-fixed border-collapse rounded-xl">
-                  <thead>
-                    <tr className="border-2 border-accent bg-primary text-textcolor">
-                      <th className="border-2 border-accent p-2">Type</th>
-                      <th className="border-2 border-accent p-2">By?</th>
-                      <th className="border-2 border-accent p-2">Amount</th>
-                      <th className="border-2 border-accent p-2">
-                        Mass Timing
-                      </th>
-                      <th className="border-2 border-accent p-2">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historyDonations.map((donation) => (
-                      <tr
-                        key={donation.id}
-                        className="border-2 border-accent bg-primary font-semibold text-textcolor"
-                      >
-                        <td className="border-2 border-accent p-2">
-                          {donation.type}
-                        </td>
-                        <td className="border-2 border-accent p-2">
-                          {donation.byWhom}
-                        </td>
-                        <td className="border-2 border-accent p-2">
-                          ₹{donation.amount}
-                        </td>
-                        <td className="border-2 border-accent p-2">
-                          {donation.massTiming}
-                        </td>
-                        <td className="border-2 border-accent p-2 font-bold text-green-700">
-                          Receipt Issued ✅
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        </section>
       </PageShell>
     </ProtectedRoute>
   );

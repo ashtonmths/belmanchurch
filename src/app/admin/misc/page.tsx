@@ -143,14 +143,16 @@ export default function AdminMisc() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin title="Publishing">
+      <PageShell
+        admin
+        title="Publishing"
+        description="Add parish events and publish the next Bethkati issue."
+      >
         <ToastContainer />
-        <div className="flex min-h-[65vh] flex-col items-center text-center">
+        <div className="flex min-h-[65vh] flex-col">
           <div className="grid w-full gap-5 md:grid-cols-2">
-            <div className="flex h-full flex-col items-center justify-center space-y-4 rounded-3xl border border-white/10 bg-white/[0.05] p-6 sm:p-8">
-              <h2 className="text-2xl font-semibold text-white">
-                Publish an event
-              </h2>
+            <div className="flex h-full flex-col space-y-4 rounded-3xl border border-white/10 bg-[#211811]/90 p-6 sm:p-8">
+              <h2 className="text-2xl font-semibold text-white">New event</h2>
               <input
                 type="text"
                 placeholder="Event Name"
@@ -158,7 +160,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, name: e.target.value })
                 }
-                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] p-3 text-base text-white placeholder-white/40 outline-none focus:border-[#f0c878]"
               />
               <input
                 type="datetime-local"
@@ -166,7 +168,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, date: e.target.value })
                 }
-                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] p-3 text-base text-white outline-none focus:border-[#f0c878]"
               />
               <input
                 type="text"
@@ -175,7 +177,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, venue: e.target.value })
                 }
-                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] p-3 text-base text-white placeholder-white/40 outline-none focus:border-[#f0c878]"
               />
               <textarea
                 placeholder="Additional Info (optional)"
@@ -183,20 +185,20 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, info: e.target.value })
                 }
-                className="mb-2 h-24 w-full max-w-xl resize-none rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
+                className="mb-2 h-28 w-full resize-none rounded-xl border border-white/15 bg-white/[0.06] p-3 text-base text-white placeholder-white/40 outline-none focus:border-[#f0c878]"
               />
               <Button onClick={handlePublishEvent}>Publish</Button>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-4 rounded-3xl border border-white/10 bg-white/[0.05] p-6 sm:p-8">
+            <div className="flex flex-col space-y-4 rounded-3xl border border-white/10 bg-[#211811]/90 p-6 sm:p-8">
               <h2 className="text-2xl font-semibold text-white">
-                Publish Bethkati
+                New Bethkati issue
               </h2>
 
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={handlePDFUpload}
-                className="w-full max-w-xl rounded-lg bg-secondary text-sm text-textcolor file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-primary hover:file:bg-accent/80"
+                className="w-full rounded-xl border border-dashed border-white/20 bg-white/[0.04] p-3 text-sm text-white/60 file:mr-4 file:rounded-full file:border-0 file:bg-[#f0c878] file:px-4 file:py-2 file:font-semibold file:text-[#211811]"
               />
 
               <input
@@ -206,7 +208,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setBethkatiData({ ...bethkatiData, year: e.target.value })
                 }
-                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] p-3 text-base text-white placeholder-white/40 outline-none focus:border-[#f0c878]"
               />
 
               <input
@@ -216,7 +218,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setBethkatiData({ ...bethkatiData, month: e.target.value })
                 }
-                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] p-3 text-base text-white placeholder-white/40 outline-none focus:border-[#f0c878]"
               />
 
               <Button onClick={handlePublishBethkati}>Publish</Button>

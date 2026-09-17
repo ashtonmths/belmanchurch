@@ -7,6 +7,7 @@ import AddFamilyModal from "~/components/modals/AddFamilyModal";
 import AddToFamilyModal from "~/components/modals/AddToFamilyModal";
 import ProtectedRoute from "~/components/ProtectRoute";
 import PageShell from "~/components/PageShell";
+import { ChevronDown, Plus, Search, UserRound } from "lucide-react";
 
 type Member = {
   id: string;
@@ -37,45 +38,54 @@ export default function Families() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
-      <PageShell admin title="Families">
-        <div className="flex min-h-[65vh] flex-col items-center rounded-3xl border border-white/10 bg-black/30 p-4 text-center backdrop-blur-md sm:p-6">
+      <PageShell
+        admin
+        title="Families"
+        description="Find parish households, review members and keep family records up to date."
+      >
+        <div className="flex min-h-[65vh] flex-col rounded-3xl border border-white/10 bg-[#211811]/90 p-4 sm:p-7">
           {/* Buttons and Search Bar */}
-          <div className="mb-6 flex w-full max-w-4xl flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="mb-6 flex w-full flex-col items-stretch justify-between gap-3 border-b border-white/10 pb-6 sm:flex-row sm:items-center">
             <div className="flex flex-wrap gap-3">
               <button
                 className="rounded-full bg-[#f0c878] px-5 py-2.5 text-sm font-semibold text-[#211811]"
                 onClick={() => setShowAddFamily(true)}
               >
-                Add a Family
+                <Plus className="mr-2 inline" size={16} />
+                Add family
               </button>
               <button
                 className="rounded-full border border-[#f0c878]/40 px-5 py-2.5 text-sm font-semibold text-[#f0c878]"
                 onClick={() => setShowAddParishoner(true)}
               >
-                Add a Parishoner
+                <Plus className="mr-2 inline" size={16} />
+                Add parishioner
               </button>
             </div>
-            <input
-              type="text"
-              placeholder="Search Family..."
-              className="rounded-full border border-white/15 bg-white/10 px-5 py-2 font-semibold text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-[#f0c878]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <label className="flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-4 text-white/40">
+              <Search size={17} />
+              <input
+                type="text"
+                placeholder="Search Family..."
+                className="min-h-11 min-w-0 bg-transparent text-sm text-white placeholder-white/40 outline-none sm:w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </label>
           </div>
 
           {/* Family List */}
           {isLoading ? (
             <p className="text-xl text-white">Loading families...</p>
           ) : (
-            <div className="w-full max-w-4xl">
+            <div className="w-full">
               {filteredFamilies?.length === 0 ? (
                 <p className="text-lg text-white">No families found.</p>
               ) : (
                 filteredFamilies?.map((family) => (
                   <div
                     key={family.id}
-                    className="mb-4 rounded-2xl border border-white/10 bg-white/[0.06] p-5 text-white"
+                    className="mb-3 rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-white sm:p-5"
                   >
                     <button
                       onClick={() =>
@@ -83,9 +93,16 @@ export default function Families() {
                           selectedFamilyId === family.id ? null : family.id,
                         )
                       }
-                      className="flex w-full items-center justify-between text-xl font-semibold"
+                      className="flex w-full flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between"
                     >
-                      {family.name}
+                      <span className="flex items-center gap-3 text-lg font-semibold">
+                        <UserRound size={18} className="text-[#f0c878]" />
+                        {family.name}
+                        <ChevronDown
+                          size={17}
+                          className={`text-white/40 transition ${selectedFamilyId === family.id ? "rotate-180" : ""}`}
+                        />
+                      </span>
 
                       <div className="flex items-center space-x-3">
                         {/* ✅ Fix: Use a <span> instead of <button> */}
@@ -101,7 +118,9 @@ export default function Families() {
                         </span>
 
                         {/* 🏠 Family Head */}
-                        <span>({family.head?.name ?? "No Head"})</span>
+                        <span className="text-sm font-normal text-white/45">
+                          Head: {family.head?.name ?? "Not assigned"}
+                        </span>
                       </div>
                     </button>
                     {/* Member List (Visible if selected) */}
@@ -110,7 +129,7 @@ export default function Families() {
                         {members?.map((member) => (
                           <div
                             key={member.id}
-                            className="flex justify-between rounded-lg bg-accent p-3 font-semibold text-primary"
+                            className="flex flex-col gap-2 rounded-xl border border-white/10 bg-black/20 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
                           >
                             <span>
                               {member.name} - {member.mobile} -{" "}
