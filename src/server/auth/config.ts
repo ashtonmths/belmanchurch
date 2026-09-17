@@ -1,10 +1,10 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Role } from "@prisma/client";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
+import { checkAdminLogin } from "~/server/auth/admin-login";
 import { db } from "~/server/db";
 
 /**
@@ -26,13 +26,6 @@ declare module "next-auth" {
 /** Internal account that backs the username/password admin login. */
 const ADMIN_EMAIL = "admin@belmanchurch.in";
 
-/** Constant-time comparison, so response timing can't reveal a partial match. */
-function safeEqual(a: string, b: string) {
-  const hashA = createHash("sha256").update(a).digest();
-  const hashB = createHash("sha256").update(b).digest();
-  return timingSafeEqual(hashA, hashB);
-}
-
 export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -51,19 +44,12 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const expectedUser = process.env.ADMIN_USERNAME;
-        const expectedPassword = process.env.ADMIN_PASSWORD;
-        if (!expectedUser || !expectedPassword) return null;
-
         const username =
           typeof credentials?.username === "string" ? credentials.username : "";
         const password =
           typeof credentials?.password === "string" ? credentials.password : "";
 
-        // Evaluate both so a wrong username and a wrong password take equal time.
-        const userOk = safeEqual(username.trim(), expectedUser);
-        const passwordOk = safeEqual(password, expectedPassword);
-        if (!userOk || !passwordOk) {
+        if (!(await checkAdminLogin(username.trim(), password))) {
           // Slow down guessing.
           await new Promise((resolve) => setTimeout(resolve, 800));
           return null;
