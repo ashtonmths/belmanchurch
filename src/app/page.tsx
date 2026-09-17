@@ -92,19 +92,19 @@ export default function Home() {
         : null;
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#17110c] text-white">
+    <main className="relative h-[100dvh] overflow-hidden bg-[#17110c] text-white">
       <div className="absolute inset-0 bg-[url('/bg/home.jpg')] bg-cover bg-center" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/25" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#17110c]/90 via-transparent to-black/25" />
 
-      <section className="relative mx-auto flex min-h-screen max-w-[90rem] items-center px-5 pb-12 pt-28 sm:px-8 lg:px-12 lg:pb-16 lg:pt-32">
-        <div className="grid w-full items-center gap-12 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-16">
+      <section className="relative mx-auto flex h-full max-w-[90rem] items-center px-5 pb-5 pt-24 sm:px-8 sm:pb-8 lg:px-12 lg:pb-10 lg:pt-28">
+        <div className="grid w-full items-center gap-5 sm:gap-7 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-12">
           <div className="max-w-4xl">
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.08 }}
-              className="max-w-4xl text-4xl font-bold leading-[1.05] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
+              className="max-w-4xl text-3xl font-bold leading-[1.05] tracking-[-0.025em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
             >
               A parish rooted in faith, family and service.
             </motion.h1>
@@ -113,7 +113,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.26 }}
-              className="mt-10 flex flex-wrap gap-3"
+              className="mt-6 flex flex-wrap gap-2.5 sm:mt-8"
             >
               <Button
                 onClick={() => setMassModal(true)}
@@ -156,59 +156,74 @@ export default function Home() {
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="border-l border-white/20 bg-black/25 p-6 backdrop-blur-md sm:p-7"
+            className="border-l border-white/20 bg-black/25 p-4 backdrop-blur-md sm:p-5 lg:p-6"
           >
-            <div className="mb-6 rounded-2xl border border-[#f0c878]/25 bg-[#f0c878]/10 p-4">
+            <div className="mb-4 rounded-xl border border-[#f0c878]/25 bg-[#f0c878]/10 p-3.5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0c878]">
                     Next Mass
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-white">
+                  <p className="mt-1 text-base font-semibold text-white">
                     {nextMass
                       ? `${nextMass.day}, ${nextMass.time}`
                       : "Calculating…"}
                   </p>
                 </div>
-                <Clock3 className="shrink-0 text-[#f0c878]" size={24} />
+                <Clock3 className="shrink-0 text-[#f0c878]" size={20} />
               </div>
-              <div className="mt-4 border-t border-white/10 pt-3">
+              <div className="mt-3 border-t border-white/10 pt-2.5">
                 <p className="text-xs text-white/45">Begins in</p>
-                <p className="mt-1 font-mono text-lg font-semibold tabular-nums tracking-wide text-white">
+                <p className="mt-1 font-mono text-base font-semibold tabular-nums tracking-wide text-white">
                   {nextMass?.countdown ?? "--h --m --s"}
                 </p>
               </div>
             </div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0c878]">
-              This Sunday
-            </p>
-            <p className="mt-3 text-3xl font-semibold text-white">Holy Mass</p>
-            <div className="mt-6 space-y-5 border-y border-white/15 py-5">
-              <div className="flex items-start gap-3">
-                <Clock3 className="mt-0.5 shrink-0 text-[#f0c878]" size={19} />
-                <div>
-                  <p className="font-semibold text-white">7:30 AM</p>
-                  <p className="mt-1 text-sm text-white/55">Morning Mass</p>
+            <div className="hidden lg:block">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0c878]">
+                This Sunday
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-white">
+                Holy Mass
+              </p>
+              <div className="mt-4 space-y-3 border-y border-white/15 py-4">
+                <div className="flex items-start gap-3">
+                  <Clock3
+                    className="mt-0.5 shrink-0 text-[#f0c878]"
+                    size={19}
+                  />
+                  <div>
+                    <p className="font-semibold text-white">7:30 AM</p>
+                    <p className="mt-1 text-sm text-white/55">Morning Mass</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Clock3 className="mt-0.5 shrink-0 text-[#f0c878]" size={19} />
-                <div>
-                  <p className="font-semibold text-white">10:30 AM</p>
-                  <p className="mt-1 text-sm text-white/55">After catechism</p>
+                <div className="flex items-start gap-3">
+                  <Clock3
+                    className="mt-0.5 shrink-0 text-[#f0c878]"
+                    size={19}
+                  />
+                  <div>
+                    <p className="font-semibold text-white">10:30 AM</p>
+                    <p className="mt-1 text-sm text-white/55">
+                      After catechism
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 shrink-0 text-[#f0c878]" size={19} />
-                <p className="text-sm leading-6 text-white/65">
-                  St. Joseph Church, Belman
-                </p>
+                <div className="flex items-start gap-3">
+                  <MapPin
+                    className="mt-0.5 shrink-0 text-[#f0c878]"
+                    size={19}
+                  />
+                  <p className="text-sm leading-6 text-white/65">
+                    St. Joseph Church, Belman
+                  </p>
+                </div>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setMassModal(true)}
-              className="group mt-5 flex min-h-11 w-full items-center justify-between rounded-full border border-white/25 px-5 py-2 text-left text-sm font-bold text-white transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
+              className="group mt-4 flex min-h-10 w-full items-center justify-between rounded-full border border-white/25 px-4 py-2 text-left text-sm font-bold text-white transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
             >
               See the full weekly schedule
               <ArrowRight
