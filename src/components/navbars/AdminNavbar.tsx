@@ -75,7 +75,7 @@ export default function AdminNavbar() {
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              className={`rounded-full px-3 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 isActive(link.href)
                   ? "bg-primary text-textcolor"
                   : "text-[#fffaf1]/70 hover:bg-white/10 hover:text-[#fffaf1]"
@@ -86,7 +86,7 @@ export default function AdminNavbar() {
           ))}
           <Link
             href="/"
-            className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-primary/30 px-3.5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-textcolor focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="ml-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 px-3.5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-textcolor focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <ArrowLeft aria-hidden="true" size={16} />
             View site
@@ -95,7 +95,7 @@ export default function AdminNavbar() {
 
         <button
           type="button"
-          className="ml-auto grid h-11 w-11 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:hidden"
+          className="ml-auto grid h-11 w-11 place-items-center rounded-full border border-primary/20 bg-primary/10 text-primary transition hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:hidden"
           onClick={() => setIsOpen(true)}
           aria-label="Open administration menu"
           aria-expanded={isOpen}
@@ -140,7 +140,7 @@ export default function AdminNavbar() {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="grid h-11 w-11 place-items-center rounded-xl bg-white/10 text-[#fffaf1] transition hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-[#fffaf1] transition hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label="Close administration menu"
                 >
                   <X aria-hidden="true" size={23} />
@@ -158,7 +158,7 @@ export default function AdminNavbar() {
                     <Link
                       href={link.href}
                       aria-current={isActive(link.href) ? "page" : undefined}
-                      className={`flex items-center justify-between rounded-2xl px-4 py-3.5 text-lg font-semibold transition ${
+                      className={`flex items-center justify-between rounded-full px-5 py-3.5 text-lg font-semibold transition ${
                         isActive(link.href)
                           ? "bg-primary text-textcolor"
                           : "text-[#fffaf1]/80 hover:bg-white/10 hover:text-[#fffaf1]"
@@ -175,7 +175,7 @@ export default function AdminNavbar() {
 
               <Link
                 href="/"
-                className="flex items-center justify-center gap-2 rounded-2xl border border-primary/30 px-5 py-4 text-base font-bold text-primary"
+                className="flex items-center justify-center gap-2 rounded-full border border-primary/30 px-5 py-4 text-base font-bold text-primary"
               >
                 <ArrowLeft aria-hidden="true" size={18} />
                 Return to website

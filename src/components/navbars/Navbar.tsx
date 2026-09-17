@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,10 +9,10 @@ import { useEffect, useState } from "react";
 
 const links = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "Our Parish" },
   { href: "/events", label: "Events" },
   { href: "/gallery", label: "Gallery" },
   { href: "/bethkati", label: "Bethkati" },
-  { href: "/about", label: "About" },
 ];
 
 export default function Navbar() {
@@ -32,46 +32,45 @@ export default function Navbar() {
     href === "/" ? pathname === href : pathname.startsWith(href);
 
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-5">
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-40">
+      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/75 to-transparent" />
       <nav
         aria-label="Primary navigation"
-        className="pointer-events-auto mx-auto flex h-[4.75rem] max-w-7xl items-center rounded-2xl border border-white/35 bg-[#fffaf1]/90 px-3 shadow-[0_18px_50px_rgba(42,27,12,0.2)] backdrop-blur-xl sm:px-4"
+        className="pointer-events-auto relative mx-auto flex h-24 max-w-[90rem] items-center px-5 sm:px-8 lg:px-12"
       >
         <Link
           href="/"
-          className="group flex min-w-0 items-center gap-2.5 rounded-xl pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           aria-label="St. Joseph Church Belman, home"
+          className="group flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
         >
-          <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary/80 to-secondary/70 shadow-inner">
-            <Image
-              alt="St. Joseph Church crest"
-              src="/Logo.png"
-              height={52}
-              width={52}
-              className="object-contain transition-transform duration-300 group-hover:scale-105"
-              priority
-            />
-          </span>
-          <span className="min-w-0 leading-tight">
-            <span className="block truncate text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-accent/70 sm:text-xs">
+          <Image
+            alt="St. Joseph Church crest"
+            src="/Logo.png"
+            height={58}
+            width={58}
+            className="h-12 w-12 object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14"
+            priority
+          />
+          <span className="border-l border-white/30 pl-3 leading-none">
+            <span className="block text-lg font-semibold tracking-wide text-white sm:text-xl">
               St. Joseph Church
             </span>
-            <span className="block text-lg font-bold tracking-tight text-textcolor sm:text-xl">
-              Belman
+            <span className="mt-1 block text-[0.7rem] font-bold uppercase tracking-[0.28em] text-[#f0c878]">
+              Belman Parish
             </span>
           </span>
         </Link>
 
-        <div className="ml-auto hidden items-center gap-1 lg:flex">
+        <div className="ml-auto hidden items-center gap-7 lg:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`relative rounded-lg px-3.5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              className={`relative py-3 text-sm font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${
                 isActive(link.href)
-                  ? "bg-accent text-white shadow-sm"
-                  : "text-textcolor/75 hover:bg-primary/45 hover:text-textcolor"
+                  ? "text-white after:scale-x-100"
+                  : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"
               }`}
             >
               {link.label}
@@ -79,22 +78,21 @@ export default function Navbar() {
           ))}
           <Link
             href="/donate"
-            className="ml-2 inline-flex items-center gap-1.5 rounded-lg bg-textcolor px-4 py-2.5 text-sm font-bold text-[#fffaf1] shadow-sm transition hover:-translate-y-0.5 hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="rounded-full border border-[#f0c878] bg-[#f0c878] px-5 py-3 text-sm font-bold text-[#2a1b10] shadow-[0_8px_30px_rgba(240,200,120,0.2)] transition hover:bg-transparent hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
-            Donate
-            <ArrowUpRight aria-hidden="true" size={16} strokeWidth={2.5} />
+            Make a donation
           </Link>
         </div>
 
         <button
           type="button"
-          className="ml-auto grid h-11 w-11 place-items-center rounded-xl border border-accent/15 bg-primary/45 text-textcolor transition hover:bg-primary/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:hidden"
           onClick={() => setIsOpen(true)}
+          className="ml-auto grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-black/20 text-white backdrop-blur-sm transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] lg:hidden"
           aria-label="Open navigation menu"
           aria-expanded={isOpen}
           aria-controls="mobile-navigation"
         >
-          <Menu aria-hidden="true" size={24} />
+          <Menu aria-hidden="true" size={25} />
         </button>
       </nav>
 
@@ -102,59 +100,49 @@ export default function Navbar() {
         {isOpen && (
           <motion.div
             id="mobile-navigation"
-            className="pointer-events-auto fixed inset-0 z-50 bg-[#2f2418]/55 p-3 backdrop-blur-md sm:p-5"
+            className="pointer-events-auto fixed inset-0 z-50 bg-[#17110c]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
           >
-            <motion.div
-              className="ml-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-3xl border border-white/35 bg-[#fffaf1] p-5 shadow-2xl"
-              initial={{ opacity: 0, x: 32 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 32 }}
-              transition={{ type: "spring", damping: 28, stiffness: 320 }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="flex items-center justify-between border-b border-accent/15 pb-5">
-                <div className="flex items-center gap-3">
-                  <Image alt="" src="/Logo.png" height={48} width={48} />
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent/70">
-                      St. Joseph Church
-                    </p>
-                    <p className="text-xl font-bold text-textcolor">Belman</p>
-                  </div>
-                </div>
+            <div className="flex h-full flex-col px-6 py-6 sm:px-10">
+              <div className="flex items-center justify-between border-b border-white/10 pb-6">
+                <Link href="/" className="flex items-center gap-3">
+                  <Image alt="" src="/Logo.png" height={50} width={50} />
+                  <span className="text-xl font-semibold text-white">
+                    St. Joseph Church
+                  </span>
+                </Link>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="grid h-11 w-11 place-items-center rounded-xl bg-primary/50 text-textcolor transition hover:bg-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="grid h-12 w-12 place-items-center rounded-full border border-white/20 text-white transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
                   aria-label="Close navigation menu"
                 >
-                  <X aria-hidden="true" size={23} />
+                  <X aria-hidden="true" size={24} />
                 </button>
               </div>
 
-              <div className="flex flex-1 flex-col justify-center gap-2 py-6">
+              <div className="flex flex-1 flex-col justify-center">
                 {links.map((link, index) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.04 * index }}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="border-b border-white/10"
                   >
                     <Link
                       href={link.href}
                       aria-current={isActive(link.href) ? "page" : undefined}
-                      className={`flex items-center justify-between rounded-2xl px-4 py-3.5 text-lg font-semibold transition ${
+                      className={`flex items-center justify-between py-4 text-2xl font-semibold transition sm:text-3xl ${
                         isActive(link.href)
-                          ? "bg-accent text-white"
-                          : "text-textcolor hover:bg-primary/45"
+                          ? "text-[#f0c878]"
+                          : "text-white/75 hover:text-white"
                       }`}
                     >
                       {link.label}
-                      <span aria-hidden="true" className="text-sm opacity-50">
+                      <span className="font-sans text-xs font-bold tracking-widest text-white/30">
                         0{index + 1}
                       </span>
                     </Link>
@@ -164,12 +152,11 @@ export default function Navbar() {
 
               <Link
                 href="/donate"
-                className="flex items-center justify-center gap-2 rounded-2xl bg-textcolor px-5 py-4 text-base font-bold text-[#fffaf1] shadow-lg"
+                className="rounded-full bg-[#f0c878] px-5 py-4 text-center font-bold text-[#2a1b10]"
               >
-                Support the parish
-                <ArrowUpRight aria-hidden="true" size={18} />
+                Make a donation
               </Link>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

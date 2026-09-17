@@ -70,7 +70,7 @@ export default function DonateButton({
             });
 
             toast.success(
-              `Payment Successful! Payment ID: ${response.razorpay_payment_id}`
+              `Payment Successful! Payment ID: ${response.razorpay_payment_id}`,
             );
           }
         },
@@ -89,7 +89,8 @@ export default function DonateButton({
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <button
-        className="w-full rounded-lg bg-accent p-3 text-primary font-semibold disabled:opacity-50"
+        type="button"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-accent bg-accent px-6 py-3 text-sm font-bold tracking-wide text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-textcolor focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
         onClick={handlePayment}
         disabled={loading}
       >

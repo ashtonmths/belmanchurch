@@ -6,9 +6,10 @@ import clsx from "clsx";
 interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: "default" | "destructive";
+  variant?: "default" | "secondary" | "outline" | "ghost" | "destructive";
   className?: string;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 }
 
 export default function Button({
@@ -17,19 +18,26 @@ export default function Button({
   variant = "default",
   className,
   disabled = false,
+  type = "button",
 }: ButtonProps) {
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={clsx(
-        "relative z-10 w-32 md:w-36 h-12 cursor-pointer rounded-full text-lg font-bold text-textcolor transition-all duration-300 ease-in-out focus:ring-2 before:absolute before:-top-1 before:-bottom-1 before:-left-1 before:-right-1 before:-z-10 before:rounded-[35px] before:transition-all before:duration-1000 before:ease-in-out before:hover:blur-xl",
-        variant === "default"
-          ? "bg-gradient-to-r from-primary via-accent to-secondary bg-[length:400%] hover:animate-gradient-xy hover:bg-[length:100%] active:bg-primary focus:ring-secondary before:bg-gradient-to-r before:from-primary before:via-secondary before:to-primary before:bg-[length:400%] before:hover:bg-[length:100%]"
-          : "bg-red-600 hover:bg-red-700 active:bg-red-800 text-white focus:ring-red-400 before:bg-red-600 before:hover:bg-red-700",
-        disabled &&
-          "cursor-not-allowed opacity-50 before:blur-0 before:bg-gray-400 before:hover:bg-gray-400", // Disabled styling
-        className // Allows overwriting or adding extra classes
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-5 py-2.5 text-sm font-bold tracking-wide shadow-sm transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        variant === "default" &&
+          "border-accent bg-accent text-white hover:-translate-y-0.5 hover:bg-textcolor focus-visible:ring-accent",
+        variant === "secondary" &&
+          "border-primary bg-primary text-textcolor hover:-translate-y-0.5 hover:bg-secondary focus-visible:ring-accent",
+        variant === "outline" &&
+          "border-current bg-transparent text-inherit hover:bg-white/10 focus-visible:ring-primary",
+        variant === "ghost" &&
+          "border-transparent bg-transparent text-inherit shadow-none hover:bg-black/5 focus-visible:ring-accent",
+        variant === "destructive" &&
+          "border-red-700 bg-red-700 text-white hover:-translate-y-0.5 hover:bg-red-800 focus-visible:ring-red-500",
+        className,
       )}
     >
       {children}
