@@ -100,63 +100,93 @@ export default function Navbar() {
         {isOpen && (
           <motion.div
             id="mobile-navigation"
-            className="pointer-events-auto fixed inset-0 z-50 bg-[#17110c]"
+            className="pointer-events-auto fixed inset-0 z-50 bg-black/55 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsOpen(false)}
           >
-            <div className="flex h-full flex-col px-6 py-6 sm:px-10">
-              <div className="flex items-center justify-between border-b border-white/10 pb-6">
+            <motion.div
+              className="ml-auto flex h-full w-[88%] max-w-sm flex-col bg-[#1d1510] px-6 pb-7 pt-6 shadow-2xl"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-5">
                 <Link href="/" className="flex items-center gap-3">
-                  <Image alt="" src="/Logo.png" height={50} width={50} />
-                  <span className="text-xl font-semibold text-white">
+                  <Image alt="" src="/Logo.png" height={44} width={44} />
+                  <span className="text-base font-semibold text-white">
                     St. Joseph Church
                   </span>
                 </Link>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="grid h-12 w-12 place-items-center rounded-full border border-white/20 text-white transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
+                  className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
                   aria-label="Close navigation menu"
                 >
-                  <X aria-hidden="true" size={24} />
+                  <motion.span
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    transition={{ delay: 0.15, duration: 0.25 }}
+                  >
+                    <X aria-hidden="true" size={21} />
+                  </motion.span>
                 </button>
               </div>
 
-              <div className="flex flex-1 flex-col justify-center">
-                {links.map((link, index) => (
+              <motion.div
+                className="flex flex-1 flex-col justify-center py-8"
+                initial="closed"
+                animate="open"
+                variants={{
+                  closed: {},
+                  open: {
+                    transition: { staggerChildren: 0.06, delayChildren: 0.12 },
+                  },
+                }}
+              >
+                {links.map((link) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
                     className="border-b border-white/10"
+                    variants={{
+                      closed: { opacity: 0, x: 18 },
+                      open: { opacity: 1, x: 0 },
+                    }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                   >
                     <Link
                       href={link.href}
                       aria-current={isActive(link.href) ? "page" : undefined}
-                      className={`flex items-center justify-between py-4 text-2xl font-semibold transition sm:text-3xl ${
+                      className={`block py-4 text-lg font-medium transition ${
                         isActive(link.href)
                           ? "text-[#f0c878]"
                           : "text-white/75 hover:text-white"
                       }`}
                     >
                       {link.label}
-                      <span className="font-sans text-xs font-bold tracking-widest text-white/30">
-                        0{index + 1}
-                      </span>
                     </Link>
                   </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
-              <Link
-                href="/donate"
-                className="rounded-full bg-[#f0c878] px-5 py-4 text-center font-bold text-[#2a1b10]"
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.42, duration: 0.3 }}
               >
-                Make a donation
-              </Link>
-            </div>
+                <Link
+                  href="/donate"
+                  className="block rounded-full bg-[#f0c878] px-5 py-3.5 text-center text-sm font-semibold text-[#2a1b10]"
+                >
+                  Make a donation
+                </Link>
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

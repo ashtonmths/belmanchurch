@@ -147,31 +147,40 @@ export default function AdminNavbar() {
                 </button>
               </div>
 
-              <div className="flex flex-1 flex-col justify-center gap-2 py-6">
-                {links.map((link, index) => (
+              <motion.div
+                className="flex flex-1 flex-col justify-center gap-2 py-6"
+                initial="closed"
+                animate="open"
+                variants={{
+                  closed: {},
+                  open: {
+                    transition: { staggerChildren: 0.06, delayChildren: 0.12 },
+                  },
+                }}
+              >
+                {links.map((link) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.04 * index }}
+                    variants={{
+                      closed: { opacity: 0, x: 16 },
+                      open: { opacity: 1, x: 0 },
+                    }}
+                    transition={{ duration: 0.28, ease: "easeOut" }}
                   >
                     <Link
                       href={link.href}
                       aria-current={isActive(link.href) ? "page" : undefined}
-                      className={`flex items-center justify-between rounded-full px-5 py-3.5 text-lg font-semibold transition ${
+                      className={`block rounded-full px-5 py-3.5 text-base font-medium transition ${
                         isActive(link.href)
                           ? "bg-primary text-textcolor"
                           : "text-[#fffaf1]/80 hover:bg-white/10 hover:text-[#fffaf1]"
                       }`}
                     >
                       {link.label}
-                      <span aria-hidden="true" className="text-sm opacity-40">
-                        0{index + 1}
-                      </span>
                     </Link>
                   </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               <Link
                 href="/"
