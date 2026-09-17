@@ -36,7 +36,7 @@ export default function Home() {
       <div className="absolute inset-0 bg-gradient-to-t from-[#17110c]/90 via-transparent to-black/25" />
 
       <section className="relative mx-auto flex min-h-screen max-w-[90rem] items-center px-5 pb-12 pt-28 sm:px-8 lg:px-12 lg:pb-16 lg:pt-32">
-        <div className="grid w-full items-end gap-12 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-16">
+        <div className="grid w-full items-center gap-12 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-16">
           <div className="max-w-4xl">
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
@@ -151,19 +151,19 @@ export default function Home() {
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              className="relative my-4 max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto rounded-3xl bg-[#fffaf1] p-5 font-sans text-[#3b2919] shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)] sm:p-9"
+              className="relative my-4 max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/10 bg-[#211811] p-5 font-sans text-white shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)] sm:p-9"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={() => setMassModal(false)}
-                className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full border border-[#3b2919]/20 text-[#3b2919] transition hover:border-[#3b2919] hover:bg-[#3b2919] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:right-6 sm:top-6"
+                className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full border border-white/20 text-white/75 transition hover:border-[#f0c878] hover:bg-[#f0c878] hover:text-[#211811] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] sm:right-6 sm:top-6"
                 aria-label="Close mass timings"
               >
                 <X aria-hidden="true" size={21} />
               </button>
 
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0c878]">
                 Worship & parish office
               </p>
               <h2 className="mt-2 pr-14 text-2xl font-bold tracking-tight sm:text-4xl">
@@ -175,7 +175,7 @@ export default function Home() {
                   <p>Weekdays — 6:30 AM</p>
                   <p>Saturday — 4:00 PM</p>
                   <p>Sunday — 7:30 AM & 10:30 AM</p>
-                  <p className="mt-2 text-sm text-[#3b2919]/60">
+                  <p className="mt-2 text-sm text-white/50">
                     10:00 AM when there is no catechism
                   </p>
                 </ScheduleBlock>
@@ -191,13 +191,11 @@ export default function Home() {
                   <p>2:00 PM to 5:00 PM</p>
                   <a
                     href="tel:+919141031604"
-                    className="mt-3 inline-block font-bold text-accent underline decoration-accent/30 underline-offset-4"
+                    className="mt-3 inline-block font-bold text-[#f0c878] underline decoration-[#f0c878]/30 underline-offset-4"
                   >
                     +91 91410 31604
                   </a>
-                  <p className="mt-1 text-sm text-[#3b2919]/60">
-                    Closed on Sunday
-                  </p>
+                  <p className="mt-1 text-sm text-white/50">Closed on Sunday</p>
                 </ScheduleBlock>
               </div>
             </motion.div>
@@ -216,9 +214,9 @@ function ScheduleBlock({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-t border-[#3b2919]/20 pt-4">
+    <section className="border-t border-white/15 pt-4">
       <h3 className="mb-3 text-xl font-semibold">{title}</h3>
-      <div className="space-y-1.5 text-base leading-6 text-[#3b2919]/75">
+      <div className="space-y-1.5 text-base leading-6 text-white/65">
         {children}
       </div>
     </section>

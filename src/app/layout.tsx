@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import TransitionWrapper from "~/components/Loader";
 import NavbarSelector from "~/components/navbars/NavbarSelector";
 import { Analytics } from "@vercel/analytics/react";
+import ScrollToTop from "~/components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: "Belman Church",
@@ -24,6 +25,7 @@ export default function RootLayout({
             <TRPCReactProvider>
               <NavbarSelector /> {/* Dynamically renders correct navbar */}
               {children}
+              <ScrollToTop />
             </TRPCReactProvider>
           </TransitionWrapper>
         </SessionProvider>

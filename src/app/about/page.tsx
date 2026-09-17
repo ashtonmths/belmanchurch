@@ -1,36 +1,12 @@
 "use client";
-import React, { useEffect } from "react";
 import Timeline from "~/components/Timeline";
 import PriestTimeline from "~/components/PriestTimeline";
 import AssociationsSection from "~/components/AssociationsSection";
 import StAnthonySection from "~/components/StAnthonySection";
-import { ArrowUp } from "lucide-react";
 import { api } from "~/trpc/react";
 import PageShell from "~/components/PageShell";
 
 const About = () => {
-  const [showScrollTop, setShowScrollTop] = React.useState(false);
-
-  const checkScrollPosition = () => {
-    if (window.pageYOffset > 300) {
-      setShowScrollTop(true);
-    } else {
-      setShowScrollTop(false);
-    }
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", checkScrollPosition);
-    return () => window.removeEventListener("scroll", checkScrollPosition);
-  }, []);
-
   // Updated Timeline data with more historical events
   const parishHistory = [
     {
@@ -216,13 +192,6 @@ const About = () => {
 
         {/* St. Anthony Section */}
         <StAnthonySection />
-        {/* Scroll to top button */}
-        <button
-          className={`fixed bottom-6 right-6 rounded-full bg-primary p-3 text-accent shadow-lg transition-opacity ${showScrollTop ? "opacity-100" : "pointer-events-none opacity-0"}`}
-          onClick={scrollToTop}
-        >
-          <ArrowUp size={24} />
-        </button>
       </div>
     </PageShell>
   );
