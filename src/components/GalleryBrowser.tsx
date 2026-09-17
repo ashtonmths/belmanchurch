@@ -2,15 +2,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Heart,
-  Link2,
-  Share2,
-  X,
-} from "lucide-react";
+import { Download, Heart, Link2, Share2, X } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -100,8 +92,6 @@ export default function GalleryBrowser({
   useEffect(() => {
     if (selectedIndex === null) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") moveImage(-1);
-      if (event.key === "ArrowRight") moveImage(1);
       if (event.key === "Escape") setSelectedIndex(null);
     };
     window.addEventListener("keydown", onKeyDown);
@@ -265,34 +255,18 @@ export default function GalleryBrowser({
                 if (info.offset.x < -70) moveImage(1);
                 if (info.offset.x > 70) moveImage(-1);
               }}
-              className="relative flex h-full w-full max-w-6xl flex-col items-center justify-center"
+              className="relative flex max-h-full max-w-6xl flex-col items-center justify-center"
               onClick={(event) => event.stopPropagation()}
             >
               <p className="mb-3 text-center text-xs text-white/45 sm:hidden">
                 Swipe left or right for more
               </p>
-              <button
-                type="button"
-                onClick={() => moveImage(-1)}
-                aria-label="Previous photograph"
-                className="absolute left-1 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm sm:left-4"
-              >
-                <ChevronLeft size={24} />
-              </button>
               <img
                 src={selectedImage.url}
                 alt="Selected gallery photograph"
                 className="max-h-[76vh] max-w-full select-none object-contain"
                 draggable={false}
               />
-              <button
-                type="button"
-                onClick={() => moveImage(1)}
-                aria-label="Next photograph"
-                className="absolute right-1 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm sm:right-4"
-              >
-                <ChevronRight size={24} />
-              </button>
               <div className="mt-4 flex flex-wrap justify-center gap-3">
                 <button
                   type="button"
@@ -331,8 +305,7 @@ export default function GalleryBrowser({
                   Download
                 </a>
                 <span className="self-center text-xs text-white/40">
-                  {(selectedIndex ?? 0) + 1} of {images?.length ?? 0} · use
-                  arrow keys
+                  {(selectedIndex ?? 0) + 1} of {images?.length ?? 0}
                 </span>
               </div>
             </motion.div>
