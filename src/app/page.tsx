@@ -13,14 +13,76 @@ import {
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "~/components/Button";
 import { useRole } from "~/hooks/useRole";
+
+type NextMass = { day: string; time: string; countdown: string };
+
+function calculateNextMass(): NextMass {
+  const indiaNow = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
+  );
+  const candidates: Array<{ date: Date; time: string }> = [];
+
+  for (let offset = 0; offset <= 7; offset += 1) {
+    const day = new Date(indiaNow);
+    day.setDate(indiaNow.getDate() + offset);
+    const weekday = day.getDay();
+    const times =
+      weekday === 0
+        ? [
+            [7, 30],
+            [10, 30],
+          ]
+        : weekday === 6
+          ? [[16, 0]]
+          : [[6, 30]];
+    times.forEach(([hour, minute]) => {
+      const date = new Date(day);
+      date.setHours(hour ?? 0, minute ?? 0, 0, 0);
+      if (date > indiaNow)
+        candidates.push({
+          date,
+          time: date.toLocaleTimeString("en-IN", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          }),
+        });
+    });
+  }
+
+  const next = candidates.sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  )[0]!;
+  const seconds = Math.max(
+    0,
+    Math.floor((next.date.getTime() - indiaNow.getTime()) / 1000),
+  );
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  const dayName = next.date.toLocaleDateString("en-IN", { weekday: "long" });
+  const day =
+    next.date.toDateString() === indiaNow.toDateString() ? "Today" : dayName;
+  const countdown = `${days ? `${days}d ` : ""}${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(remainingSeconds).padStart(2, "0")}s`;
+  return { day, time: next.time, countdown };
+}
 
 export default function Home() {
   const router = useRouter();
   const role = useRole();
   const [massModal, setMassModal] = useState(false);
+  const [nextMass, setNextMass] = useState<NextMass | null>(null);
+
+  useEffect(() => {
+    const update = () => setNextMass(calculateNextMass());
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const accountAction =
     role === "ADMIN" || role === "DEVELOPER"
@@ -96,6 +158,27 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="border-l border-white/20 bg-black/25 p-6 backdrop-blur-md sm:p-7"
           >
+            <div className="mb-6 rounded-2xl border border-[#f0c878]/25 bg-[#f0c878]/10 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0c878]">
+                    Next Mass
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {nextMass
+                      ? `${nextMass.day}, ${nextMass.time}`
+                      : "Calculating…"}
+                  </p>
+                </div>
+                <Clock3 className="shrink-0 text-[#f0c878]" size={24} />
+              </div>
+              <div className="mt-4 border-t border-white/10 pt-3">
+                <p className="text-xs text-white/45">Begins in</p>
+                <p className="mt-1 font-mono text-lg font-semibold tabular-nums tracking-wide text-white">
+                  {nextMass?.countdown ?? "--h --m --s"}
+                </p>
+              </div>
+            </div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f0c878]">
               This Sunday
             </p>
