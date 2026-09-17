@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function TransitionWrapper({
   children,
@@ -12,6 +12,7 @@ export default function TransitionWrapper({
 }) {
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
+  const loadingStartedAt = useRef(Date.now());
 
   useEffect(() => {
     const beginNavigation = (event: MouseEvent) => {
@@ -24,6 +25,7 @@ export default function TransitionWrapper({
         anchor.pathname === location.pathname
       )
         return;
+      loadingStartedAt.current = Date.now();
       setLoading(true);
     };
     document.addEventListener("click", beginNavigation);
@@ -34,9 +36,26 @@ export default function TransitionWrapper({
     let cancelled = false;
     const finish = async () => {
       await document.fonts.ready;
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => !cancelled && setLoading(false)),
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       );
+      const pendingImages = Array.from(document.images).filter(
+        (image) => !image.complete,
+      );
+      await Promise.all(
+        pendingImages.map(
+          (image) =>
+            new Promise<void>((resolve) => {
+              image.addEventListener("load", () => resolve(), { once: true });
+              image.addEventListener("error", () => resolve(), { once: true });
+            }),
+        ),
+      );
+      const remaining = Math.max(
+        0,
+        1000 - (Date.now() - loadingStartedAt.current),
+      );
+      window.setTimeout(() => !cancelled && setLoading(false), remaining);
     };
     void finish();
     return () => {

@@ -316,12 +316,12 @@ export default function About() {
               {history.map(([year, title, text], index) => (
                 <article
                   key={year}
-                  className={`relative pl-9 md:flex md:min-h-56 md:w-1/2 md:pl-0 ${index % 2 === 0 ? "md:pr-10" : "md:ml-auto md:pl-10"}`}
+                  className="relative pl-9 md:grid md:min-h-56 md:grid-cols-2 md:pl-0"
                 >
-                  <span
-                    className={`absolute left-[0.18rem] top-7 h-3 w-3 rounded-full bg-[#f0c878] ring-4 ring-[#17110c] md:left-auto ${index % 2 === 0 ? "md:-right-[0.4rem]" : "md:-left-[0.35rem]"}`}
-                  />
-                  <div className="w-full rounded-2xl border border-white/10 bg-[#211811] p-6">
+                  <span className="absolute left-[0.18rem] top-7 h-3 w-3 rounded-full bg-[#f0c878] ring-4 ring-[#17110c] md:left-1/2 md:-translate-x-1/2" />
+                  <div
+                    className={`w-full rounded-2xl border border-white/10 bg-[#211811] p-6 ${index % 2 === 0 ? "md:col-start-1 md:mr-10 md:w-[calc(100%-2.5rem)]" : "md:col-start-2 md:ml-10 md:w-[calc(100%-2.5rem)]"}`}
+                  >
                     <p className="text-sm font-semibold text-[#f0c878]">
                       {year}
                     </p>
