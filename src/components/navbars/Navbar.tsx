@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/about", label: "Our Parish" },
   { href: "/events", label: "Events" },
   { href: "/gallery", label: "Gallery" },
   { href: "/bethkati", label: "Bethkati" },
@@ -18,6 +17,7 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [parishOpen, setParishOpen] = useState(false);
 
   useEffect(() => setIsOpen(false), [pathname]);
 
@@ -62,7 +62,7 @@ export default function Navbar() {
         </Link>
 
         <div className="ml-auto hidden items-center gap-7 lg:flex">
-          {links.map((link) => (
+          {links.slice(0, 1).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -72,6 +72,42 @@ export default function Navbar() {
                   ? "text-white after:scale-x-100"
                   : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"
               }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="group relative">
+            <button
+              type="button"
+              className={`flex items-center gap-1 py-3 text-sm font-semibold tracking-wide transition-colors ${pathname.startsWith("/about") || pathname.startsWith("/st-anthony") ? "text-white" : "text-white/70 hover:text-white"}`}
+            >
+              Our Parish
+              <ChevronDown
+                size={15}
+                className="transition-transform group-focus-within:rotate-180 group-hover:rotate-180"
+              />
+            </button>
+            <div className="invisible absolute left-1/2 top-full w-56 -translate-x-1/2 translate-y-2 rounded-2xl border border-white/10 bg-[#211811] p-2 opacity-0 shadow-2xl transition group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+              <Link
+                href="/about"
+                className="block rounded-xl px-4 py-3 text-sm text-white/75 hover:bg-white/10 hover:text-white"
+              >
+                St. Joseph Church
+              </Link>
+              <Link
+                href="/st-anthony"
+                className="block rounded-xl px-4 py-3 text-sm text-white/75 hover:bg-white/10 hover:text-white"
+              >
+                St. Anthony Chapel
+              </Link>
+            </div>
+          </div>
+          {links.slice(1).map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              className={`relative py-3 text-sm font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${isActive(link.href) ? "text-white after:scale-x-100" : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
             >
               {link.label}
             </Link>
@@ -149,7 +185,7 @@ export default function Navbar() {
                   },
                 }}
               >
-                {links.map((link) => (
+                {links.slice(0, 1).map((link) => (
                   <motion.div
                     key={link.href}
                     className="border-b border-white/10"
@@ -167,6 +203,71 @@ export default function Navbar() {
                           ? "text-[#f0c878]"
                           : "text-white/75 hover:text-white"
                       }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ))}
+                <motion.div
+                  className="border-b border-white/10"
+                  variants={{
+                    closed: { opacity: 0, x: 18 },
+                    open: { opacity: 1, x: 0 },
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setParishOpen((open) => !open)}
+                    className={`flex w-full items-center justify-between py-4 text-lg font-medium ${pathname.startsWith("/about") || pathname.startsWith("/st-anthony") ? "text-[#f0c878]" : "text-white/75"}`}
+                    aria-expanded={parishOpen}
+                  >
+                    Our Parish
+                    <ChevronDown
+                      size={18}
+                      className={`transition-transform ${parishOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {parishOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="space-y-1 pb-4 pl-4">
+                          <Link
+                            href="/about"
+                            className="block py-2 text-sm text-white/65"
+                          >
+                            St. Joseph Church
+                          </Link>
+                          <Link
+                            href="/st-anthony"
+                            className="block py-2 text-sm text-white/65"
+                          >
+                            St. Anthony Chapel
+                          </Link>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+                {links.slice(1).map((link) => (
+                  <motion.div
+                    key={link.href}
+                    className="border-b border-white/10"
+                    variants={{
+                      closed: { opacity: 0, x: 18 },
+                      open: { opacity: 1, x: 0 },
+                    }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  >
+                    <Link
+                      href={link.href}
+                      aria-current={isActive(link.href) ? "page" : undefined}
+                      className={`block py-4 text-lg font-medium transition ${isActive(link.href) ? "text-[#f0c878]" : "text-white/75 hover:text-white"}`}
                     >
                       {link.label}
                     </Link>
