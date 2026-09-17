@@ -143,7 +143,7 @@ export default function Card() {
               type="text"
               value={mobileInput}
               onChange={(e) => setMobileInput(e.target.value)}
-              className="mt-2 w-[60%] rounded border bg-primary p-2 text-center text-textcolor placeholder-textcolor"
+              className="mt-2 w-full max-w-md rounded border bg-primary p-2 text-center text-textcolor placeholder-textcolor"
               placeholder="Enter mobile number"
             />
             <Button
@@ -167,7 +167,7 @@ export default function Card() {
                 <p className="text-lg font-bold text-primary">
                   {member.name ?? "Unknown"}:
                 </p>
-                <div className="flex w-[90%] flex-row items-center justify-center gap-2 md:w-[60%]">
+                <div className="flex w-full max-w-md flex-col items-center justify-center gap-2 sm:flex-row">
                   <input
                     type="text"
                     value={
@@ -175,7 +175,7 @@ export default function Card() {
                       ""
                     }
                     onChange={(e) => handleChange(member.id, e.target.value)}
-                    className="w-[100%] rounded border bg-primary p-2 text-center text-textcolor"
+                    className="w-full rounded border bg-primary p-2 text-center text-textcolor"
                     disabled={!isFamilyHead}
                   />
                   {isFamilyHead && (

@@ -17,7 +17,7 @@ pdfjs.GlobalWorkerOptions.workerSrc =
 export default function BethkatiViewer({ file, onClose }: BethkatiViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [width, setWidth] = useState(340); 
+  const [width, setWidth] = useState(340);
 
   useEffect(() => {
     const updateWidth = () => {
@@ -38,33 +38,27 @@ export default function BethkatiViewer({ file, onClose }: BethkatiViewerProps) {
   const goPrev = () => setPageNumber((prev) => (prev > 1 ? prev - 1 : prev));
 
   return (
-    <div className="absolute flex flex-col justify-center items-center w-[90%]">
-      <Button
-        onClick={onClose}
-        className="mb-5 -mt-5"
-      >
+    <div className="absolute flex w-full max-w-5xl flex-col items-center justify-center px-3 sm:px-6">
+      <Button onClick={onClose} className="-mt-5 mb-5">
         Close
       </Button>
       <div className="flex flex-col items-center">
-          <Document
-            file={file}
-            onLoadSuccess={(pdf) => setNumPages(pdf.numPages)}
-          >
-            <Page
-              pageNumber={pageNumber}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-              width={width}
-            />
-          </Document>
+        <Document
+          file={file}
+          onLoadSuccess={(pdf) => setNumPages(pdf.numPages)}
+        >
+          <Page
+            pageNumber={pageNumber}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+            width={width}
+          />
+        </Document>
         <div className="mt-4 flex gap-4">
-          <Button
-            onClick={goPrev}
-            disabled={pageNumber === 1}
-          >
+          <Button onClick={goPrev} disabled={pageNumber === 1}>
             Prev
           </Button>
-          <span className="text-primary text-base">
+          <span className="text-base text-primary">
             Page {pageNumber} of {numPages ?? "?"}
           </span>
           <Button

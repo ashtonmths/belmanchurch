@@ -258,13 +258,13 @@ export default function AdminGallery() {
                 placeholder="Event Name"
                 value={eventName}
                 onChange={(e) => setEventName(formatEventName(e.target.value))}
-                className="h-12 w-[80%] rounded-full border-2 border-accent/50 bg-primary p-4 text-xl placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-12 w-full max-w-xl rounded-full border-2 border-accent/50 bg-primary p-4 text-base placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary sm:text-xl"
               />
               <input
                 type="date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="h-12 w-[80%] rounded-full border-2 border-accent/50 bg-primary p-4 text-xl placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-12 w-full max-w-xl rounded-full border-2 border-accent/50 bg-primary p-4 text-base placeholder-textcolor focus:outline-none focus:ring-2 focus:ring-primary sm:text-xl"
               />
             </div>
 

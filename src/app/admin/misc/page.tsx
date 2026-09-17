@@ -158,7 +158,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, name: e.target.value })
                 }
-                className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
               />
               <input
                 type="datetime-local"
@@ -166,7 +166,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, date: e.target.value })
                 }
-                className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
               />
               <input
                 type="text"
@@ -175,7 +175,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, venue: e.target.value })
                 }
-                className="w-[60%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
               />
               <textarea
                 placeholder="Additional Info (optional)"
@@ -183,7 +183,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setEventData({ ...eventData, info: e.target.value })
                 }
-                className="mb-2 h-24 w-[60%] resize-none rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+                className="mb-2 h-24 w-full max-w-xl resize-none rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
               />
               <Button onClick={handlePublishEvent}>Publish</Button>
             </div>
@@ -196,7 +196,7 @@ export default function AdminMisc() {
                 type="file"
                 accept="application/pdf"
                 onChange={handlePDFUpload}
-                className="w-[50%] rounded-lg bg-secondary text-textcolor file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-primary hover:file:bg-accent/80"
+                className="w-full max-w-xl rounded-lg bg-secondary text-sm text-textcolor file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-primary hover:file:bg-accent/80"
               />
 
               <input
@@ -206,7 +206,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setBethkatiData({ ...bethkatiData, year: e.target.value })
                 }
-                className="w-[50%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
               />
 
               <input
@@ -216,7 +216,7 @@ export default function AdminMisc() {
                 onChange={(e) =>
                   setBethkatiData({ ...bethkatiData, month: e.target.value })
                 }
-                className="w-[50%] rounded-lg bg-secondary p-3 text-lg text-textcolor placeholder-textcolor/70 focus:outline-none"
+                className="w-full max-w-xl rounded-lg bg-secondary p-3 text-base text-textcolor placeholder-textcolor/70 focus:outline-none sm:text-lg"
               />
 
               <Button onClick={handlePublishBethkati}>Publish</Button>

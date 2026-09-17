@@ -78,33 +78,46 @@ export default function DonatePage() {
 
   return (
     <ProtectedRoute allowedRoles={["DEVELOPER", "ADMIN"]}>
-      <PageShell title="Make a donation" contentClassName="mx-auto max-w-xl">
+      <PageShell
+        title="Make a donation"
+        description="Choose where your offering should go and complete the details below."
+        contentClassName="mx-auto max-w-3xl"
+      >
         <ToastContainer />
-        <div className="rounded-3xl border border-white/10 bg-[#fffaf1] p-6 text-[#3b2919] shadow-2xl sm:p-10">
-          <div className="space-y-3">
-            {/* Donation Type */}
-            <div>
-              <label className="mb-1 block font-semibold">Donation Type:</label>
-              <select
-                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
-                value={selectedType}
-                onChange={(e) => handleTypeChange(e.target.value)}
-              >
-                <option value="" disabled>
-                  --- Select Donation Type ---
-                </option>
-                <option value="CHURCH">St Joseph - Church Donation</option>
-                <option value="CHAPEL">St Anthony - Chapel Donation</option>
-                <option value="THANKSGIVING">Thanksgiving Mass</option>
-              </select>
+        <div className="rounded-3xl border border-white/10 bg-[#211811]/90 p-5 text-white shadow-2xl backdrop-blur-md sm:p-8">
+          <fieldset>
+            <legend className="mb-4 text-sm font-medium text-white/65">
+              Choose a purpose
+            </legend>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {(
+                [
+                  ["CHURCH", "St. Joseph Church"],
+                  ["CHAPEL", "St. Anthony Chapel"],
+                  ["THANKSGIVING", "Thanksgiving Mass"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  onClick={() => handleTypeChange(value)}
+                  className={`min-h-20 rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${selectedType === value ? "border-[#f0c878] bg-[#f0c878] text-[#211811]" : "border-white/15 bg-white/[0.04] text-white/75 hover:border-white/30"}`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
+          </fieldset>
 
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {/* From */}
             <div>
-              <label className="mb-1 block font-semibold">From:</label>
+              <label className="mb-2 block text-sm font-medium text-white/65">
+                Your name
+              </label>
               <input
                 type="text"
-                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878] disabled:text-white/50"
                 value={byWhom}
                 disabled={!!session?.user.name}
                 onChange={(e) => setByWhom(e.target.value)}
@@ -113,10 +126,12 @@ export default function DonatePage() {
 
             {/* For */}
             <div>
-              <label className="mb-1 block font-semibold">For:</label>
+              <label className="mb-2 block text-sm font-medium text-white/65">
+                Offering for
+              </label>
               {type === "THANKSGIVING" ? (
                 <select
-                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                  className="w-full rounded-xl border border-white/15 bg-[#211811] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
                   value={forWhom}
                   onChange={(e) => setForWhom(e.target.value)}
                 >
@@ -131,7 +146,7 @@ export default function DonatePage() {
               ) : (
                 <input
                   type="text"
-                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                  className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none disabled:text-white/50"
                   value={forWhom}
                   disabled
                   onChange={(e) => setForWhom(e.target.value)}
@@ -141,10 +156,12 @@ export default function DonatePage() {
 
             {/* Email */}
             <div>
-              <label className="mb-1 block font-semibold">Email:</label>
+              <label className="mb-2 block text-sm font-medium text-white/65">
+                Email address
+              </label>
               <input
                 type="email"
-                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878] disabled:text-white/50"
                 value={email}
                 disabled={!!session?.user.email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -153,10 +170,12 @@ export default function DonatePage() {
 
             {/* Mass Timing */}
             <div>
-              <label className="mb-1 block font-semibold">Mass Timing:</label>
+              <label className="mb-2 block text-sm font-medium text-white/65">
+                Mass timing
+              </label>
               {type === "THANKSGIVING" ? (
                 <select
-                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                  className="w-full rounded-xl border border-white/15 bg-[#211811] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
                   value={massTiming}
                   onChange={(e) => setMassTiming(e.target.value)}
                 >
@@ -189,7 +208,7 @@ export default function DonatePage() {
               ) : (
                 <input
                   type="text"
-                  className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none"
+                  className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none disabled:text-white/50"
                   value={massTiming}
                   disabled
                 />
@@ -198,11 +217,13 @@ export default function DonatePage() {
 
             {/* Amount */}
             <div>
-              <label className="mb-1 block font-semibold">Amount:</label>
+              <label className="mb-2 block text-sm font-medium text-white/65">
+                Amount (₹)
+              </label>
               <input
                 type="number"
                 min={type === "THANKSGIVING" ? 300 : 100}
-                className="w-full rounded-lg border border-[#765827] bg-[#EAC696] p-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#765827]"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878] disabled:text-white/50"
                 value={amount}
                 disabled={type === "THANKSGIVING"}
                 onChange={(e) => setAmount(e.target.value)}
@@ -210,7 +231,7 @@ export default function DonatePage() {
             </div>
 
             {/* Donate Button */}
-            <div className="min-h-[0px]">
+            <div className="flex items-end sm:justify-end">
               {type && (
                 <DonateButton
                   type={type}
