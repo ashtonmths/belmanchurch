@@ -9,6 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import DonateButton from "~/components/DonateButton";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
+import { api } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
 type DonationType = "CHURCH" | "CHAPEL" | "THANKSGIVING";
@@ -38,6 +39,7 @@ function nextDate(weekday: number) {
 
 export default function DonatePage() {
   const { data: session } = useSession();
+  const { data: massSchedule = [] } = api.misc.getMassSchedule.useQuery();
   const [step, setStep] = useState(1);
   const [type, setType] = useState<DonationType | null>(null);
   const [forWhom, setForWhom] = useState("");
@@ -63,6 +65,7 @@ export default function DonatePage() {
       setAmount("300");
       setMassTiming("");
     }
+    window.setTimeout(() => setStep(2), 180);
   };
 
   const detailsValid = () => {
@@ -141,17 +144,9 @@ export default function DonatePage() {
                       </button>
                     ))}
                   </div>
-                  <div className="mt-8 flex justify-end">
-                    <button
-                      type="button"
-                      disabled={!type}
-                      onClick={() => setStep(2)}
-                      className="flex items-center gap-2 rounded-full bg-[#f0c878] px-6 py-3 font-medium text-[#211811] disabled:opacity-35"
-                    >
-                      Continue
-                      <ArrowRight size={17} />
-                    </button>
-                  </div>
+                  <p className="mt-7 text-sm text-white/40">
+                    Select a purpose to continue.
+                  </p>
                 </motion.section>
               )}
 
@@ -211,29 +206,22 @@ export default function DonatePage() {
                             }
                           >
                             <option value="">Select Mass timing</option>
-                            <option
-                              value={nextDate(6)
-                                .hour(16)
-                                .format("dddd, MMMM D - h:mmA")}
-                            >
-                              Saturday - 4:00 PM
-                            </option>
-                            <option
-                              value={nextDate(0)
-                                .hour(7)
-                                .minute(30)
-                                .format("dddd, MMMM D - h:mmA")}
-                            >
-                              Sunday - 7:30 AM
-                            </option>
-                            <option
-                              value={nextDate(0)
-                                .hour(10)
-                                .minute(30)
-                                .format("dddd, MMMM D - h:mmA")}
-                            >
-                              Sunday - 10:30 AM
-                            </option>
+                            {massSchedule
+                              .filter((mass) => mass.active)
+                              .map((mass) => {
+                                const date = nextDate(mass.dayOfWeek)
+                                  .hour(mass.hour)
+                                  .minute(mass.minute);
+                                const value = date.format(
+                                  "dddd, MMMM D - h:mm A",
+                                );
+                                return (
+                                  <option key={mass.id} value={value}>
+                                    {date.format("dddd - h:mm A")} ·{" "}
+                                    {mass.label}
+                                  </option>
+                                );
+                              })}
                           </select>
                         </Field>
                       </>

@@ -90,11 +90,11 @@ export default function DonateButton({
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <button
         type="button"
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-accent bg-accent px-6 py-3 text-sm font-bold tracking-wide text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-textcolor focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#f0c878] px-7 py-3 text-sm font-semibold text-[#211811] shadow-[0_10px_30px_rgba(240,200,120,0.12)] transition hover:bg-[#e7bb64] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] focus-visible:ring-offset-2 focus-visible:ring-offset-[#211811] disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
         onClick={handlePayment}
         disabled={loading}
       >
-        {loading ? "Processing..." : "Donate"}
+        {loading ? "Opening secure payment…" : `Donate ₹${amount}`}
       </button>
     </>
   );
