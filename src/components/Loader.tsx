@@ -1,50 +1,103 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function TransitionWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 1500); // ⏳ 1-second loader
-    return () => clearTimeout(timeout);
+    const beginNavigation = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const anchor = target.closest("a");
+      if (
+        !anchor ||
+        anchor.target === "_blank" ||
+        anchor.origin !== location.origin ||
+        anchor.pathname === location.pathname
+      )
+        return;
+      setLoading(true);
+    };
+    document.addEventListener("click", beginNavigation);
+    return () => document.removeEventListener("click", beginNavigation);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const finish = async () => {
+      await document.fonts.ready;
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => !cancelled && setLoading(false)),
+      );
+    };
+    void finish();
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   return (
-    <div className="relative">
-      <AnimatePresence mode="wait">
+    <div className="min-h-screen bg-[#17110c]">
+      <AnimatePresence>
         {loading && (
           <motion.div
-            key="loader"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+            className="fixed inset-0 z-[100] grid place-items-center bg-[#17110c]"
             initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
           >
-            <div className="relative h-24 w-24 animate-spin rounded-full border-2 border-gray-800 shadow-[0px_-10px_10px_#6359f8,10px_-10px_10px_#f36896,10px_0_10px_#ff0b0b,10px_10px_10px_#ff5500,0_10px_10px_#ff9500,-10px_10px_10px_#ffb700]">
-              <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-gray-800"></div>
+            <div className="flex flex-col items-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative grid h-24 w-24 place-items-center rounded-full border border-[#f0c878]/30"
+              >
+                <motion.span
+                  className="absolute inset-[-1px] rounded-full border-t border-[#f0c878]"
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.4,
+                    ease: "linear",
+                  }}
+                />
+                <Image
+                  src="/Logo.png"
+                  alt="St. Joseph Church"
+                  width={62}
+                  height={62}
+                  className="object-contain"
+                  priority
+                />
+              </motion.div>
+              <p className="mt-5 text-sm font-medium tracking-wide text-white/70">
+                St. Joseph Church, Belman
+              </p>
+              <div className="mt-4 h-px w-32 overflow-hidden bg-white/10">
+                <motion.div
+                  className="h-full bg-[#f0c878]"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "100%" }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.1,
+                    ease: "easeInOut",
+                  }}
+                />
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Ensures content only appears after the loader fades out */}
-      <motion.div
-        key="content"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: loading ? 0 : 1 }}
-        transition={{ duration: 0.5, delay: loading ? 0.5 : 0 }}
-        className="min-h-screen bg-black"
-      >
-        {children}
-      </motion.div>
+      {children}
     </div>
   );
 }
