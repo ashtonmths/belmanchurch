@@ -3,7 +3,8 @@
 
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { useLayoutEffect, useRef } from "react";
+import { X } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 
 const history = [
@@ -49,8 +50,8 @@ const history = [
   ],
   [
     "1974",
-    "St. Anthony's Shrine",
-    "The shrine at Pakala was blessed on 13 July, giving the miraculous statue of St. Anthony a home open to all.",
+    "St. Anthony's Chapel",
+    "The chapel at Pakala was blessed on 13 July, giving the miraculous statue of St. Anthony a home open to all.",
   ],
   [
     "1982",
@@ -85,6 +86,7 @@ export default function About() {
   const pageRef = useRef<HTMLElement>(null);
   const facadeRef = useRef<HTMLImageElement>(null);
   const altarRef = useRef<HTMLImageElement>(null);
+  const [selectedPriest, setSelectedPriest] = useState<Priest | null>(null);
   const { data: priests = [] } = api.misc.getAllPriests.useQuery();
 
   useLayoutEffect(() => {
@@ -257,7 +259,7 @@ export default function About() {
                 Allahabad.
               </p>
             </div>
-            <dl className="mt-10 grid border-t border-white/15 text-sm sm:grid-cols-2">
+            <dl className="mt-10 grid gap-x-12 border-t border-white/15 text-sm sm:grid-cols-2">
               <Fact label="Established" value="1894" />
               <Fact label="Families" value="581" />
               <Fact label="Wards" value="21" />
@@ -308,24 +310,32 @@ export default function About() {
           <h2 className="text-2xl font-semibold sm:text-3xl">
             Through the years
           </h2>
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
-            {history.map(([year, title, text]) => (
-              <article
-                key={year}
-                className="min-h-52 rounded-2xl border border-white/10 bg-[#211811] p-6 sm:p-7"
-              >
-                <p className="text-sm font-semibold text-[#f0c878]">{year}</p>
-                <h3 className="mt-5 text-xl font-medium text-white">{title}</h3>
-                <p className="mt-3 leading-7 text-white/60">{text}</p>
-              </article>
-            ))}
+          <div className="relative mt-10 overflow-x-auto pb-5">
+            <div className="absolute left-0 right-0 top-[4.35rem] h-px bg-white/20" />
+            <div className="relative flex min-w-max gap-5">
+              {history.map(([year, title, text]) => (
+                <article key={year} className="w-72 shrink-0 pt-1 sm:w-80">
+                  <p className="text-sm font-semibold text-[#f0c878]">{year}</p>
+                  <span className="mt-5 block h-3 w-3 rounded-full bg-[#f0c878] ring-4 ring-[#17110c]" />
+                  <div className="mt-6 min-h-52 rounded-2xl border border-white/10 bg-[#211811] p-6">
+                    <h3 className="text-xl font-medium text-white">{title}</h3>
+                    <p className="mt-3 leading-7 text-white/60">{text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        <PriestSection title="Parish priests" priests={parishPriests} />
+        <PriestSection
+          title="Parish priests"
+          priests={parishPriests}
+          onSelect={setSelectedPriest}
+        />
         <PriestSection
           title="Assistant parish priests"
           priests={assistantPriests}
+          onSelect={setSelectedPriest}
         />
 
         <section
@@ -346,31 +356,43 @@ export default function About() {
             ))}
           </div>
         </section>
-
-        <section
-          data-reveal
-          className="grid gap-10 py-16 md:grid-cols-[0.65fr_1.35fr] md:gap-20 md:py-24"
-        >
-          <div>
-            <h2 className="text-2xl font-semibold sm:text-3xl">
-              St. Anthony&apos;s Shrine
-            </h2>
-            <p className="mt-3 text-sm text-[#f0c878]">Pakala, Manjarpalke</p>
-          </div>
-          <div className="space-y-5 leading-8 text-white/65">
-            <p>
-              The shrine began with a wooden statue of St. Anthony kept by the
-              D&apos;Silva family of Pakala. As devotion grew, people from
-              Belman and nearby villages came to pray and offer candles.
-            </p>
-            <p>
-              A public place of worship was built with the support of the
-              community and the parish. The shrine was blessed and opened on 13
-              July 1974, and its annual feast is observed on 13 June.
-            </p>
-          </div>
-        </section>
       </div>
+      {selectedPriest && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-5 backdrop-blur-sm"
+          onClick={() => setSelectedPriest(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="priest-name"
+            className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#211811] p-7 text-center shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedPriest(null)}
+              aria-label="Close priest details"
+              className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-white/15 text-white/70 hover:text-white"
+            >
+              <X size={19} />
+            </button>
+            {selectedPriest.imageUrl ? (
+              <img
+                src={selectedPriest.imageUrl}
+                alt=""
+                className="mx-auto h-36 w-36 rounded-full object-cover"
+              />
+            ) : (
+              <div className="mx-auto h-36 w-36 rounded-full bg-white/10" />
+            )}
+            <h2 id="priest-name" className="mt-6 text-2xl font-semibold">
+              {selectedPriest.name}
+            </h2>
+            <p className="mt-2 text-white/55">{selectedPriest.period}</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -394,9 +416,11 @@ type Priest = {
 function PriestSection({
   title,
   priests,
+  onSelect,
 }: {
   title: string;
   priests: Priest[];
+  onSelect: (priest: Priest) => void;
 }) {
   if (!priests.length) return null;
   return (
@@ -404,24 +428,26 @@ function PriestSection({
       <h2 className="text-2xl font-semibold sm:text-3xl">{title}</h2>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {priests.map((priest) => (
-          <article
+          <button
+            type="button"
             key={priest.id}
-            className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.05] p-4"
+            onClick={() => onSelect(priest)}
+            className="flex min-h-28 items-center gap-5 rounded-2xl border border-white/10 bg-white/[0.05] p-5 text-left transition hover:border-[#f0c878]/50 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
           >
             {priest.imageUrl ? (
               <img
                 src={priest.imageUrl}
                 alt=""
-                className="h-14 w-14 rounded-full object-cover"
+                className="h-20 w-20 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <div className="h-14 w-14 rounded-full bg-white/10" />
+              <div className="h-20 w-20 shrink-0 rounded-full bg-white/10" />
             )}
             <div>
               <h3 className="font-medium text-white">{priest.name}</h3>
               <p className="mt-1 text-sm text-white/50">{priest.period}</p>
             </div>
-          </article>
+          </button>
         ))}
       </div>
     </section>
