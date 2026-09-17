@@ -5,8 +5,8 @@ import {
   adminProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { desc } from "drizzle-orm";
-import { bethkati, events } from "~/server/db/schema";
+import { asc, desc } from "drizzle-orm";
+import { bethkati, events, priests } from "~/server/db/schema";
 
 export const miscRouter = createTRPCRouter({
   // Create Event
@@ -64,6 +64,19 @@ export const miscRouter = createTRPCRouter({
   getAllEvents: publicProcedure.query(async () => {
     return db.query.events.findMany({
       orderBy: desc(events.date),
+    });
+  }),
+  getAllPriests: publicProcedure.query(async () => {
+    return db.query.priests.findMany({
+      columns: {
+        id: true,
+        name: true,
+        role: true,
+        period: true,
+        imageUrl: true,
+        isCurrent: true,
+      },
+      orderBy: asc(priests.order),
     });
   }),
 });

@@ -5,6 +5,7 @@ import PriestTimeline from "~/components/PriestTimeline";
 import AssociationsSection from "~/components/AssociationsSection";
 import StAnthonySection from "~/components/StAnthonySection";
 import { ArrowUp } from "lucide-react";
+import { api } from "~/trpc/react";
 
 const About = () => {
   const [showScrollTop, setShowScrollTop] = React.useState(false);
@@ -111,54 +112,13 @@ const About = () => {
     },
   ];
 
-  // Priest data
-  const parishPriests = [
-    { name: "Rev. Fr. Nicholas Carneiro", period: "1894 - 1903" },
-    { name: "Rev. Fr. Rosario P. Lewis", period: "1903 - 1906" },
-    { name: "Rev. Fr. Emmanuel Vas", period: "1906 - 1910" },
-    { name: "Rev. Fr. Peter R. D'Souza", period: "1910 - 1913" },
-    { name: "Rev. Fr. Anthony A.E. Colaco", period: "1913 - 1914", image: "/priests/anthonyC.jpg" },
-    { name: "Rev. Fr. Denis R. Lewis", period: "1914 - 1934", image: "/priests/denisRlewis.jpg" },
-    { name: "Rev. Fr. P.L. Botelho", period: "1934 - 1957", image: "/priests/bothelo.jpg" },
-    { name: "Rev. Fr. Nicholas J. Pereira", period: "1957 - 1973", image: "/priests/nicholas.jpg" },
-    { name: "Rev. Fr. Aloysius Rodrigues", period: "1973 - 1978", image: "/priests/aloysiusR.jpg" },
-    { name: "Rev. Fr. Lawrence Gomes", period: "1978 - 1986", image: "/priests/lawrenceG.jpg" },
-    { name: "Rev. Fr. John Fernandes", period: "1986 - 1994", image: "/priests/johnF.jpg" },
-    { name: "Rev. Fr. Thomas D'Souza", period: "1994 - 2001", image: "/priests/thomasD.jpg" },
-    { name: "Rev. Fr. Lawrence Rodrigues", period: "2002 - 2009", image: "/priests/lawrenceR.jpg" },
-    { name: "Rev. Fr. Lawrence B. D'Souza", period: "2009 - 2016", image: "/priests/lawrenceD.jpg" },
-    { name: "Rev. Fr. Sunil Vaigus", period: "2016 - 2017", image: "/priests/sunilV.jpg" },
-    { name: "Rev. Fr. Edwin D'souza", period: "2017 - 2022", image: "/priests/edwinD.jpg" },
-    { name: "Rev. Fr Frederick Mascarenhas", period: "2022 - Till Date", image: "/priests/frederickM.jpg" },
-  ];
-
-  const assistantPriests = [
-    { name: "Rev. Fr. Norbert D'Souza", period: "1954 to 1957", image: "/priests/norbertD.png" },
-    { name: "Rev. Fr. Walter D'Mello", period: "1984 to 1987", image: "/priests/walterD.jpg" },
-    { name: "Rev. Fr. Gerald D'Souza", period: "1987 to 1988", image: "/priests/geraldD.png" },
-    { name: "Rev. Fr. Peter D'Souza", period: "1992 to 1993", image: "/priests/peterD.jpg" },
-    { name: "Rev. Fr. Sylvester D'Costa", period: "1993 to 1995", image: "/priests/sylvesterD.jpg" },
-    { name: "Rev. Fr. Micheal Santhumayor", period: "1995 to 1997" },
-    { name: "Rev. Fr. Dolphy Monteiro", period: "1997 to 1998" },
-    { name: "Rev. Fr. Jerome D'Souza", period: "1998 to 2001", image: "/priests/jeromeD.png" },
-    { name: "Rev. Fr. Jerome Lawrence Mascarenhas", period: "2001 to 2002", image: "/priests/jeromeLM.jpg" },
-    { name: "Rev. Fr. Pascal Menezes", period: "2002 to 2003" },
-    { name: "Rev. Fr. Praveen Amrith Martis", period: "2003 to 2005", image: "/priests/praveenAM.jpg" },
-    { name: "Rev. Fr. Vijay Lobo", period: "2005 to 2007" },
-    { name: "Rev. Fr. Rock Ravi Fernandes", period: "2007 to 2009", image: "/priests/rockRF.jpg" },
-    { name: "Rev. Fr. Edwin D'Souza", period: "2009 to 2010", image: "/priests/edwinD.jpg" },
-    { name: "Rev. Fr. Melwyn Lobo", period: "2010 to 2011" },
-    { name: "Rev. Fr. Ronald Pinto", period: "2011 to 2012", image: "/priests/ronaldP.jpg" },
-    { name: "Rev. Fr. John Baptist Moras", period: "2014 to 2016", image: "/priests/JBmoras.jpg" },
-    { name: "Rev. Fr. Joswin Praveen D'Souza", period: "2016 to 2017", image: "/priests/joswinPD.jpg" },
-    { name: "Rev. Fr. Melwyl Roy Lobo", period: "2017 to 2018", image: "/priests/melwynRL.jpg" },
-    { name: "Rev. Fr. Prakash Menezes OP", period: "2018 to 2019" },
-    { name: "Rev. Fr. Ivan Martis", period: "2020 to 2021", image: "/priests/ivanM.png" },
-    { name: "Rev. Fr. Anson Dsouza SVD", period: "2021 to 2022", image: "" },
-    { name: "Rev. Fr. Ankith Dsouza", period: "2022 to 2023" },
-    { name: "Rev. Fr. Arnold Mathias SDB", period: "2023 to 2025", image: "/priests/arnoldM.png" },
-    { name: "Rev. Fr. Oswald Vaz", period: "2025 to Till Date", image: "/priests/oswaldV.png" },
-  ];
+  const { data: priests = [] } = api.misc.getAllPriests.useQuery();
+  const parishPriests = priests.filter(
+    (priest) => priest.role === "PARISH_PRIEST",
+  );
+  const assistantPriests = priests.filter(
+    (priest) => priest.role === "ASSISTANT_PRIEST",
+  );
 
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-[url('/bg/home.jpg')] bg-cover bg-center">
@@ -168,10 +128,10 @@ const About = () => {
             {/* Hero Section */}
             <section className="px-4 py-12">
               <div className="container mx-auto max-w-6xl">
-                <h1 className="mb-6 text-center text-4xl font-bold md:text-5xl text-primary">
+                <h1 className="mb-6 text-center text-4xl font-bold text-primary md:text-5xl">
                   About Belman Parish
                 </h1>
-                <div className="mx-auto max-w-3xl rounded-lg bg-primary p-6 backdrop-blur-sm text-textcolor font-semibold">
+                <div className="mx-auto max-w-3xl rounded-lg bg-primary p-6 font-semibold text-textcolor backdrop-blur-sm">
                   <p className="mb-4 text-lg">
                     Belman parish was established in 1894 with a current
                     Catholic population of around 2,156 individuals across 581
@@ -189,13 +149,13 @@ const About = () => {
             </section>
 
             {/* Location Section */}
-            <section className="px-4 py-12 text-primary font-semibold">
+            <section className="px-4 py-12 font-semibold text-primary">
               <div className="container mx-auto max-w-6xl">
                 <div className="rounded-lg border-l-4 border-accent bg-primary p-6 md:p-10">
                   <h2 className="mb-4 text-3xl font-bold text-textcolor">
                     Location & Background
                   </h2>
-                  <div className="grid gap-8 md:grid-cols-2 text-accent">
+                  <div className="grid gap-8 text-accent md:grid-cols-2">
                     <div>
                       <h3 className="mb-3 text-xl font-semibold">Location</h3>
                       <p className="mb-4">
@@ -207,8 +167,8 @@ const About = () => {
 
                       <h3 className="mb-3 text-xl font-semibold">The Name</h3>
                       <p className="mb-4">
-                        The word Belmannu came from &apos;bili mannu&apos;
-                        in Kannada meaning white soil. Belman was once a part of
+                        The word Belmannu came from &apos;bili mannu&apos; in
+                        Kannada meaning white soil. Belman was once a part of
                         Shirva parish before becoming its own parish in 1894.
                       </p>
                     </div>
