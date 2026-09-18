@@ -1,211 +1,94 @@
-# Belman Church Management System
+# St. Joseph Church, Belman
 
-![Belman Church](https://raw.githubusercontent.com/ashtonmths/belmanchurch/refs/heads/main/public/screenshots/hero.png)
+![St. Joseph Church website](public/screenshots/hero.png)
 
-A modern, full-stack church management system built with Next.js 15, tRPC, and Drizzle ORM. This application helps manage parishioners, families, donations, events, galleries, and publications for Belman Church.
+The parish website and administration system for St. Joseph Church, Belman. It provides Mass timings, parish history, events, Bethkati issues, gallery albums, contact enquiries and parish administration in one responsive website.
 
-## ✨ Features
+Live website: [belmanchurch.in](https://belmanchurch.in)
 
-### 👥 Parishioner Management
+## Main features
 
-- Register and manage parishioner details
-- Family grouping and household management
-- Ward-based organization
-- Mobile verification and account linking
+- Dynamic Mass schedule with catechism and non-catechism Sunday timings
+- Parish history, priest records and St. Anthony Chapel information
+- Event cards and Bethkati PDF archive
+- Gallery albums with likes, downloads, contributor details and native mobile sharing
+- Contact form with an admin inbox and email notifications
+- Family, member and ward management
+- Role-based access for developers, admins, photographers, parishioners and users
+- Cloudinary storage for photographs and documents
+- Responsive layouts for phones, tablets and desktops
 
-### 💰 Donation Management
+Photographers can only access gallery administration. Administrators can manage the other parish records and website settings.
 
-- Online donation processing via Razorpay
-- Support for Church, Chapel, and Thanksgiving donations
-- Automated receipt generation
-- Payment verification and tracking
-- Donation history and reporting
+## Online donations
 
-### 📸 Gallery Management
+The Razorpay donation flow has been developed, but online donations are currently paused. Razorpay requires additional parish documents, including a power of attorney, before the payment process can be activated.
 
-- Event photo uploads to Cloudinary
-- Gallery organization by events and dates
-- Like and interaction features
-- Role-based upload permissions (Admin, Developer, Photographer)
+## Technology
 
-### 📅 Events & Publications
+- Next.js 15 and TypeScript
+- Tailwind CSS and Framer Motion
+- tRPC and Zod
+- PostgreSQL with Drizzle ORM
+- Auth.js with Google sign-in
+- Cloudinary
+- Nodemailer
+- Razorpay integration, currently disabled
 
-- Event creation and management
-- Bethkati (church bulletin) PDF uploads
-- Public event calendar
-- Monthly publication archive
+## Local setup
 
-### 🔐 Role-Based Access Control
+Requirements: Node.js 18 or newer, PostgreSQL, Google OAuth credentials, Cloudinary credentials and SMTP credentials.
 
-- **Developer**: Full system access
-- **Admin**: Administrative operations
-- **Photographer**: Gallery uploads
-- **Parishoner**: Personal profile management
-- **User**: Basic authenticated access
-
-### 🛡️ Security Features
-
-- NextAuth v5 authentication with Google OAuth
-- Role-based authorization at API level
-- Protected TRPC procedures
-- Session management with the Auth.js Drizzle adapter
-- Secure payment processing
-
-## 🚀 Tech Stack
-
-- **Framework**: [Next.js 15](https://nextjs.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **API**: [tRPC](https://trpc.io/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/) with [Drizzle ORM](https://orm.drizzle.team/)
-- **Authentication**: [NextAuth.js v5](https://next-auth.js.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Payments**: [Razorpay](https://razorpay.com/)
-- **File Storage**: [Cloudinary](https://cloudinary.com/)
-- **Email**: [Nodemailer](https://nodemailer.com/)
-
-## 📋 Prerequisites
-
-- Node.js 18+ and npm
-- PostgreSQL database
-- Google OAuth credentials
-- Razorpay account
-- Cloudinary account
-
-## 🛠️ Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/ashtonmths/belmanchurch.git
-   cd belmanchurch
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-
-   Create a `.env` file in the root directory:
-
-   ```env
-   # Database
-   DATABASE_URL="postgresql://user:password@localhost:5432/belmanchurch"
-
-   # NextAuth
-   NEXTAUTH_SECRET="your-secret-key"
-   NEXTAUTH_URL="http://localhost:3000"
-
-   # Google OAuth
-   AUTH_GOOGLE_ID="your-google-client-id"
-   AUTH_GOOGLE_SECRET="your-google-client-secret"
-
-   # Razorpay
-   NEXT_PUBLIC_RAZORPAY_KEY_ID="your-razorpay-key-id"
-   RAZORPAY_SECRET_KEY="your-razorpay-secret"
-
-   # Cloudinary
-   CLOUDINARY_URL="cloudinary://api_key:api_secret@cloud_name"
-
-   # Email (Optional)
-   EMAIL_HOST="smtp.gmail.com"
-   EMAIL_PORT="587"
-   EMAIL_USER="your-email@gmail.com"
-   EMAIL_PASS="your-app-password"
-   ```
-
-4. **Set up the database**
-
-   ```bash
-   npm run db:push
-   ```
-
-5. **Start the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 📦 Available Scripts
-
-- `npm run dev` - Start development server with Turbopack
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint errors
-- `npm run typecheck` - Run TypeScript type checking
-- `npm run db:push` - Push the Drizzle schema to the database
-- `npm run db:generate` - Generate a Drizzle migration
-- `npm run db:migrate` - Apply pending Drizzle migrations
-- `npm run db:seed` - Seed the ward list
-- `npm run db:studio` - Open Drizzle Studio
-- `npm run format:check` - Check code formatting
-- `npm run format:write` - Format code with Prettier
-
-## 🏗️ Project Structure
-
-```
-belmanchurch/
-├── drizzle/                   # SQL migrations and seed script
-├── drizzle.config.ts          # Drizzle Kit configuration
-├── public/
-│   ├── bg/                    # Background images
-│   └── priests/               # Priest photos
-├── src/
-│   ├── app/                   # Next.js app directory
-│   │   ├── admin/            # Admin pages
-│   │   ├── api/              # API routes
-│   │   ├── donate/           # Donation page
-│   │   ├── events/           # Events page
-│   │   ├── gallery/          # Gallery pages
-│   │   └── profile/          # User profile
-│   ├── components/           # React components
-│   ├── hooks/                # Custom React hooks
-│   ├── server/
-│   │   ├── api/
-│   │   │   ├── routers/      # tRPC routers
-│   │   │   └── trpc.ts       # tRPC setup
-│   │   ├── auth/             # Authentication config
-│   │   ├── db/               # Drizzle schema
-│   │   └── utils/            # Server utilities
-│   ├── styles/               # Global styles
-│   ├── trpc/                 # tRPC client setup
-│   └── types/                # TypeScript types
-├── .env                      # Environment variables
-├── next.config.js            # Next.js configuration
-├── tailwind.config.ts        # Tailwind CSS config
-└── tsconfig.json             # TypeScript config
+```bash
+git clone https://github.com/ashtonmths/belmanchurch.git
+cd belmanchurch
+npm install
 ```
 
-## 🔒 Security
+Create a `.env` file:
 
-This project implements comprehensive security measures:
+```env
+DATABASE_URL="postgresql://user:password@host:5432/database"
 
-- ✅ Role-based access control on all API endpoints
-- ✅ Session-based authentication with NextAuth
-- ✅ Protected procedures using tRPC middleware
-- ✅ Input validation with Zod schemas
-- ✅ Secure payment processing
-- ✅ Environment variable protection
-- ✅ CSRF protection
-- ✅ XSS protection via React
+NEXTAUTH_SECRET="your-secret"
+NEXTAUTH_URL="http://localhost:3000"
+AUTH_GOOGLE_ID="your-google-client-id"
+AUTH_GOOGLE_SECRET="your-google-client-secret"
 
-## 📧 Contact
+NEXT_PUBLIC_RAZORPAY_KEY_ID="your-razorpay-key-id"
+RAZORPAY_SECRET_KEY="your-razorpay-secret"
 
-For questions or support, please contact:
+CLOUDINARY_URL="cloudinary://api_key:api_secret@cloud_name"
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your-upload-preset"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
 
-**Email**: [belmanchurch.in@gmail.com](mailto:belmanchurch.in@gmail.com)
+SMTP_HOST="smtp.example.com"
+SMTP_PORT="465"
+SMTP_USER="parish@example.com"
+SMTP_PASS="your-app-password"
+```
 
-## 🙏 Acknowledgments
+Apply migrations and start the development server:
 
-Built with ❤️ for Belman Church community
+```bash
+npm run db:migrate
+npm run dev
+```
 
----
+Open [http://localhost:3000](http://localhost:3000).
 
-Made with [T3 Stack](https://create.t3.gg/)
+## Commands
+
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm run typecheck    # TypeScript checks
+npm run lint         # ESLint checks
+npm run db:generate  # Generate a migration
+npm run db:migrate   # Apply migrations
+npm run db:studio    # Open Drizzle Studio
+```
+
+## Contact
+
+[belmanchurch.in@gmail.com](mailto:belmanchurch.in@gmail.com)
