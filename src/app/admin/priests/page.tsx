@@ -2,7 +2,8 @@
 "use client";
 import { Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
 import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
@@ -76,7 +77,7 @@ export default function PriestsAdmin() {
         title="Priests"
         description="Add clergy records, update service periods and manage portraits."
       >
-        <ToastContainer />
+        <ThemedToast />
         <div className="flex justify-end pb-5">
           <button
             onClick={() => setForm(empty)}

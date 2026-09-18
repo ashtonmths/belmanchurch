@@ -1,7 +1,8 @@
 "use client";
 import { HandCoins, Save, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
 import { api } from "~/trpc/react";
@@ -28,7 +29,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Control public features without changing the website code."
       >
-        <ToastContainer />
+        <ThemedToast />
         <section className="w-full rounded-3xl border border-white/10 bg-[#211811]/90 p-5 sm:p-8">
           <div className="flex items-center gap-3 border-b border-white/10 pb-6">
             <span className="grid h-11 w-11 place-items-center rounded-full bg-[#f0c878]/10 text-[#f0c878]">

@@ -3,6 +3,42 @@
 @tailwind components;
 @tailwind utilities;
 
+.Toastify__toast-container {
+  width: min(24rem, calc(100vw - 1.5rem));
+  padding: 0;
+}
+
+.belman-toast {
+  min-height: 4rem;
+  overflow: hidden;
+  border: 1px solid rgba(240, 200, 120, 0.2);
+  border-radius: 1rem;
+  background: rgba(33, 24, 17, 0.97);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+}
+
+.belman-toast .Toastify__toast-body {
+  padding: 0.25rem 0.4rem;
+  font-family: inherit;
+  font-size: 0.925rem;
+  line-height: 1.45;
+}
+
+.belman-toast-progress {
+  height: 2px;
+  background: #f0c878;
+}
+
+.belman-toast .Toastify__toast-icon {
+  color: #f0c878;
+}
+
+.belman-toast .Toastify__close-button {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;

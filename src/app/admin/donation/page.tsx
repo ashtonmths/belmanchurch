@@ -2,7 +2,8 @@
 import dayjs from "dayjs";
 import { CheckCircle2, ReceiptText, Search, Upload } from "lucide-react";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
 import { api } from "~/trpc/react";
@@ -57,7 +58,7 @@ export default function DonationAdmin() {
         title="Donations"
         description="Review completed offerings and send receipts without leaving the queue."
       >
-        <ToastContainer />
+        <ThemedToast />
         <section className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/90">
           <div className="flex flex-col gap-4 border-b border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
             <div className="flex gap-2">

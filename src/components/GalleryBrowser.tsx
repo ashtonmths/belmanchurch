@@ -6,7 +6,8 @@ import { Download, Heart, Link2, Share2, X } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
 import { api } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
@@ -312,7 +313,7 @@ export default function GalleryBrowser({
           </motion.div>
         )}
       </AnimatePresence>
-      <ToastContainer position="top-right" autoClose={2500} />
+      <ThemedToast />
     </PageShell>
   );
 }

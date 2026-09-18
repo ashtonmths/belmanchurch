@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import Button from "~/components/Button";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "~/components/ProtectRoute";
 import PageShell from "~/components/PageShell";
@@ -148,7 +149,7 @@ export default function AdminMisc() {
         title="Publishing"
         description="Add parish events and publish the next Bethkati issue."
       >
-        <ToastContainer />
+        <ThemedToast />
         <div className="flex min-h-[65vh] flex-col">
           <div className="grid w-full gap-5 md:grid-cols-2">
             <div className="flex h-full flex-col space-y-4 rounded-3xl border border-white/10 bg-[#211811]/90 p-6 sm:p-8">

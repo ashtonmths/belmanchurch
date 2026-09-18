@@ -1,7 +1,8 @@
 "use client";
 import { Clock3, Save } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
 import { api } from "~/trpc/react";
@@ -64,7 +65,7 @@ export default function MassAdminPage() {
         title="Mass times"
         description="Update the weekly schedule and choose which Sunday schedule is currently in use."
       >
-        <ToastContainer />
+        <ThemedToast />
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <section className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/90 shadow-2xl">
             <div className="flex flex-col gap-4 border-b border-white/10 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
