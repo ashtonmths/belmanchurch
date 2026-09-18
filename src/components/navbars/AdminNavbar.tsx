@@ -16,12 +16,16 @@ const allLinks = [
   { href: "/admin/gallery", label: "Gallery" },
   { href: "/admin/priests", label: "Priests" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/contact", label: "Enquiries" },
 ];
 export default function AdminNavbar() {
   const pathname = usePathname();
   const role = useRole();
   const [open, setOpen] = useState(false);
-  const links = role === "PHOTOGRAPHER" ? allLinks.slice(-1) : allLinks;
+  const links =
+    role === "PHOTOGRAPHER"
+      ? allLinks.filter((link) => link.href === "/admin/gallery")
+      : allLinks;
   const active = (href: string) =>
     href === "/admin" ? pathname === href : pathname.startsWith(href);
   useEffect(() => setOpen(false), [pathname]);
