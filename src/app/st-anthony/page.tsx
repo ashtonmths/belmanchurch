@@ -6,11 +6,13 @@ export default function StAnthonyChapel() {
     <main className="bg-[#17110c] font-sans text-white">
       <header className="relative flex min-h-[72vh] items-end overflow-hidden px-5 pb-14 pt-28 sm:px-8 sm:pb-20 lg:px-12">
         <Image
-          src="/bg/st-anthony-facade.png"
+          src="/bg/st-anthony-facade.jpeg"
           alt="St. Anthony Chapel, Pakala"
           fill
           priority
-          className="object-contain object-center"
+          sizes="100vw"
+          quality={82}
+          className="object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#17110c] via-black/30 to-black/45" />
         <div className="relative mx-auto w-full max-w-6xl">
@@ -28,6 +30,7 @@ export default function StAnthonyChapel() {
               src="/bg/st-anthony-statue.png"
               alt="The miraculous statue of St. Anthony"
               fill
+              sizes="(max-width: 768px) 100vw, 40vw"
               className="object-contain object-center p-4"
             />
           </div>
@@ -76,6 +79,7 @@ export default function StAnthonyChapel() {
               src="/bg/st-anthony-altar.webp"
               alt="Altar inside St. Anthony Chapel"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>

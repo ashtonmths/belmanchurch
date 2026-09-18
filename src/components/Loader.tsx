@@ -39,18 +39,25 @@ export default function TransitionWrapper({
       await new Promise<void>((resolve) =>
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       );
-      const pendingImages = Array.from(document.images).filter(
-        (image) => !image.complete,
-      );
-      await Promise.all(
-        pendingImages.map(
-          (image) =>
-            new Promise<void>((resolve) => {
-              image.addEventListener("load", () => resolve(), { once: true });
-              image.addEventListener("error", () => resolve(), { once: true });
-            }),
+      const pendingImages = Array.from(document.images).filter((image) => {
+        if (image.complete || image.loading === "lazy") return false;
+        const rect = image.getBoundingClientRect();
+        return rect.top < window.innerHeight * 1.5;
+      });
+      await Promise.race([
+        Promise.all(
+          pendingImages.map(
+            (image) =>
+              new Promise<void>((resolve) => {
+                image.addEventListener("load", () => resolve(), { once: true });
+                image.addEventListener("error", () => resolve(), {
+                  once: true,
+                });
+              }),
+          ),
         ),
-      );
+        new Promise<void>((resolve) => window.setTimeout(resolve, 8000)),
+      ]);
       const remaining = Math.max(
         0,
         1000 - (Date.now() - loadingStartedAt.current),
