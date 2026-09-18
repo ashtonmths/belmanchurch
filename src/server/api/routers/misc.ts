@@ -21,32 +21,36 @@ export const miscRouter = createTRPCRouter({
     });
   }),
   getSiteSettings: publicProcedure.query(async ({ ctx }) => {
-    const settings = await ctx.db.query.siteSettings.findFirst({
-      where: eq(siteSettings.id, "main"),
-    });
-    return (
-      settings ?? {
-        id: "main",
-        donationEnabled: true,
-        catechismEnabled: true,
-        updatedAt: new Date(),
-      }
-    );
+    const settings = await ctx.db.select().from(siteSettings);
+    return {
+      donationEnabled:
+        settings.find((item) => item.key === "DONATIONS_ENABLED")?.enabled ??
+        true,
+      catechismEnabled:
+        settings.find((item) => item.key === "CATECHISM_ENABLED")?.enabled ??
+        true,
+    };
   }),
   updateSiteSettings: adminProcedure
     .input(
       z.object({ donationEnabled: z.boolean(), catechismEnabled: z.boolean() }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [settings] = await ctx.db
-        .insert(siteSettings)
-        .values({ id: "main", ...input })
-        .onConflictDoUpdate({
-          target: siteSettings.id,
-          set: { ...input, updatedAt: new Date() },
-        })
-        .returning();
-      return settings;
+      await ctx.db.transaction(async (tx) => {
+        for (const setting of [
+          { key: "DONATIONS_ENABLED", enabled: input.donationEnabled },
+          { key: "CATECHISM_ENABLED", enabled: input.catechismEnabled },
+        ]) {
+          await tx
+            .insert(siteSettings)
+            .values(setting)
+            .onConflictDoUpdate({
+              target: siteSettings.key,
+              set: { enabled: setting.enabled, updatedAt: new Date() },
+            });
+        }
+      });
+      return input;
     }),
   updateMassSchedule: adminProcedure
     .input(
@@ -149,7 +153,7 @@ export const miscRouter = createTRPCRouter({
     });
   }),
   getAllPriests: publicProcedure.query(async () => {
-    return db.query.priests.findMany({
+    const records = await db.query.priests.findMany({
       columns: {
         id: true,
         name: true,
@@ -161,6 +165,14 @@ export const miscRouter = createTRPCRouter({
       },
       orderBy: asc(priests.order),
     });
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    return records.map((priest) => ({
+      ...priest,
+      imageUrl:
+        priest.imageUrl?.startsWith("/priests/") && cloudName
+          ? `https://res.cloudinary.com/${cloudName}/image/upload/Priests/${priest.imageUrl.split("/").at(-1)}`
+          : priest.imageUrl,
+    }));
   }),
   createPriest: adminProcedure
     .input(

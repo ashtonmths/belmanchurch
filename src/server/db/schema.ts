@@ -237,9 +237,8 @@ export const massSchedules = pgTable("MassSchedule", {
 });
 
 export const siteSettings = pgTable("SiteSettings", {
-  id: text("id").primaryKey().default("main"),
-  donationEnabled: boolean("donationEnabled").notNull().default(true),
-  catechismEnabled: boolean("catechismEnabled").notNull().default(true),
+  key: text("key").primaryKey(),
+  enabled: boolean("enabled").notNull().default(true),
   updatedAt: updatedAt(),
 });
 

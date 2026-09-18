@@ -38,9 +38,9 @@ export const donationRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       try {
         const settings = await db.query.siteSettings.findFirst({
-          where: eq(siteSettings.id, "main"),
+          where: eq(siteSettings.key, "DONATIONS_ENABLED"),
         });
-        if (settings && !settings.donationEnabled) {
+        if (settings && !settings.enabled) {
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "Donations are currently unavailable",
