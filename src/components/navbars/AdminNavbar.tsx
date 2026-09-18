@@ -14,6 +14,8 @@ const allLinks = [
   { href: "/admin/misc", label: "Publishing" },
   { href: "/admin/mass", label: "Mass times" },
   { href: "/admin/gallery", label: "Gallery" },
+  { href: "/admin/priests", label: "Priests" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 export default function AdminNavbar() {
   const pathname = usePathname();
@@ -57,12 +59,12 @@ export default function AdminNavbar() {
             </span>
           </span>
         </Link>
-        <div className="ml-auto hidden items-center gap-5 xl:flex">
+        <div className="ml-auto hidden items-center gap-4 2xl:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`relative py-3 text-[0.95rem] font-semibold tracking-wide transition after:absolute after:inset-x-0 after:bottom-1 after:h-px after:bg-[#f0c878] ${active(link.href) ? "text-white after:scale-x-100" : "text-white/65 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
+              className={`relative py-3 text-sm font-semibold tracking-wide transition after:absolute after:inset-x-0 after:bottom-1 after:h-px after:bg-[#f0c878] ${active(link.href) ? "text-white after:scale-x-100" : "text-white/65 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
             >
               {link.label}
             </Link>
@@ -77,7 +79,7 @@ export default function AdminNavbar() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="ml-auto grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-black/20 text-white xl:hidden"
+          className="ml-auto grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-black/20 text-white 2xl:hidden"
           aria-label="Open administration menu"
         >
           <Menu size={24} />
