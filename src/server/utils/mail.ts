@@ -36,3 +36,38 @@ export async function sendReceipt(
     return { success: false, error: (error as Error).message };
   }
 }
+
+type ContactNotification = {
+  name: string;
+  email: string;
+  phone: string | null;
+  subject: string;
+  message: string;
+  createdAt: Date;
+};
+
+export async function sendContactNotification(inquiry: ContactNotification) {
+  try {
+    await transporter.sendMail({
+      from: `"St. Joseph Church Website" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER,
+      replyTo: inquiry.email,
+      subject: `New website enquiry: ${inquiry.subject}`,
+      text: [
+        "A new contact enquiry was submitted through the parish website.",
+        "",
+        `Name: ${inquiry.name}`,
+        `Email: ${inquiry.email}`,
+        `Phone: ${inquiry.phone ?? "Not provided"}`,
+        `Subject: ${inquiry.subject}`,
+        `Submitted: ${inquiry.createdAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`,
+        "",
+        inquiry.message,
+      ].join("\n"),
+    });
+    return true;
+  } catch (error) {
+    console.error("Contact notification email failed:", error);
+    return false;
+  }
+}

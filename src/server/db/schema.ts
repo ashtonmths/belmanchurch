@@ -211,6 +211,18 @@ export const bethkati = pgTable("Bethkati", {
   createdAt: createdAt(),
 });
 
+export const contactInquiries = pgTable("ContactInquiry", {
+  id: id(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("isRead").notNull().default(false),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
 export const priests = pgTable("Priest", {
   id: id(),
   name: text("name").notNull(),

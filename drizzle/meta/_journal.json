@@ -36,6 +36,13 @@
       "when": 1789750531589,
       "tag": "0004_rare_stingray",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789752123686,
+      "tag": "0005_reflective_starfox",
+      "breakpoints": true
     }
   ]
 }
