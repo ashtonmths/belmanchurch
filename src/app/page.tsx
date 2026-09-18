@@ -8,6 +8,7 @@ import {
   Images,
   LogIn,
   MapPin,
+  Phone,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -206,6 +207,14 @@ export default function Home() {
               >
                 <Clock3 aria-hidden="true" size={18} />
                 Mass timings
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/contact")}
+                className="border-white/35 px-6 text-white hover:border-[#f0c878] hover:bg-white/10 hover:text-[#f0c878]"
+              >
+                <Phone aria-hidden="true" size={18} />
+                Contact us
               </Button>
               <Button
                 variant="outline"

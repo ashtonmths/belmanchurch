@@ -59,12 +59,12 @@ export default function AdminNavbar() {
             </span>
           </span>
         </Link>
-        <div className="ml-auto hidden items-center gap-3 xl:flex">
+        <div className="ml-auto hidden items-center gap-4 xl:flex">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`relative whitespace-nowrap py-3 text-[0.92rem] font-semibold tracking-wide transition after:absolute after:inset-x-0 after:bottom-1 after:h-px after:bg-[#f0c878] ${active(link.href) ? "text-white after:scale-x-100" : "text-white/65 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
+              className={`relative whitespace-nowrap py-3 text-[0.98rem] font-semibold tracking-wide transition after:absolute after:inset-x-0 after:bottom-1 after:h-px after:bg-[#f0c878] ${active(link.href) ? "text-white after:scale-x-100" : "text-white/65 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
             >
               {link.label}
             </Link>

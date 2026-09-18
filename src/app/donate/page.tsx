@@ -5,10 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import DonateButton from "~/components/DonateButton";
 import PageShell from "~/components/PageShell";
-import ProtectedRoute from "~/components/ProtectRoute";
 import { api } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -89,232 +89,249 @@ export default function DonatePage() {
     "w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878] disabled:text-white/45";
   const purpose = purposes.find((item) => item.value === type);
 
-  return (
-    <ProtectedRoute allowedRoles={["DEVELOPER", "ADMIN"]}>
+  if (siteSettings?.donationEnabled === false) {
+    return (
       <PageShell
-        title="Make a donation"
-        description="A secure, simple way to support the parish."
-        contentClassName="mx-auto w-full max-w-5xl"
+        title="Online donations are paused"
+        description="The parish has temporarily disabled online donations."
+        contentClassName="mx-auto w-full max-w-3xl"
       >
-        <ToastContainer />
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/95 shadow-2xl">
-          <div className="flex border-b border-white/10 px-5 py-5 sm:px-8">
-            {["Purpose", "Details", "Review"].map((label, index) => (
-              <div key={label} className="flex flex-1 items-center gap-2">
-                <span
-                  className={`grid h-7 w-7 place-items-center rounded-full text-xs ${step > index + 1 ? "bg-[#f0c878] text-[#211811]" : step === index + 1 ? "border border-[#f0c878] text-[#f0c878]" : "border border-white/15 text-white/35"}`}
-                >
-                  {step > index + 1 ? <Check size={14} /> : index + 1}
-                </span>
-                <span
-                  className={`hidden text-sm sm:block ${step === index + 1 ? "text-white" : "text-white/40"}`}
-                >
-                  {label}
-                </span>
-                {index < 2 && <span className="mx-2 h-px flex-1 bg-white/10" />}
-              </div>
-            ))}
-          </div>
+        <section className="rounded-3xl border border-white/10 bg-[#211811]/95 p-7 text-center shadow-2xl sm:p-12">
+          <h2 className="text-2xl font-semibold text-white">
+            Donations are unavailable for now
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl leading-7 text-white/55">
+            Please check again later, or contact the parish office if you need
+            help with an offering.
+          </p>
+          <a
+            href="/contact"
+            className="mt-7 inline-flex min-h-12 items-center justify-center rounded-full border border-[#f0c878] px-6 font-semibold text-[#f0c878] transition hover:bg-[#f0c878] hover:text-[#211811]"
+          >
+            Contact the parish office
+          </a>
+        </section>
+      </PageShell>
+    );
+  }
 
-          <div className="min-h-[28rem] p-5 sm:p-8 lg:p-10">
-            <AnimatePresence mode="wait">
-              {step === 1 && (
-                <motion.section
-                  key="purpose"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  <h2 className="text-2xl font-semibold">
-                    Where should your offering go?
-                  </h2>
-                  <div className="mt-7 grid gap-4 md:grid-cols-3">
-                    {purposes.map((item) => (
-                      <button
-                        type="button"
-                        key={item.value}
-                        onClick={() => choosePurpose(item.value)}
-                        className={`min-h-40 rounded-2xl border p-6 text-left transition ${type === item.value ? "border-[#f0c878] bg-[#f0c878]/10" : "border-white/10 bg-white/[0.04] hover:border-white/25"}`}
-                      >
-                        <h3 className="font-medium text-white">
-                          Donation for {item.label}
-                        </h3>
-                        <p className="mt-3 text-sm leading-6 text-white/50">
-                          {item.detail}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-7 text-sm text-white/40">
-                    Select a purpose to continue.
-                  </p>
-                </motion.section>
-              )}
+  return (
+    <PageShell
+      title="Make a donation"
+      description="A secure, simple way to support the parish."
+      contentClassName="mx-auto w-full max-w-5xl"
+    >
+      <ThemedToast />
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/95 shadow-2xl">
+        <div className="flex border-b border-white/10 px-5 py-5 sm:px-8">
+          {["Purpose", "Details", "Review"].map((label, index) => (
+            <div key={label} className="flex flex-1 items-center gap-2">
+              <span
+                className={`grid h-7 w-7 place-items-center rounded-full text-xs ${step > index + 1 ? "bg-[#f0c878] text-[#211811]" : step === index + 1 ? "border border-[#f0c878] text-[#f0c878]" : "border border-white/15 text-white/35"}`}
+              >
+                {step > index + 1 ? <Check size={14} /> : index + 1}
+              </span>
+              <span
+                className={`hidden text-sm sm:block ${step === index + 1 ? "text-white" : "text-white/40"}`}
+              >
+                {label}
+              </span>
+              {index < 2 && <span className="mx-2 h-px flex-1 bg-white/10" />}
+            </div>
+          ))}
+        </div>
 
-              {step === 2 && (
-                <motion.section
-                  key="details"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  <h2 className="text-2xl font-semibold">Donation details</h2>
-                  <div className="mt-7 grid gap-5 md:grid-cols-2">
-                    <Field label="Your name">
-                      <input
-                        className={inputClass}
-                        value={byWhom}
-                        disabled={!!session?.user.name}
-                        onChange={(event) => setByWhom(event.target.value)}
-                      />
-                    </Field>
-                    <Field label="Email address">
-                      <input
-                        type="email"
-                        className={inputClass}
-                        value={email}
-                        disabled={!!session?.user.email}
-                        onChange={(event) => setEmail(event.target.value)}
-                      />
-                    </Field>
-                    {type === "THANKSGIVING" ? (
-                      <>
-                        <Field label="Occasion">
-                          <select
-                            className={inputClass}
-                            value={forWhom}
-                            onChange={(event) => setForWhom(event.target.value)}
-                          >
-                            <option value="">Select an occasion</option>
-                            {[
-                              "Birthday",
-                              "Anniversary",
-                              "Wedding",
-                              "Success",
-                              "Healing",
-                              "Thanksgiving",
-                            ].map((item) => (
-                              <option key={item}>{item}</option>
-                            ))}
-                          </select>
-                        </Field>
-                        <Field label="Mass timing">
-                          <select
-                            className={inputClass}
-                            value={massTiming}
-                            onChange={(event) =>
-                              setMassTiming(event.target.value)
-                            }
-                          >
-                            <option value="">Select Mass timing</option>
-                            {massSchedule
-                              .filter((mass) => mass.active)
-                              .filter(
-                                (mass) =>
-                                  mass.scheduleType !== "SUNDAY_CATECHISM" ||
-                                  siteSettings?.catechismEnabled !== false,
-                              )
-                              .filter(
-                                (mass) =>
-                                  mass.scheduleType !== "SUNDAY_NO_CATECHISM" ||
-                                  siteSettings?.catechismEnabled === false,
-                              )
-                              .map((mass) => {
-                                const date = nextDate(mass.dayOfWeek)
-                                  .hour(mass.hour)
-                                  .minute(mass.minute);
-                                const value = date.format(
-                                  "dddd, MMMM D - h:mm A",
-                                );
-                                return (
-                                  <option key={mass.id} value={value}>
-                                    {date.format("dddd - h:mm A")} ·{" "}
-                                    {mass.label}
-                                  </option>
-                                );
-                              })}
-                          </select>
-                        </Field>
-                      </>
-                    ) : (
-                      <Field label="Offering for">
-                        <input
-                          className={inputClass}
-                          value={forWhom}
-                          disabled
-                        />
-                      </Field>
-                    )}
-                    <Field label="Amount (₹)">
-                      <input
-                        type="number"
-                        min={type === "THANKSGIVING" ? 300 : 100}
-                        className={inputClass}
-                        value={amount}
-                        disabled={type === "THANKSGIVING"}
-                        onChange={(event) => setAmount(event.target.value)}
-                      />
-                    </Field>
-                  </div>
-                  <div className="mt-8 flex justify-between">
-                    <Back onClick={() => setStep(1)} />
+        <div className="min-h-[28rem] p-5 sm:p-8 lg:p-10">
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.section
+                key="purpose"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <h2 className="text-2xl font-semibold">
+                  Where should your offering go?
+                </h2>
+                <div className="mt-7 grid gap-4 md:grid-cols-3">
+                  {purposes.map((item) => (
                     <button
                       type="button"
-                      onClick={() => detailsValid() && setStep(3)}
-                      className="flex items-center gap-2 rounded-full bg-[#f0c878] px-6 py-3 font-medium text-[#211811]"
+                      key={item.value}
+                      onClick={() => choosePurpose(item.value)}
+                      className={`min-h-40 rounded-2xl border p-6 text-left transition ${type === item.value ? "border-[#f0c878] bg-[#f0c878]/10" : "border-white/10 bg-white/[0.04] hover:border-white/25"}`}
                     >
-                      Review
-                      <ArrowRight size={17} />
+                      <h3 className="font-medium text-white">
+                        Donation for {item.label}
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-white/50">
+                        {item.detail}
+                      </p>
                     </button>
-                  </div>
-                </motion.section>
-              )}
+                  ))}
+                </div>
+                <p className="mt-7 text-sm text-white/40">
+                  Select a purpose to continue.
+                </p>
+              </motion.section>
+            )}
 
-              {step === 3 && type && (
-                <motion.section
-                  key="review"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  <h2 className="text-2xl font-semibold">
-                    Review your donation
-                  </h2>
-                  <dl className="mt-7 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.04] px-5">
-                    <Summary label="Purpose" value={purpose?.label ?? type} />
-                    <Summary label="From" value={byWhom} />
-                    <Summary label="Email" value={email} />
-                    <Summary label="For" value={forWhom} />
-                    {type === "THANKSGIVING" && (
-                      <Summary label="Mass" value={massTiming} />
-                    )}
-                    <Summary label="Amount" value={`₹${amount}`} />
-                  </dl>
-                  <p className="mt-5 text-sm leading-6 text-white/45">
-                    You will be redirected to Razorpay to complete the payment
-                    securely.
-                  </p>
-                  <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <Back onClick={() => setStep(2)} />
-                    <div className="w-full sm:w-auto">
-                      <DonateButton
-                        type={type}
-                        amount={amount}
-                        forWhom={forWhom}
-                        byWhom={byWhom}
-                        email={email}
-                        massTiming={massTiming}
-                        onValidate={detailsValid}
-                      />
-                    </div>
+            {step === 2 && (
+              <motion.section
+                key="details"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <h2 className="text-2xl font-semibold">Donation details</h2>
+                <div className="mt-7 grid gap-5 md:grid-cols-2">
+                  <Field label="Your name">
+                    <input
+                      className={inputClass}
+                      value={byWhom}
+                      disabled={!!session?.user.name}
+                      onChange={(event) => setByWhom(event.target.value)}
+                    />
+                  </Field>
+                  <Field label="Email address">
+                    <input
+                      type="email"
+                      className={inputClass}
+                      value={email}
+                      disabled={!!session?.user.email}
+                      onChange={(event) => setEmail(event.target.value)}
+                    />
+                  </Field>
+                  {type === "THANKSGIVING" ? (
+                    <>
+                      <Field label="Occasion">
+                        <select
+                          className={inputClass}
+                          value={forWhom}
+                          onChange={(event) => setForWhom(event.target.value)}
+                        >
+                          <option value="">Select an occasion</option>
+                          {[
+                            "Birthday",
+                            "Anniversary",
+                            "Wedding",
+                            "Success",
+                            "Healing",
+                            "Thanksgiving",
+                          ].map((item) => (
+                            <option key={item}>{item}</option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Mass timing">
+                        <select
+                          className={inputClass}
+                          value={massTiming}
+                          onChange={(event) =>
+                            setMassTiming(event.target.value)
+                          }
+                        >
+                          <option value="">Select Mass timing</option>
+                          {massSchedule
+                            .filter((mass) => mass.active)
+                            .filter(
+                              (mass) =>
+                                mass.scheduleType !== "SUNDAY_CATECHISM" ||
+                                siteSettings?.catechismEnabled !== false,
+                            )
+                            .filter(
+                              (mass) =>
+                                mass.scheduleType !== "SUNDAY_NO_CATECHISM" ||
+                                siteSettings?.catechismEnabled === false,
+                            )
+                            .map((mass) => {
+                              const date = nextDate(mass.dayOfWeek)
+                                .hour(mass.hour)
+                                .minute(mass.minute);
+                              const value = date.format(
+                                "dddd, MMMM D - h:mm A",
+                              );
+                              return (
+                                <option key={mass.id} value={value}>
+                                  {date.format("dddd - h:mm A")} · {mass.label}
+                                </option>
+                              );
+                            })}
+                        </select>
+                      </Field>
+                    </>
+                  ) : (
+                    <Field label="Offering for">
+                      <input className={inputClass} value={forWhom} disabled />
+                    </Field>
+                  )}
+                  <Field label="Amount (₹)">
+                    <input
+                      type="number"
+                      min={type === "THANKSGIVING" ? 300 : 100}
+                      className={inputClass}
+                      value={amount}
+                      disabled={type === "THANKSGIVING"}
+                      onChange={(event) => setAmount(event.target.value)}
+                    />
+                  </Field>
+                </div>
+                <div className="mt-8 flex justify-between">
+                  <Back onClick={() => setStep(1)} />
+                  <button
+                    type="button"
+                    onClick={() => detailsValid() && setStep(3)}
+                    className="flex items-center gap-2 rounded-full bg-[#f0c878] px-6 py-3 font-medium text-[#211811]"
+                  >
+                    Review
+                    <ArrowRight size={17} />
+                  </button>
+                </div>
+              </motion.section>
+            )}
+
+            {step === 3 && type && (
+              <motion.section
+                key="review"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <h2 className="text-2xl font-semibold">Review your donation</h2>
+                <dl className="mt-7 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.04] px-5">
+                  <Summary label="Purpose" value={purpose?.label ?? type} />
+                  <Summary label="From" value={byWhom} />
+                  <Summary label="Email" value={email} />
+                  <Summary label="For" value={forWhom} />
+                  {type === "THANKSGIVING" && (
+                    <Summary label="Mass" value={massTiming} />
+                  )}
+                  <Summary label="Amount" value={`₹${amount}`} />
+                </dl>
+                <p className="mt-5 text-sm leading-6 text-white/45">
+                  You will be redirected to Razorpay to complete the payment
+                  securely.
+                </p>
+                <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <Back onClick={() => setStep(2)} />
+                  <div className="w-full sm:w-auto">
+                    <DonateButton
+                      type={type}
+                      amount={amount}
+                      forWhom={forWhom}
+                      byWhom={byWhom}
+                      email={email}
+                      massTiming={massTiming}
+                      onValidate={detailsValid}
+                    />
                   </div>
-                </motion.section>
-              )}
-            </AnimatePresence>
-          </div>
+                </div>
+              </motion.section>
+            )}
+          </AnimatePresence>
         </div>
-      </PageShell>
-    </ProtectedRoute>
+      </div>
+    </PageShell>
   );
 }
 

@@ -13,6 +13,7 @@ const links = [
   { href: "/events", label: "Events" },
   { href: "/gallery", label: "Gallery" },
   { href: "/bethkati", label: "Bethkati" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {
@@ -64,13 +65,13 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="ml-auto hidden items-center gap-7 lg:flex">
+        <div className="ml-auto hidden items-center gap-7 xl:flex">
           {links.slice(0, 1).map((link) => (
             <Link
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`relative py-3 text-base font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${
+              className={`relative py-3 text-[1.05rem] font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${
                 isActive(link.href)
                   ? "text-white after:scale-x-100"
                   : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"
@@ -82,7 +83,7 @@ export default function Navbar() {
           <div className="group relative">
             <button
               type="button"
-              className={`flex items-center gap-1 py-3 text-base font-semibold tracking-wide transition-colors ${pathname.startsWith("/about") || pathname.startsWith("/st-anthony") ? "text-white" : "text-white/70 hover:text-white"}`}
+              className={`flex items-center gap-1.5 py-3 text-[1.05rem] font-semibold tracking-wide transition-colors ${pathname.startsWith("/about") || pathname.startsWith("/st-anthony") ? "text-white" : "text-white/70 hover:text-white"}`}
             >
               Our Parish
               <ChevronDown
@@ -110,7 +111,7 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               aria-current={isActive(link.href) ? "page" : undefined}
-              className={`relative py-3 text-base font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${isActive(link.href) ? "text-white after:scale-x-100" : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
+              className={`relative py-3 text-[1.05rem] font-semibold tracking-wide transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:bg-[#f0c878] after:transition-transform ${isActive(link.href) ? "text-white after:scale-x-100" : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100"}`}
             >
               {link.label}
             </Link>
@@ -128,7 +129,7 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="ml-auto grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-black/20 text-white backdrop-blur-sm transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] lg:hidden"
+          className="ml-auto grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-black/20 text-white backdrop-blur-sm transition hover:border-[#f0c878] hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] xl:hidden"
           aria-label="Open navigation menu"
           aria-expanded={isOpen}
           aria-controls="mobile-navigation"
