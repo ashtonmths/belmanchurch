@@ -18,11 +18,11 @@ export default function PageShell({
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#17110c] text-white">
       <div
-        className={`absolute inset-0 bg-cover bg-center ${
+        className={`fixed inset-x-0 top-0 h-[100lvh] bg-cover bg-center ${
           admin ? "bg-[url('/bg/admin.jpg')]" : "bg-[url('/bg/home.jpg')]"
         }`}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-[#17110c]/85 to-[#17110c]" />
+      <div className="fixed inset-x-0 top-0 h-[100lvh] bg-gradient-to-b from-black/80 via-[#17110c]/85 to-[#17110c]" />
 
       <div className="relative mx-auto min-h-screen w-full max-w-[90rem] px-5 pb-16 pt-28 sm:px-8 lg:px-12 lg:pt-32">
         {(title !== undefined || description !== undefined) && (

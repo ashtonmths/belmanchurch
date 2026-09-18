@@ -178,10 +178,10 @@ export default function Home() {
         : null;
 
   return (
-    <main className="relative h-[100dvh] overflow-hidden bg-[#17110c] text-white">
-      <div className="absolute inset-0 bg-[url('/bg/home.jpg')] bg-cover bg-center" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/25" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#17110c]/90 via-transparent to-black/25" />
+    <main className="relative min-h-[100svh] overflow-hidden bg-[#17110c] text-white lg:h-[100lvh]">
+      <div className="fixed inset-x-0 top-0 h-[100lvh] bg-[url('/bg/home.jpg')] bg-cover bg-center" />
+      <div className="fixed inset-x-0 top-0 h-[100lvh] bg-gradient-to-r from-black/90 via-black/60 to-black/25" />
+      <div className="fixed inset-x-0 top-0 h-[100lvh] bg-gradient-to-t from-[#17110c]/90 via-transparent to-black/25" />
 
       <section className="relative mx-auto flex h-full max-w-[90rem] items-center px-5 pb-5 pt-24 sm:px-8 sm:pb-8 lg:px-12 lg:pb-10 lg:pt-28">
         <div className="grid w-full items-center gap-5 sm:gap-7 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-12">
@@ -234,14 +234,16 @@ export default function Home() {
                   Sign in
                 </Button>
               ) : accountAction ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push(accountAction.href)}
-                  className="px-4 text-white/80 hover:bg-white/10 hover:text-white"
-                >
-                  <accountAction.icon aria-hidden="true" size={18} />
-                  {accountAction.label}
-                </Button>
+                <span className="basis-full">
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push(accountAction.href)}
+                    className="px-4 text-white/80 hover:bg-white/10 hover:text-white"
+                  >
+                    <accountAction.icon aria-hidden="true" size={18} />
+                    {accountAction.label}
+                  </Button>
+                </span>
               ) : null}
             </motion.div>
           </div>
