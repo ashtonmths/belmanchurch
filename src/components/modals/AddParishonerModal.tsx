@@ -1,61 +1,63 @@
 "use client";
 import { useState } from "react";
+import {
+  AdminDialog,
+  adminInput,
+  DialogActions,
+} from "~/components/admin/AdminDialog";
 import { api } from "~/trpc/react";
-
-export default function AddParishonerModal({ onClose }: { onClose: () => void }) {
+export default function AddParishonerModal({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [wardId, setWardId] = useState("");
   const [familyId, setFamilyId] = useState("");
-
   const { data: wards } = api.ward.getAllWards.useQuery();
   const { data: families } = api.family.getAllFamilies.useQuery();
-  const addParishoner = api.parishoner.addParishoner.useMutation({
-    onSuccess: () => {
-      window.location.reload();
-    },
+  const add = api.parishoner.addParishoner.useMutation({
+    onSuccess: () => window.location.reload(),
   });
-
-  const handleSave = () => {
-    addParishoner.mutate(
-      { name, mobile, wardId, familyId },
-      { onSuccess: () => onClose() }
-    );
-  };
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-      <div className="rounded-lg bg-white p-6">
-        <h2 className="text-lg font-bold">Add Parishoner</h2>
-
-        <label className="mt-2 block">
-          Name:
+    <AdminDialog
+      title="Add parishioner"
+      onClose={onClose}
+      actions={
+        <DialogActions
+          onClose={onClose}
+          onSave={() => add.mutate({ name, mobile, wardId, familyId })}
+          disabled={!name || !mobile || add.isPending}
+        />
+      }
+    >
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="text-sm text-white/55">
+          Name
           <input
-            type="text"
+            className={adminInput}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded border p-2"
           />
         </label>
-
-        <label className="mt-2 block">
-          Mobile:
+        <label className="text-sm text-white/55">
+          Mobile
           <input
-            type="text"
+            className={adminInput}
+            inputMode="tel"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
-            className="w-full rounded border p-2"
           />
         </label>
-
-        <label className="mt-2 block">
-          Ward:
+        <label className="text-sm text-white/55">
+          Ward
           <select
+            className={adminInput}
             value={wardId}
             onChange={(e) => setWardId(e.target.value)}
-            className="w-full rounded border p-2"
           >
-            <option value="">Select Ward</option>
+            <option value="">Select ward</option>
             {wards?.map((ward) => (
               <option key={ward.id} value={ward.id}>
                 {ward.name}
@@ -63,15 +65,14 @@ export default function AddParishonerModal({ onClose }: { onClose: () => void })
             ))}
           </select>
         </label>
-
-        <label className="mt-2 block">
-          Family:
+        <label className="text-sm text-white/55">
+          Family
           <select
+            className={adminInput}
             value={familyId}
             onChange={(e) => setFamilyId(e.target.value)}
-            className="w-full rounded border p-2"
           >
-            <option value="">Select Family</option>
+            <option value="">Select family</option>
             {families?.map((family) => (
               <option key={family.id} value={family.id}>
                 {family.name}
@@ -79,19 +80,7 @@ export default function AddParishonerModal({ onClose }: { onClose: () => void })
             ))}
           </select>
         </label>
-
-        <div className="mt-4 flex justify-end space-x-2">
-          <button onClick={onClose} className="rounded bg-gray-300 px-4 py-2">
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="rounded bg-primary px-4 py-2 text-white"
-          >
-            Save
-          </button>
-        </div>
       </div>
-    </div>
+    </AdminDialog>
   );
 }

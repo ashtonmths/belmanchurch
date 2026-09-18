@@ -1,7 +1,11 @@
+"use client";
 import { useState } from "react";
+import {
+  AdminDialog,
+  adminInput,
+  DialogActions,
+} from "~/components/admin/AdminDialog";
 import { api } from "~/trpc/react";
-
-// ✅ Define the type for member
 type Member = {
   id: string;
   name?: string | null;
@@ -9,70 +13,67 @@ type Member = {
   ward?: { id: string; name: string } | null;
   familyHead?: boolean;
 };
-
-interface EditMemberModalProps {
-  member: Member;
-  onClose: () => void;
-}
-
 export default function EditMemberModal({
   member,
   onClose,
-}: EditMemberModalProps) {
+}: {
+  member: Member;
+  onClose: () => void;
+}) {
   const [name, setName] = useState(member.name ?? "");
   const [mobile, setMobile] = useState(member.mobile ?? "");
   const [wardId, setWardId] = useState(member.ward?.id ?? "");
-  const [isHead, setIsHead] = useState(!!member.familyHead);
-
-  // ✅ Fetch all wards
+  const [head, setHead] = useState(!!member.familyHead);
   const { data: wards } = api.ward.getAllWards.useQuery();
-  const updateMember = api.parishoner.updateParishoner.useMutation({
-    onSuccess: () => {
-      window.location.reload(); // 🔄 Full page refresh after update
-    },
+  const update = api.parishoner.updateParishoner.useMutation({
+    onSuccess: () => window.location.reload(),
   });
-
-  const handleSave = () => {
-    updateMember.mutate(
-      { parishonerId: member.id, name, mobile, wardId, head: isHead },
-      { onSuccess: () => onClose() },
-    );
-  };
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-      <div className="rounded-lg bg-white p-6">
-        <h2 className="text-lg font-bold">Edit Member</h2>
-
-        <label className="mt-2 block">
-          Name:
+    <AdminDialog
+      title="Edit member"
+      onClose={onClose}
+      actions={
+        <DialogActions
+          onClose={onClose}
+          onSave={() =>
+            update.mutate({
+              parishonerId: member.id,
+              name,
+              mobile,
+              wardId,
+              head,
+            })
+          }
+          disabled={!name || !mobile || update.isPending}
+        />
+      }
+    >
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="text-sm text-white/55">
+          Name
           <input
-            type="text"
+            className={adminInput}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded border p-2"
           />
         </label>
-
-        <label className="mt-2 block">
-          Mobile:
+        <label className="text-sm text-white/55">
+          Mobile
           <input
-            type="text"
+            className={adminInput}
+            inputMode="tel"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
-            className="w-full rounded border p-2"
           />
         </label>
-
-        {/* ✅ Ward Selection */}
-        <label className="mt-2 block">
-          Ward:
+        <label className="text-sm text-white/55 sm:col-span-2">
+          Ward
           <select
+            className={adminInput}
             value={wardId}
             onChange={(e) => setWardId(e.target.value)}
-            className="w-full rounded border p-2"
           >
-            <option value="">Select Ward</option>
+            <option value="">Select ward</option>
             {wards?.map((ward) => (
               <option key={ward.id} value={ward.id}>
                 {ward.name}
@@ -80,28 +81,16 @@ export default function EditMemberModal({
             ))}
           </select>
         </label>
-
-        <label className="mt-2 block">
-          <input
-            type="checkbox"
-            checked={isHead}
-            onChange={() => setIsHead(!isHead)}
-          />
-          Assign as Family Head
-        </label>
-
-        <div className="mt-4 flex justify-end space-x-2">
-          <button onClick={onClose} className="rounded bg-gray-300 px-4 py-2">
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="rounded bg-primary px-4 py-2 text-white"
-          >
-            Save
-          </button>
-        </div>
       </div>
-    </div>
+      <label className="flex items-center gap-2 text-sm text-white/70">
+        <input
+          type="checkbox"
+          checked={head}
+          onChange={(e) => setHead(e.target.checked)}
+          className="h-4 w-4 accent-[#f0c878]"
+        />
+        Assign as family head
+      </label>
+    </AdminDialog>
   );
 }

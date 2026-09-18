@@ -1,94 +1,61 @@
+"use client";
 import { useState } from "react";
+import {
+  AdminDialog,
+  adminInput,
+  DialogActions,
+} from "~/components/admin/AdminDialog";
 import { api } from "~/trpc/react";
-
-interface AddMemberModalProps {
-  familyId: string;
-  onClose: () => void;
-}
-
 export default function AddMemberModal({
   familyId,
   onClose,
-}: AddMemberModalProps) {
-  const [selectedParishonerId, setSelectedParishonerId] = useState("");
+}: {
+  familyId: string;
+  onClose: () => void;
+}) {
+  const [selected, setSelected] = useState("");
   const [search, setSearch] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // ✅ Fetch all parishioners
-  const { data: parishoners } = api.parishoner.getAllParishoners.useQuery();
-
-  const addMember = api.parishoner.assignParishonerToFamily.useMutation({
-    onSuccess: () => {
-      window.location.reload(); // 🔄 Refresh to reflect new member
-    },
+  const { data: people } = api.parishoner.getAllParishoners.useQuery();
+  const add = api.parishoner.assignParishonerToFamily.useMutation({
+    onSuccess: () => window.location.reload(),
   });
-
-  const handleSave = () => {
-    if (!selectedParishonerId) return;
-    addMember.mutate(
-      { parishonerId: selectedParishonerId, familyId },
-      { onSuccess: () => onClose() },
-    );
-  };
-
-  // ✅ Filter parishioners based on search input
-  const filteredParishoners = parishoners?.filter((p) =>
-    p.name?.toLowerCase().includes(search.toLowerCase()),
+  const filtered = people?.filter((person) =>
+    person.name?.toLowerCase().includes(search.toLowerCase()),
   );
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-      <div className="w-96 rounded-lg bg-white p-6">
-        <h2 className="text-lg font-bold">Add Member to Family</h2>
-
-        {/* ✅ Search Input */}
-        <div className="relative mt-2">
-          <input
-            type="text"
-            placeholder="Search Parishoner..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setIsDropdownOpen(true);
-            }}
-            className="w-full rounded border p-2"
-          />
-
-          {/* ⬇️ Dropdown List */}
-          {isDropdownOpen && (
-            <ul className="absolute left-0 top-full mt-1 max-h-48 w-full overflow-y-auto rounded border bg-white shadow-lg">
-              {filteredParishoners?.map((p) => (
-                <li
-                  key={p.id}
-                  className={`cursor-pointer p-2 hover:bg-gray-200 ${
-                    selectedParishonerId === p.id ? "bg-primary text-white" : ""
-                  }`}
-                  onClick={() => {
-                    setSelectedParishonerId(p.id);
-                    setSearch(p.name ?? ""); // Ensure it's always a string
-                    setIsDropdownOpen(false); // Close dropdown
-                  }}
-                >
-                  {p.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-end space-x-2">
-          <button onClick={onClose} className="rounded bg-gray-300 px-4 py-2">
-            Cancel
-          </button>
+    <AdminDialog
+      title="Add family member"
+      onClose={onClose}
+      actions={
+        <DialogActions
+          onClose={onClose}
+          onSave={() => add.mutate({ parishonerId: selected, familyId })}
+          label="Add member"
+          disabled={!selected || add.isPending}
+        />
+      }
+    >
+      <label className="block text-sm text-white/55">
+        Find parishioner
+        <input
+          className={adminInput}
+          placeholder="Search by name"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </label>
+      <div className="max-h-56 space-y-1 overflow-y-auto rounded-xl border border-white/10 p-2">
+        {filtered?.map((person) => (
           <button
-            onClick={handleSave}
-            className="rounded bg-primary px-4 py-2 text-white"
-            disabled={!selectedParishonerId}
+            type="button"
+            key={person.id}
+            onClick={() => setSelected(person.id)}
+            className={`block w-full rounded-lg px-3 py-2.5 text-left text-sm ${selected === person.id ? "bg-[#f0c878] text-[#211811]" : "text-white/70 hover:bg-white/[0.06]"}`}
           >
-            Add
+            {person.name}
           </button>
-        </div>
+        ))}
       </div>
-    </div>
+    </AdminDialog>
   );
 }
