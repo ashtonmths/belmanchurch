@@ -93,15 +93,43 @@ export default function AdminGallery() {
         description="Prepare and publish a complete event album from one place."
       >
         <ToastContainer />
-        <div className="mb-5 flex rounded-full border border-white/10 bg-[#211811]/80 p-1 sm:max-w-xl">
-          {["Album details", "Photographs", "Review"].map((label, index) => (
+        <div className="mb-6 rounded-2xl border border-white/10 bg-[#211811]/80 px-5 py-5 sm:px-7">
+          <div
+            className="relative mx-3 h-1 rounded-full bg-white/10"
+            role="progressbar"
+            aria-label="Gallery publishing progress"
+            aria-valuemin={1}
+            aria-valuemax={3}
+            aria-valuenow={step}
+          >
             <div
-              key={label}
-              className={`flex-1 rounded-full px-3 py-2.5 text-center text-sm ${step === index + 1 ? "bg-[#f0c878] font-semibold text-[#211811]" : "text-white/45"}`}
-            >
-              {label}
-            </div>
-          ))}
+              className="absolute inset-y-0 left-0 rounded-full bg-[#f0c878] transition-[width] duration-500 ease-out"
+              style={{ width: `${((step - 1) / 2) * 100}%` }}
+            />
+            {[1, 2, 3].map((position) => (
+              <span
+                key={position}
+                className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-colors duration-300 ${position <= step ? "border-[#f0c878] bg-[#f0c878]" : "border-white/25 bg-[#211811]"}`}
+                style={{ left: `${((position - 1) / 2) * 100}%` }}
+              />
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-3 text-center text-xs sm:text-sm">
+            {["Album details", "Photographs", "Review"].map((label, index) => (
+              <span
+                key={label}
+                className={
+                  step === index + 1
+                    ? "font-semibold text-[#f0c878]"
+                    : index + 1 < step
+                      ? "text-white/70"
+                      : "text-white/35"
+                }
+              >
+                {label}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_24rem]">
           <section className="overflow-hidden rounded-3xl border border-white/10 bg-[#211811]/90">
