@@ -10,7 +10,8 @@ import {
   Upload,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
+import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
 import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
@@ -92,10 +93,10 @@ export default function AdminGallery() {
         title="Gallery"
         description="Prepare and publish a complete event album from one place."
       >
-        <ToastContainer />
+        <ThemedToast />
         <div className="mb-6 rounded-2xl border border-white/10 bg-[#211811]/80 px-5 py-5 sm:px-7">
           <div
-            className="relative mx-3 h-1 rounded-full bg-white/10"
+            className="relative ml-[16.6667%] mr-[16.6667%] h-1 rounded-full bg-white/10"
             role="progressbar"
             aria-label="Gallery publishing progress"
             aria-valuemin={1}
