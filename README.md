@@ -20,10 +20,6 @@ Live website: [belmanchurch.in](https://belmanchurch.in)
 
 Photographers can only access gallery administration. Administrators can manage the other parish records and website settings.
 
-## Online donations
-
-The Razorpay donation flow has been developed, but online donations are currently paused. Razorpay requires additional parish documents, including a power of attorney, before the payment process can be activated.
-
 ## Technology
 
 - Next.js 15 and TypeScript
