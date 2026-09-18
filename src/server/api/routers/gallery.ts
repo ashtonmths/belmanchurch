@@ -74,6 +74,14 @@ export const galleryRouter = createTRPCRouter({
         eventDate: true,
         cloudinaryFolder: true,
       },
+      with: {
+        images: {
+          columns: { uploadedById: true },
+          with: {
+            uploadedBy: { columns: { id: true, name: true, image: true } },
+          },
+        },
+      },
       orderBy: desc(galleries.eventDate),
     });
 
@@ -94,6 +102,15 @@ export const galleryRouter = createTRPCRouter({
 
           return {
             ...folder,
+            contributors: Array.from(
+              new Map(
+                folder.images
+                  .map((image) => image.uploadedBy)
+                  .filter((user) => user !== null)
+                  .map((user) => [user.id, user]),
+              ).values(),
+            ),
+            images: undefined,
             previewImage: sorted[0]?.secure_url ?? null, // First uploaded
           };
         } catch (error) {
@@ -101,7 +118,19 @@ export const galleryRouter = createTRPCRouter({
             `Error fetching preview for ${folder.cloudinaryFolder}:`,
             error,
           );
-          return { ...folder, previewImage: null };
+          return {
+            ...folder,
+            contributors: Array.from(
+              new Map(
+                folder.images
+                  .map((image) => image.uploadedBy)
+                  .filter((user) => user !== null)
+                  .map((user) => [user.id, user]),
+              ).values(),
+            ),
+            images: undefined,
+            previewImage: null,
+          };
         }
       }),
     );

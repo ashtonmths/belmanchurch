@@ -4,7 +4,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Heart, Link2, Share2, X } from "lucide-react";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ThemedToast from "~/components/ThemedToast";
@@ -64,10 +64,32 @@ export default function GalleryBrowser({
     );
   };
 
+  const signInToLike = () => {
+    if (!selectedImage || !albumId) return;
+    sessionStorage.setItem(
+      "pending-gallery-like",
+      JSON.stringify({ albumId, imageId: selectedImage.id }),
+    );
+    void signIn("google", {
+      redirectTo: `${window.location.origin}/gallery/${albumId}`,
+    });
+  };
+
   const handleLike = () => {
     if (!selectedImage) return;
     if (!session) {
-      toast.error("Sign in to like photographs");
+      toast.info(
+        <div className="flex items-center gap-4">
+          <span className="text-sm">Sign in to like this photograph.</span>
+          <button
+            type="button"
+            onClick={signInToLike}
+            className="shrink-0 rounded-full bg-[#f0c878] px-3 py-1.5 text-xs font-semibold text-[#211811]"
+          >
+            Sign in
+          </button>
+        </div>,
+      );
       return;
     }
     const current = likeState[selectedImage.id] ?? {
@@ -88,6 +110,74 @@ export default function GalleryBrowser({
           setLikeState((state) => ({ ...state, [selectedImage.id]: current })),
       },
     );
+  };
+
+  useEffect(() => {
+    if (!session || !albumId || !images?.length || toggleLike.isPending) return;
+    const pending = sessionStorage.getItem("pending-gallery-like");
+    if (!pending) return;
+
+    try {
+      const request = JSON.parse(pending) as {
+        albumId?: string;
+        imageId?: string;
+      };
+      if (request.albumId !== albumId || !request.imageId) return;
+      const index = images.findIndex((image) => image.id === request.imageId);
+      if (index < 0) return;
+      const image = images[index];
+      if (!image) return;
+
+      sessionStorage.removeItem("pending-gallery-like");
+      setSelectedIndex(index);
+      if (image.isLiked) {
+        setLikeState((state) => ({
+          ...state,
+          [image.id]: { liked: true, count: image.likes },
+        }));
+        return;
+      }
+
+      toggleLike.mutate(
+        { imageId: image.id },
+        {
+          onSuccess: (result) =>
+            setLikeState((state) => ({
+              ...state,
+              [image.id]: {
+                liked: result.isLiked,
+                count: result.likes,
+              },
+            })),
+          onError: () => toast.error("The photograph could not be liked"),
+        },
+      );
+    } catch {
+      sessionStorage.removeItem("pending-gallery-like");
+    }
+  }, [albumId, images, session, toggleLike]);
+
+  const shareAlbum = async (folder: NonNullable<typeof folders>[number]) => {
+    const url = `${window.location.origin}/gallery/${folder.id}`;
+    const date = new Date(folder.eventDate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    const text = `${folder.eventName}\n${date}\nView and download photographs: ${url}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: folder.eventName, text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      toast.success("Album details and link copied");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      await navigator.clipboard.writeText(text);
+      toast.success("Album details and link copied");
+    }
   };
 
   useEffect(() => {
@@ -139,18 +229,45 @@ export default function GalleryBrowser({
                       year: "numeric",
                     })}
                   </p>
+                  {folder.contributors.length > 0 && (
+                    <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-4">
+                      <div className="flex -space-x-2">
+                        {folder.contributors.slice(0, 3).map((contributor) =>
+                          contributor.image ? (
+                            <Image
+                              key={contributor.id}
+                              src={contributor.image}
+                              alt={contributor.name ?? "Album contributor"}
+                              width={28}
+                              height={28}
+                              className="h-7 w-7 rounded-full border-2 border-[#211811] object-cover"
+                            />
+                          ) : (
+                            <span
+                              key={contributor.id}
+                              className="grid h-7 w-7 place-items-center rounded-full border-2 border-[#211811] bg-[#f0c878] text-[10px] font-bold text-[#211811]"
+                            >
+                              {contributor.name?.charAt(0).toUpperCase() ?? "?"}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                      <p className="line-clamp-2 text-xs leading-5 text-white/45">
+                        Added by{" "}
+                        {folder.contributors
+                          .map((person) => person.name ?? "Contributor")
+                          .join(", ")}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </button>
               <div className="px-5 pb-5">
                 <button
                   type="button"
-                  onClick={() => {
-                    const url = `${window.location.origin}/gallery/${folder.id}`;
-                    void navigator.clipboard.writeText(url);
-                    toast.success("Album link copied");
-                  }}
+                  onClick={() => void shareAlbum(folder)}
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3.5 py-2 text-xs font-medium text-white/65 transition hover:border-[#f0c878]/50 hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878]"
-                  aria-label={`Copy link to ${folder.eventName}`}
+                  aria-label={`Share ${folder.eventName}`}
                 >
                   <Share2 size={14} />
                   Share album
