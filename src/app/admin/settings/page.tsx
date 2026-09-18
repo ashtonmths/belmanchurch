@@ -29,7 +29,7 @@ export default function SettingsPage() {
         description="Control public features without changing the website code."
       >
         <ToastContainer />
-        <section className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-[#211811]/90 p-5 sm:p-8">
+        <section className="w-full rounded-3xl border border-white/10 bg-[#211811]/90 p-5 sm:p-8">
           <div className="flex items-center gap-3 border-b border-white/10 pb-6">
             <span className="grid h-11 w-11 place-items-center rounded-full bg-[#f0c878]/10 text-[#f0c878]">
               <Settings2 size={21} />
