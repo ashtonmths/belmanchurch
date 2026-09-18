@@ -10,7 +10,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendReceipt(email: string, file: { name: string; buffer: Buffer }) {
+export async function sendReceipt(
+  email: string,
+  file: { name: string; buffer: Buffer },
+) {
   try {
     const mailOptions = {
       from: `"St. Joseph Church, Belman" <${process.env.SMTP_USER}>`,

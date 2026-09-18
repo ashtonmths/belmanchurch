@@ -143,8 +143,11 @@ export const adminProcedure = t.procedure
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
-    if (!['ADMIN', 'DEVELOPER'].includes(ctx.session.user.role)) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+    if (!["ADMIN", "DEVELOPER"].includes(ctx.session.user.role)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
     }
     return next({
       ctx: {

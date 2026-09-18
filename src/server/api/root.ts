@@ -17,7 +17,7 @@ export const appRouter = createTRPCRouter({
   misc: miscRouter,
   ward: wardRouter,
   parishoner: parishonerRouter,
-  gallery: galleryRouter
+  gallery: galleryRouter,
 });
 
 // export type definition of API
