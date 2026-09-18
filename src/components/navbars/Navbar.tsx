@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { api } from "~/trpc/react";
 
 const links = [
   { href: "/", label: "Home" },
@@ -18,6 +19,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [parishOpen, setParishOpen] = useState(false);
+  const { data: siteSettings } = api.misc.getSiteSettings.useQuery();
+  const donationsEnabled = siteSettings?.donationEnabled === true;
 
   useEffect(() => setIsOpen(false), [pathname]);
 
@@ -112,12 +115,14 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/donate"
-            className="rounded-full border border-[#f0c878] bg-[#f0c878] px-5 py-3 text-base font-bold text-[#2a1b10] shadow-[0_8px_30px_rgba(240,200,120,0.2)] transition hover:bg-transparent hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          >
-            Make a donation
-          </Link>
+          {donationsEnabled && (
+            <Link
+              href="/donate"
+              className="rounded-full border border-[#f0c878] bg-[#f0c878] px-5 py-3 text-base font-bold text-[#2a1b10] shadow-[0_8px_30px_rgba(240,200,120,0.2)] transition hover:bg-transparent hover:text-[#f0c878] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0c878] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            >
+              Make a donation
+            </Link>
+          )}
         </div>
 
         <button
@@ -275,18 +280,20 @@ export default function Navbar() {
                 ))}
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.42, duration: 0.3 }}
-              >
-                <Link
-                  href="/donate"
-                  className="block rounded-full bg-[#f0c878] px-5 py-3.5 text-center text-sm font-semibold text-[#2a1b10]"
+              {donationsEnabled && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.42, duration: 0.3 }}
                 >
-                  Make a donation
-                </Link>
-              </motion.div>
+                  <Link
+                    href="/donate"
+                    className="block rounded-full bg-[#f0c878] px-5 py-3.5 text-center text-sm font-semibold text-[#2a1b10]"
+                  >
+                    Make a donation
+                  </Link>
+                </motion.div>
+              )}
             </motion.div>
           </motion.div>
         )}

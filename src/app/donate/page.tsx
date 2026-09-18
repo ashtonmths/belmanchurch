@@ -40,6 +40,7 @@ function nextDate(weekday: number) {
 export default function DonatePage() {
   const { data: session } = useSession();
   const { data: massSchedule = [] } = api.misc.getMassSchedule.useQuery();
+  const { data: siteSettings } = api.misc.getSiteSettings.useQuery();
   const [step, setStep] = useState(1);
   const [type, setType] = useState<DonationType | null>(null);
   const [forWhom, setForWhom] = useState("");
@@ -208,6 +209,16 @@ export default function DonatePage() {
                             <option value="">Select Mass timing</option>
                             {massSchedule
                               .filter((mass) => mass.active)
+                              .filter(
+                                (mass) =>
+                                  mass.scheduleType !== "SUNDAY_CATECHISM" ||
+                                  siteSettings?.catechismEnabled !== false,
+                              )
+                              .filter(
+                                (mass) =>
+                                  mass.scheduleType !== "SUNDAY_NO_CATECHISM" ||
+                                  siteSettings?.catechismEnabled === false,
+                              )
                               .map((mass) => {
                                 const date = nextDate(mass.dayOfWeek)
                                   .hour(mass.hour)

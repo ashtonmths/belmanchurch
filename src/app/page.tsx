@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Button from "~/components/Button";
 import { useRole } from "~/hooks/useRole";
 import { api } from "~/trpc/react";
@@ -25,35 +25,58 @@ type MassTime = {
   minute: number;
   label: string;
   active: boolean;
+  scheduleType: string;
 };
 
 const fallbackSchedule: MassTime[] = [
-  ...[1, 2, 3, 4, 5].map((dayOfWeek) => ({
-    dayOfWeek,
+  {
+    dayOfWeek: 1,
     hour: 6,
     minute: 30,
     label: "Weekday Mass",
     active: true,
-  })),
-  { dayOfWeek: 6, hour: 16, minute: 0, label: "Evening Mass", active: true },
-  { dayOfWeek: 0, hour: 7, minute: 30, label: "Morning Mass", active: true },
+    scheduleType: "WEEKDAY",
+  },
+  {
+    dayOfWeek: 6,
+    hour: 16,
+    minute: 0,
+    label: "Evening Mass",
+    active: true,
+    scheduleType: "SATURDAY",
+  },
+  {
+    dayOfWeek: 0,
+    hour: 7,
+    minute: 30,
+    label: "Morning Mass",
+    active: true,
+    scheduleType: "SUNDAY_ALWAYS",
+  },
   {
     dayOfWeek: 0,
     hour: 10,
     minute: 30,
     label: "After catechism",
     active: true,
+    scheduleType: "SUNDAY_CATECHISM",
+  },
+  {
+    dayOfWeek: 0,
+    hour: 10,
+    minute: 0,
+    label: "Mass without catechism",
+    active: true,
+    scheduleType: "SUNDAY_NO_CATECHISM",
   },
 ];
-const dayNames = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+const scheduleNames: Record<string, string> = {
+  WEEKDAY: "Weekdays",
+  SATURDAY: "Saturday",
+  SUNDAY_ALWAYS: "Sunday",
+  SUNDAY_CATECHISM: "Sunday (with catechism)",
+  SUNDAY_NO_CATECHISM: "Sunday (without catechism)",
+};
 
 function formatTime(hour: number, minute: number) {
   return new Date(2000, 0, 1, hour, minute).toLocaleTimeString("en-IN", {
@@ -113,7 +136,29 @@ export default function Home() {
   const router = useRouter();
   const role = useRole();
   const { data: storedSchedule } = api.misc.getMassSchedule.useQuery();
-  const schedule = storedSchedule?.length ? storedSchedule : fallbackSchedule;
+  const { data: siteSettings } = api.misc.getSiteSettings.useQuery();
+  const groupedSchedule = storedSchedule?.length
+    ? storedSchedule
+    : fallbackSchedule;
+  const schedule = useMemo(
+    () =>
+      groupedSchedule.flatMap((mass) => {
+        if (mass.scheduleType === "WEEKDAY")
+          return [1, 2, 3, 4, 5].map((dayOfWeek) => ({ ...mass, dayOfWeek }));
+        if (
+          mass.scheduleType === "SUNDAY_CATECHISM" &&
+          siteSettings?.catechismEnabled === false
+        )
+          return [];
+        if (
+          mass.scheduleType === "SUNDAY_NO_CATECHISM" &&
+          siteSettings?.catechismEnabled !== false
+        )
+          return [];
+        return [mass];
+      }),
+    [groupedSchedule, siteSettings?.catechismEnabled],
+  );
   const [massModal, setMassModal] = useState(false);
   const [nextMass, setNextMass] = useState<NextMass | null>(null);
 
@@ -309,15 +354,29 @@ export default function Home() {
 
               <div className="mt-7 grid gap-x-10 gap-y-7 md:grid-cols-2">
                 <ScheduleBlock title="Mass timings">
-                  {schedule
+                  {groupedSchedule
                     .filter((mass) => mass.active)
+                    .filter(
+                      (mass) =>
+                        mass.scheduleType !== "SUNDAY_CATECHISM" ||
+                        siteSettings?.catechismEnabled !== false,
+                    )
+                    .filter(
+                      (mass) =>
+                        mass.scheduleType !== "SUNDAY_NO_CATECHISM" ||
+                        siteSettings?.catechismEnabled === false,
+                    )
                     .map((mass) => (
-                      <p key={`${mass.dayOfWeek}-${mass.hour}-${mass.minute}`}>
-                        {dayNames[mass.dayOfWeek]} —{" "}
+                      <p key={mass.scheduleType}>
+                        {scheduleNames[mass.scheduleType]} —{" "}
                         {formatTime(mass.hour, mass.minute)}
                         <span className="text-white/40"> · {mass.label}</span>
                       </p>
                     ))}
+                  <p className="mt-3 text-sm text-[#f5d99e]/75">
+                    Sunday catechism and non-catechism Mass times may vary from
+                    late March through late May.
+                  </p>
                 </ScheduleBlock>
                 <ScheduleBlock title="Catechism">
                   <p>Sunday — 9:15 AM to 10:30 AM</p>

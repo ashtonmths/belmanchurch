@@ -226,12 +226,20 @@ export const priests = pgTable("Priest", {
 export const massSchedules = pgTable("MassSchedule", {
   id: id(),
   dayOfWeek: integer("dayOfWeek").notNull(),
+  scheduleType: text("scheduleType").notNull().default("WEEKDAY"),
   label: text("label").notNull(),
   hour: integer("hour").notNull(),
   minute: integer("minute").notNull().default(0),
   active: boolean("active").notNull().default(true),
   sortOrder: integer("sortOrder").notNull().default(0),
   createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const siteSettings = pgTable("SiteSettings", {
+  id: text("id").primaryKey().default("main"),
+  donationEnabled: boolean("donationEnabled").notNull().default(true),
+  catechismEnabled: boolean("catechismEnabled").notNull().default(true),
   updatedAt: updatedAt(),
 });
 

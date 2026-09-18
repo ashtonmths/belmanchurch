@@ -10,7 +10,7 @@ import crypto from "crypto";
 import Razorpay from "razorpay";
 import { sendReceipt } from "~/server/utils/mail";
 import { desc, eq } from "drizzle-orm";
-import { donations, orders } from "~/server/db/schema";
+import { donations, orders, siteSettings } from "~/server/db/schema";
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -37,6 +37,15 @@ export const donationRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
+        const settings = await db.query.siteSettings.findFirst({
+          where: eq(siteSettings.id, "main"),
+        });
+        if (settings && !settings.donationEnabled) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Donations are currently unavailable",
+          });
+        }
         const razorpayOrder = await razorpay.orders.create({
           amount: input.amount * 100,
           currency: "INR",
@@ -60,6 +69,7 @@ export const donationRouter = createTRPCRouter({
 
         return { razorpayOrderId: razorpayOrder.id };
       } catch (error) {
+        if (error instanceof TRPCError) throw error;
         console.error("Order creation failed:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

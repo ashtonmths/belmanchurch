@@ -22,6 +22,13 @@
       "when": 1789661251439,
       "tag": "0002_third_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789748247107,
+      "tag": "0003_jittery_kingpin",
+      "breakpoints": true
     }
   ]
 }
