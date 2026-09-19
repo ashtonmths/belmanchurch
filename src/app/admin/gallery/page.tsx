@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  History,
   ImagePlus,
   Info,
   MapPin,
@@ -15,6 +16,7 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import ThemedToast from "~/components/ThemedToast";
+import GalleryHistory from "~/components/admin/GalleryHistory";
 import PageShell from "~/components/PageShell";
 import ProtectedRoute from "~/components/ProtectRoute";
 import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
@@ -24,8 +26,36 @@ import "react-toastify/dist/ReactToastify.css";
 const COMPRESSION_THRESHOLD_BYTES = 500 * 1024;
 const COMPRESSED_PHOTO_SIZE_MB = 300 / 1024;
 
+function GalleryTabs({
+  active,
+  onChange,
+}: {
+  active: "upload" | "history";
+  onChange: (value: "upload" | "history") => void;
+}) {
+  return (
+    <div className="mb-6 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#211811]/90 p-1.5 sm:w-fit sm:min-w-80">
+      <button
+        type="button"
+        onClick={() => onChange("upload")}
+        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition ${active === "upload" ? "bg-[#f0c878] text-[#211811]" : "text-white/55 hover:text-white"}`}
+      >
+        <Upload size={16} /> Upload
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange("history")}
+        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition ${active === "history" ? "bg-[#f0c878] text-[#211811]" : "text-white/55 hover:text-white"}`}
+      >
+        <History size={16} /> History
+      </button>
+    </div>
+  );
+}
+
 export default function AdminGallery() {
   const utils = api.useUtils();
+  const [activeTab, setActiveTab] = useState<"upload" | "history">("upload");
   const [files, setFiles] = useState<File[]>([]);
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -39,7 +69,9 @@ export default function AdminGallery() {
   );
   const { uploadImages, isUploading } = useCloudinaryUpload();
   const { data: pendingEvents = [], isLoading: checkingPendingEvents } =
-    api.gallery.getPendingEvents.useQuery();
+    api.gallery.getPendingEvents.useQuery(undefined, {
+      enabled: activeTab === "upload",
+    });
   const publish = api.gallery.uploadGallery.useMutation({
     onSuccess: ({ eventCreated }) => {
       toast.success(
@@ -141,6 +173,22 @@ export default function AdminGallery() {
     setStep(2);
   };
 
+  if (activeTab === "history") {
+    return (
+      <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
+        <PageShell
+          admin
+          title="Gallery"
+          description="Review published albums, update their details and choose thumbnails."
+        >
+          <ThemedToast />
+          <GalleryTabs active={activeTab} onChange={setActiveTab} />
+          <GalleryHistory />
+        </PageShell>
+      </ProtectedRoute>
+    );
+  }
+
   if (checkingPendingEvents) {
     return (
       <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
@@ -149,6 +197,7 @@ export default function AdminGallery() {
           title="Gallery"
           description="Prepare and publish a complete event album from one place."
         >
+          <GalleryTabs active={activeTab} onChange={setActiveTab} />
           <div className="min-h-48 animate-pulse rounded-3xl border border-white/10 bg-[#211811]/90" />
         </PageShell>
       </ProtectedRoute>
@@ -164,6 +213,7 @@ export default function AdminGallery() {
           description="These parish events do not have a gallery album yet."
         >
           <ThemedToast />
+          <GalleryTabs active={activeTab} onChange={setActiveTab} />
           <section className="rounded-3xl border border-white/10 bg-[#211811]/95 p-5 shadow-2xl sm:p-8">
             <div className="flex flex-col gap-3 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -231,6 +281,7 @@ export default function AdminGallery() {
         description="Prepare and publish a complete event album from one place."
       >
         <ThemedToast />
+        <GalleryTabs active={activeTab} onChange={setActiveTab} />
         <div className="mb-6 rounded-2xl border border-white/10 bg-[#211811]/80 px-5 py-5 sm:px-7">
           <div
             className="relative ml-[16.6667%] mr-[16.6667%] h-1 rounded-full bg-white/10"
