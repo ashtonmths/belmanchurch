@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://belmanchurch.in";
   const albums = await db.query.galleries.findMany({
     columns: { id: true, createdAt: true },
+    with: { images: { columns: { createdAt: true } } },
     orderBy: desc(galleries.eventDate),
   });
   const pages = [
@@ -25,13 +26,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...pages.map(([path, priority, changeFrequency]) => ({
       url: `${baseUrl}${path}`,
-      lastModified: new Date(),
       changeFrequency,
       priority,
     })),
     ...albums.map((album) => ({
       url: `${baseUrl}/gallery/${album.id}`,
-      lastModified: album.createdAt,
+      lastModified: album.images.reduce(
+        (latest, image) =>
+          image.createdAt > latest ? image.createdAt : latest,
+        album.createdAt,
+      ),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),

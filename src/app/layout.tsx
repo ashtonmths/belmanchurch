@@ -70,21 +70,60 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const parishJsonLd = {
+  const siteJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Church",
-    name: "St. Joseph Church, Belman",
-    url: "https://belmanchurch.in",
-    logo: "https://belmanchurch.in/Logo.png",
-    image: "https://belmanchurch.in/screenshots/hero.png",
-    email: "belmanchurch.in@gmail.com",
-    telephone: "+91 91410 31604",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Belman",
-      addressRegion: "Karnataka",
-      addressCountry: "IN",
-    },
+    "@graph": [
+      {
+        "@type": "Church",
+        "@id": "https://belmanchurch.in/#church",
+        name: "St. Joseph Church, Belman",
+        url: "https://belmanchurch.in",
+        logo: "https://belmanchurch.in/Logo.png",
+        image: "https://belmanchurch.in/screenshots/hero.png",
+        email: "belmanchurch.in@gmail.com",
+        telephone: "+91 91410 31604",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Belman",
+          addressRegion: "Karnataka",
+          addressCountry: "IN",
+        },
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://belmanchurch.in/#website",
+        url: "https://belmanchurch.in",
+        name: "St. Joseph Church, Belman",
+        description: "Official parish website of St. Joseph Church, Belman.",
+        publisher: { "@id": "https://belmanchurch.in/#church" },
+        inLanguage: "en-IN",
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Our Parish",
+        url: "https://belmanchurch.in/about",
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Parish Events",
+        url: "https://belmanchurch.in/events",
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Gallery",
+        url: "https://belmanchurch.in/gallery",
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Bethkati",
+        url: "https://belmanchurch.in/bethkati",
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Contact Us",
+        url: "https://belmanchurch.in/contact",
+      },
+    ],
   };
 
   return (
@@ -92,7 +131,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col bg-[#17110c] font-sans">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(parishJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
         />
         <Analytics />
         <SessionProvider>
