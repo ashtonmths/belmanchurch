@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import GalleryBrowser from "~/components/GalleryBrowser";
 import { db } from "~/server/db";
 import { galleries, galleryImages } from "~/server/db/schema";
+import { api } from "~/trpc/server";
 
 type AlbumPageProps = { params: Promise<{ id: string }> };
 
@@ -86,8 +87,42 @@ export default async function GalleryAlbumPage({ params }: AlbumPageProps) {
   const { id } = await params;
   const gallery = await db.query.galleries.findFirst({
     where: eq(galleries.id, id),
-    columns: { id: true },
+    columns: { id: true, eventName: true },
   });
   if (!gallery) notFound();
-  return <GalleryBrowser initialAlbumId={id} />;
+  const [folders, images] = await Promise.all([
+    api.gallery.getFolders(),
+    api.gallery.getImagesByID({ id }),
+  ]);
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Gallery",
+        item: "https://belmanchurch.in/gallery",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: gallery.eventName,
+        item: `https://belmanchurch.in/gallery/${gallery.id}`,
+      },
+    ],
+  };
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <GalleryBrowser
+        initialAlbumId={id}
+        initialFolders={folders}
+        initialImages={images}
+      />
+    </>
+  );
 }

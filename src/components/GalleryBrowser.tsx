@@ -9,13 +9,17 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ThemedToast from "~/components/ThemedToast";
 import PageShell from "~/components/PageShell";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function GalleryBrowser({
   initialAlbumId = null,
+  initialFolders,
+  initialImages,
 }: {
   initialAlbumId?: string | null;
+  initialFolders?: RouterOutputs["gallery"]["getFolders"];
+  initialImages?: RouterOutputs["gallery"]["getImagesByID"];
 }) {
   const [albumId, setAlbumId] = useState(initialAlbumId);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -24,10 +28,19 @@ export default function GalleryBrowser({
   >({});
   const { data: session } = useSession();
   const toggleLike = api.gallery.toggleLike.useMutation();
-  const { data: folders, isLoading, error } = api.gallery.getFolders.useQuery();
+  const {
+    data: folders,
+    isLoading,
+    error,
+  } = api.gallery.getFolders.useQuery(undefined, {
+    initialData: initialFolders,
+  });
   const { data: images, isFetching } = api.gallery.getImagesByID.useQuery(
     { id: albumId ?? "" },
-    { enabled: !!albumId },
+    {
+      enabled: !!albumId,
+      initialData: albumId === initialAlbumId ? initialImages : undefined,
+    },
   );
   const activeFolder = folders?.find((folder) => folder.id === albumId);
   const selectedImage =
