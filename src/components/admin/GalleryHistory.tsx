@@ -32,7 +32,31 @@ export default function GalleryHistory() {
       { enabled: Boolean(selectedId), staleTime: 60_000 },
     );
   const updateAlbum = api.gallery.updateAlbum.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
+      utils.gallery.getAdminAlbums.setData(undefined, (current) =>
+        current?.map((album) =>
+          album.id === variables.id
+            ? {
+                ...album,
+                eventName: variables.eventName,
+                eventDate: new Date(variables.eventDate),
+                thumbnailUrl: variables.thumbnailUrl,
+              }
+            : album,
+        ),
+      );
+      utils.gallery.getFolders.setData(undefined, (current) =>
+        current?.map((album) =>
+          album.id === variables.id
+            ? {
+                ...album,
+                eventName: variables.eventName,
+                eventDate: new Date(variables.eventDate),
+                previewImage: variables.thumbnailUrl,
+              }
+            : album,
+        ),
+      );
       toast.success("Album updated");
       await Promise.all([
         utils.gallery.getAdminAlbums.invalidate(),

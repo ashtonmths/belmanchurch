@@ -6,7 +6,7 @@ import {
 } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { and, asc, count, desc, eq, ne } from "drizzle-orm";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { events, galleries, galleryImages } from "~/server/db/schema";
 import {
   getCachedGalleryFolders,
@@ -108,6 +108,9 @@ export const galleryRouter = createTRPCRouter({
       });
       revalidateTag("gallery-folders");
       revalidateTag("gallery-images");
+      revalidatePath("/gallery");
+      revalidatePath(`/gallery/${input.id}`);
+      revalidatePath("/events");
       return { success: true };
     }),
 
