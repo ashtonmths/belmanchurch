@@ -4,9 +4,11 @@ import imageCompression from "browser-image-compression";
 import {
   ArrowLeft,
   ArrowRight,
+  CalendarDays,
   Check,
   ImagePlus,
   Info,
+  MapPin,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -20,9 +22,12 @@ import { api } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminGallery() {
+  const utils = api.useUtils();
   const [files, setFiles] = useState<File[]>([]);
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
+  const [linkedEventId, setLinkedEventId] = useState<string | null>(null);
+  const [pendingEventsSkipped, setPendingEventsSkipped] = useState(false);
   const [thumbnailIndex, setThumbnailIndex] = useState<number | null>(null);
   const [step, setStep] = useState(1);
   const previews = useMemo(
@@ -30,14 +35,23 @@ export default function AdminGallery() {
     [files],
   );
   const { uploadImages, isUploading } = useCloudinaryUpload();
+  const { data: pendingEvents = [], isLoading: checkingPendingEvents } =
+    api.gallery.getPendingEvents.useQuery();
   const publish = api.gallery.uploadGallery.useMutation({
-    onSuccess: () => {
-      toast.success("Gallery published");
+    onSuccess: ({ eventCreated }) => {
+      toast.success(
+        eventCreated
+          ? "Gallery published and event added"
+          : "Gallery published",
+      );
       setFiles([]);
       setEventName("");
       setEventDate("");
+      setLinkedEventId(null);
+      setPendingEventsSkipped(false);
       setThumbnailIndex(null);
       setStep(1);
+      void utils.gallery.getPendingEvents.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
@@ -96,6 +110,7 @@ export default function AdminGallery() {
       publish.mutate({
         eventName: eventName.trim(),
         eventDate,
+        eventId: linkedEventId ?? undefined,
         images: urls,
         thumbnailUrl,
       });
@@ -103,6 +118,105 @@ export default function AdminGallery() {
       toast.error("Upload did not complete. Please try again.");
     }
   };
+
+  const choosePendingEvent = (event: (typeof pendingEvents)[number]) => {
+    const dateParts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(new Date(event.date));
+    const part = (type: Intl.DateTimeFormatPartTypes) =>
+      dateParts.find((item) => item.type === type)?.value ?? "";
+    setEventName(event.name);
+    setEventDate(`${part("year")}-${part("month")}-${part("day")}`);
+    setLinkedEventId(event.id);
+    setPendingEventsSkipped(true);
+    setStep(2);
+  };
+
+  if (checkingPendingEvents) {
+    return (
+      <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
+        <PageShell
+          admin
+          title="Gallery"
+          description="Prepare and publish a complete event album from one place."
+        >
+          <div className="min-h-48 animate-pulse rounded-3xl border border-white/10 bg-[#211811]/90" />
+        </PageShell>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!pendingEventsSkipped && pendingEvents.length > 0) {
+    return (
+      <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
+        <PageShell
+          admin
+          title="Photographs pending"
+          description="These parish events do not have a gallery album yet."
+        >
+          <ThemedToast />
+          <section className="rounded-3xl border border-white/10 bg-[#211811]/95 p-5 shadow-2xl sm:p-8">
+            <div className="flex flex-col gap-3 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-white">
+                  Upload photographs for an event?
+                </h2>
+                <p className="mt-2 max-w-2xl leading-7 text-white/50">
+                  Choosing an event fills in its name and date and takes you
+                  directly to photograph selection.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingEventsSkipped(true)}
+                className="min-h-11 shrink-0 rounded-full border border-white/15 px-5 text-sm font-semibold text-white/65 transition hover:border-white/30 hover:text-white"
+              >
+                Skip for now
+              </button>
+            </div>
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              {pendingEvents.map((event) => (
+                <article
+                  key={event.id}
+                  className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-5 sm:p-6"
+                >
+                  <h3 className="text-xl font-semibold text-white">
+                    {event.name}
+                  </h3>
+                  <div className="mt-4 space-y-2 text-sm text-white/50">
+                    <p className="flex items-center gap-2">
+                      <CalendarDays size={16} className="text-[#f0c878]" />
+                      {new Date(event.date).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        timeZone: "Asia/Kolkata",
+                      })}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <MapPin size={16} className="text-[#f0c878]" />
+                      {event.venue}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => choosePendingEvent(event)}
+                    className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[#f0c878] px-5 font-semibold text-[#211811] transition hover:bg-[#e7bb64]"
+                  >
+                    Upload this event
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        </PageShell>
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DEVELOPER", "PHOTOGRAPHER"]}>
       <PageShell
@@ -163,13 +277,14 @@ export default function AdminGallery() {
                     Event name
                     <input
                       value={eventName}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        setLinkedEventId(null);
                         setEventName(
                           e.target.value.replace(/\b\w/g, (c) =>
                             c.toUpperCase(),
                           ),
-                        )
-                      }
+                        );
+                      }}
                       placeholder="Parish feast"
                       className="mt-2 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
                     />
@@ -179,7 +294,10 @@ export default function AdminGallery() {
                     <input
                       type="date"
                       value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
+                      onChange={(e) => {
+                        setLinkedEventId(null);
+                        setEventDate(e.target.value);
+                      }}
                       className="mt-2 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
                     />
                   </label>
