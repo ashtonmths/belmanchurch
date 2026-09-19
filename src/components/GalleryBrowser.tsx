@@ -12,6 +12,16 @@ import PageShell from "~/components/PageShell";
 import { api, type RouterOutputs } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
+function cloudinaryUrl(url: string, transformation: string) {
+  return url.includes("res.cloudinary.com") && url.includes("/image/upload/")
+    ? url.replace("/image/upload/", `/image/upload/${transformation}/`)
+    : url;
+}
+
+function downloadUrl(url: string) {
+  return cloudinaryUrl(url, "fl_attachment");
+}
+
 export default function GalleryBrowser({
   initialAlbumId = null,
   initialFolders,
@@ -34,12 +44,18 @@ export default function GalleryBrowser({
     error,
   } = api.gallery.getFolders.useQuery(undefined, {
     initialData: initialFolders,
+    staleTime: 15 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
   const { data: images, isFetching } = api.gallery.getImagesByID.useQuery(
     { id: albumId ?? "" },
     {
       enabled: !!albumId,
       initialData: albumId === initialAlbumId ? initialImages : undefined,
+      staleTime: 5 * 60 * 1000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     },
   );
   const activeFolder = folders?.find((folder) => folder.id === albumId);
@@ -233,9 +249,18 @@ export default function GalleryBrowser({
               >
                 <div className="relative aspect-[4/3]">
                   <Image
-                    src={folder.previewImage ?? "/favicon.webp"}
+                    src={
+                      folder.previewImage
+                        ? cloudinaryUrl(
+                            folder.previewImage,
+                            "c_fill,g_auto,w_720,h_540,q_auto,f_auto",
+                          )
+                        : "/favicon.webp"
+                    }
                     alt={folder.eventName}
                     fill
+                    unoptimized={Boolean(folder.previewImage)}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover transition duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -259,6 +284,7 @@ export default function GalleryBrowser({
                               alt={contributor.name ?? "Album contributor"}
                               width={28}
                               height={28}
+                              unoptimized
                               className="h-7 w-7 rounded-full border-2 border-[#211811] object-cover"
                             />
                           ) : (
@@ -351,10 +377,14 @@ export default function GalleryBrowser({
                         className="relative aspect-square overflow-hidden rounded-xl bg-white/5"
                       >
                         <Image
-                          src={image.url}
+                          src={cloudinaryUrl(
+                            image.url,
+                            "c_fill,g_auto,w_600,h_600,q_auto,f_auto",
+                          )}
                           alt={`${activeFolder?.eventName ?? "Album"} photograph ${index + 1}`}
                           fill
                           unoptimized
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           className="object-cover transition hover:scale-105"
                         />
                         <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/65 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
@@ -434,7 +464,7 @@ export default function GalleryBrowser({
                   Copy link
                 </button>
                 <a
-                  href={selectedImage.url}
+                  href={downloadUrl(selectedImage.url)}
                   download
                   className="flex items-center gap-2 rounded-full bg-[#f0c878] px-4 py-2 text-sm font-medium text-[#211811]"
                 >

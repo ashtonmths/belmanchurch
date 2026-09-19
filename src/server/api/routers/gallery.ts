@@ -4,13 +4,14 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import cloudinary from "cloudinary";
-import { db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { events, galleries, galleryImages } from "~/server/db/schema";
-
-cloudinary.v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+import {
+  getCachedGalleryFolders,
+  getCachedGalleryImages,
+} from "~/server/gallery-data";
 
 const normalizedName = (value: string) =>
   value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
@@ -122,6 +123,8 @@ export const galleryRouter = createTRPCRouter({
           )
           .onConflictDoNothing({ target: galleryImages.url });
 
+        revalidateTag("gallery-folders");
+        revalidateTag("gallery-images");
         return { success: true, cloudinaryFolder, eventCreated };
       });
     }),
@@ -147,80 +150,7 @@ export const galleryRouter = createTRPCRouter({
       .slice(0, 12);
   }),
 
-  getFolders: publicProcedure.query(async ({}) => {
-    const folders = await db.query.galleries.findMany({
-      columns: {
-        id: true,
-        eventName: true,
-        eventDate: true,
-        cloudinaryFolder: true,
-        thumbnailUrl: true,
-      },
-      with: {
-        images: {
-          columns: { uploadedById: true },
-          with: {
-            uploadedBy: { columns: { id: true, name: true, image: true } },
-          },
-        },
-      },
-      orderBy: desc(galleries.eventDate),
-    });
-
-    const folderPreviews = await Promise.all(
-      folders.map(async (folder) => {
-        const contributors = Array.from(
-          new Map(
-            folder.images
-              .map((image) => image.uploadedBy)
-              .filter((user) => user !== null)
-              .map((user) => [user.id, user]),
-          ).values(),
-        );
-        const album = {
-          id: folder.id,
-          eventName: folder.eventName,
-          eventDate: folder.eventDate,
-          cloudinaryFolder: folder.cloudinaryFolder,
-          contributors,
-        };
-
-        if (folder.thumbnailUrl) {
-          return { ...album, previewImage: folder.thumbnailUrl };
-        }
-
-        try {
-          const response = (await cloudinary.v2.api.resources({
-            type: "upload",
-            prefix: folder.cloudinaryFolder,
-            max_results: 100, // Ensure you get enough to sort
-          })) as { resources: { secure_url: string; created_at: string }[] };
-
-          const sorted = response.resources.sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-
-          return {
-            ...album,
-            previewImage: sorted[0]?.secure_url ?? null,
-          };
-        } catch (error) {
-          console.error(
-            `Error fetching preview for ${folder.cloudinaryFolder}:`,
-            error,
-          );
-          return {
-            ...album,
-            previewImage: null,
-          };
-        }
-      }),
-    );
-
-    return folderPreviews;
-  }),
+  getFolders: publicProcedure.query(() => getCachedGalleryFolders()),
 
   toggleLike: protectedProcedure
     .input(z.object({ imageId: z.string() }))
@@ -246,6 +176,8 @@ export const galleryRouter = createTRPCRouter({
         .set({ likedBy: updatedLikedBy })
         .where(eq(galleryImages.id, imageId));
 
+      revalidateTag("gallery-images");
+
       return {
         likes: updatedLikedBy.length,
         isLiked: updatedLikedBy.includes(userId),
@@ -255,26 +187,8 @@ export const galleryRouter = createTRPCRouter({
   getImagesByID: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const gallery = await db.query.galleries.findFirst({
-        where: eq(galleries.id, input.id),
-        columns: { id: true },
-      });
-
-      if (!gallery) throw new Error("Gallery not found");
-
-      // Fetch images linked to this gallery
-      const images = await db.query.galleryImages.findMany({
-        where: eq(galleryImages.galleryId, gallery.id),
-        columns: {
-          id: true,
-          url: true,
-          likedBy: true,
-        },
-        with: {
-          uploadedBy: { columns: { id: true, name: true, image: true } },
-        },
-        orderBy: desc(galleryImages.createdAt),
-      });
+      const images = await getCachedGalleryImages(input.id);
+      if (!images) throw new TRPCError({ code: "NOT_FOUND" });
 
       const userId = ctx.session?.user?.id;
 

@@ -1,12 +1,19 @@
-import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import GalleryBrowser from "~/components/GalleryBrowser";
-import { db } from "~/server/db";
-import { galleries, galleryImages } from "~/server/db/schema";
-import { api } from "~/trpc/server";
+import {
+  getCachedGalleryFolders,
+  getCachedGalleryImages,
+} from "~/server/gallery-data";
 
 type AlbumPageProps = { params: Promise<{ id: string }> };
+
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const folders = await getCachedGalleryFolders();
+  return folders.map((folder) => ({ id: folder.id }));
+}
 
 function getSocialImage(url: string | undefined) {
   if (!url) return undefined;
@@ -22,29 +29,15 @@ export async function generateMetadata({
   params,
 }: AlbumPageProps): Promise<Metadata> {
   const { id } = await params;
-  const gallery = await db.query.galleries.findFirst({
-    where: eq(galleries.id, id),
-    columns: {
-      id: true,
-      eventName: true,
-      eventDate: true,
-      thumbnailUrl: true,
-    },
-  });
+  const folders = await getCachedGalleryFolders();
+  const gallery = folders.find((folder) => folder.id === id);
 
   if (!gallery) {
     return { title: "Gallery album not found", robots: { index: false } };
   }
 
-  const firstImage = gallery.thumbnailUrl
-    ? null
-    : await db.query.galleryImages.findFirst({
-        where: eq(galleryImages.galleryId, gallery.id),
-        columns: { url: true },
-        orderBy: asc(galleryImages.createdAt),
-      });
-  const image = getSocialImage(gallery.thumbnailUrl ?? firstImage?.url);
-  const date = gallery.eventDate.toLocaleDateString("en-IN", {
+  const image = getSocialImage(gallery.previewImage ?? undefined);
+  const date = new Date(gallery.eventDate).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -85,15 +78,19 @@ export async function generateMetadata({
 
 export default async function GalleryAlbumPage({ params }: AlbumPageProps) {
   const { id } = await params;
-  const gallery = await db.query.galleries.findFirst({
-    where: eq(galleries.id, id),
-    columns: { id: true, eventName: true },
-  });
-  if (!gallery) notFound();
-  const [folders, images] = await Promise.all([
-    api.gallery.getFolders(),
-    api.gallery.getImagesByID({ id }),
+  const [folders, cachedImages] = await Promise.all([
+    getCachedGalleryFolders(),
+    getCachedGalleryImages(id),
   ]);
+  const gallery = folders.find((folder) => folder.id === id);
+  if (!gallery || !cachedImages) notFound();
+  const images = cachedImages.map((image) => ({
+    id: image.id,
+    url: image.url,
+    likes: image.likedBy.length,
+    uploadedBy: image.uploadedBy ?? null,
+    isLiked: null,
+  }));
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
