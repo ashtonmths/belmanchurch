@@ -19,6 +19,7 @@ export const galleryRouter = createTRPCRouter({
         eventName: z.string(),
         eventDate: z.string(),
         images: z.array(z.string()),
+        thumbnailUrl: z.string().url(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -27,7 +28,7 @@ export const galleryRouter = createTRPCRouter({
       ) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
       }
-      const { eventName, eventDate, images } = input;
+      const { eventName, eventDate, images, thumbnailUrl } = input;
 
       const cloudinaryFolder = `${eventName} - ${eventDate}`;
 
@@ -43,7 +44,14 @@ export const galleryRouter = createTRPCRouter({
             eventName,
             eventDate: new Date(eventDate),
             cloudinaryFolder,
+            thumbnailUrl,
           })
+          .returning();
+      } else {
+        [gallery] = await db
+          .update(galleries)
+          .set({ thumbnailUrl })
+          .where(eq(galleries.id, gallery.id))
           .returning();
       }
 
@@ -73,6 +81,7 @@ export const galleryRouter = createTRPCRouter({
         eventName: true,
         eventDate: true,
         cloudinaryFolder: true,
+        thumbnailUrl: true,
       },
       with: {
         images: {
@@ -87,6 +96,26 @@ export const galleryRouter = createTRPCRouter({
 
     const folderPreviews = await Promise.all(
       folders.map(async (folder) => {
+        const contributors = Array.from(
+          new Map(
+            folder.images
+              .map((image) => image.uploadedBy)
+              .filter((user) => user !== null)
+              .map((user) => [user.id, user]),
+          ).values(),
+        );
+        const album = {
+          id: folder.id,
+          eventName: folder.eventName,
+          eventDate: folder.eventDate,
+          cloudinaryFolder: folder.cloudinaryFolder,
+          contributors,
+        };
+
+        if (folder.thumbnailUrl) {
+          return { ...album, previewImage: folder.thumbnailUrl };
+        }
+
         try {
           const response = (await cloudinary.v2.api.resources({
             type: "upload",
@@ -101,17 +130,8 @@ export const galleryRouter = createTRPCRouter({
           );
 
           return {
-            ...folder,
-            contributors: Array.from(
-              new Map(
-                folder.images
-                  .map((image) => image.uploadedBy)
-                  .filter((user) => user !== null)
-                  .map((user) => [user.id, user]),
-              ).values(),
-            ),
-            images: undefined,
-            previewImage: sorted[0]?.secure_url ?? null, // First uploaded
+            ...album,
+            previewImage: sorted[0]?.secure_url ?? null,
           };
         } catch (error) {
           console.error(
@@ -119,16 +139,7 @@ export const galleryRouter = createTRPCRouter({
             error,
           );
           return {
-            ...folder,
-            contributors: Array.from(
-              new Map(
-                folder.images
-                  .map((image) => image.uploadedBy)
-                  .filter((user) => user !== null)
-                  .map((user) => [user.id, user]),
-              ).values(),
-            ),
-            images: undefined,
+            ...album,
             previewImage: null,
           };
         }

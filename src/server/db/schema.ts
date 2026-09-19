@@ -259,6 +259,7 @@ export const galleries = pgTable("Gallery", {
   eventName: text("eventName").notNull(),
   eventDate: timestamp("eventDate", { precision: 3 }).notNull(),
   cloudinaryFolder: text("cloudinaryFolder").notNull(),
+  thumbnailUrl: text("thumbnailUrl"),
   createdAt: createdAt(),
 });
 

@@ -4,6 +4,7 @@ import imageCompression from "browser-image-compression";
 import {
   ArrowLeft,
   ArrowRight,
+  Check,
   ImagePlus,
   Info,
   Trash2,
@@ -22,18 +23,20 @@ export default function AdminGallery() {
   const [files, setFiles] = useState<File[]>([]);
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
+  const [thumbnailIndex, setThumbnailIndex] = useState<number | null>(null);
   const [step, setStep] = useState(1);
   const previews = useMemo(
     () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
     [files],
   );
-  const { uploadImages } = useCloudinaryUpload();
+  const { uploadImages, isUploading } = useCloudinaryUpload();
   const publish = api.gallery.uploadGallery.useMutation({
     onSuccess: () => {
       toast.success("Gallery published");
       setFiles([]);
       setEventName("");
       setEventDate("");
+      setThumbnailIndex(null);
       setStep(1);
     },
     onError: (e) => toast.error(e.message),
@@ -58,6 +61,7 @@ export default function AdminGallery() {
           }),
         ),
       );
+      if (files.length === 0 && compressed.length > 0) setThumbnailIndex(0);
       setFiles((current) => [...current, ...compressed]);
       toast.update(id, {
         render: `${compressed.length} photographs ready`,
@@ -75,13 +79,26 @@ export default function AdminGallery() {
     }
   };
   const submit = async () => {
-    if (!eventName.trim() || !eventDate || !files.length) {
-      toast.error("Add the event name, date and photographs");
+    if (
+      !eventName.trim() ||
+      !eventDate ||
+      !files.length ||
+      thumbnailIndex === null
+    ) {
+      toast.error("Add the album details, photographs and a thumbnail");
       return;
     }
     try {
       const urls = await uploadImages(files, `${eventName} - ${eventDate}`);
-      publish.mutate({ eventName: eventName.trim(), eventDate, images: urls });
+      const thumbnailUrl = urls[thumbnailIndex];
+      if (!thumbnailUrl)
+        throw new Error("The selected thumbnail was not uploaded");
+      publish.mutate({
+        eventName: eventName.trim(),
+        eventDate,
+        images: urls,
+        thumbnailUrl,
+      });
     } catch {
       toast.error("Upload did not complete. Please try again.");
     }
@@ -198,7 +215,10 @@ export default function AdminGallery() {
                       </p>
                       <button
                         type="button"
-                        onClick={() => setFiles([])}
+                        onClick={() => {
+                          setFiles([]);
+                          setThumbnailIndex(null);
+                        }}
                         className="text-sm text-white/55 hover:text-white"
                       >
                         Clear all
@@ -208,7 +228,7 @@ export default function AdminGallery() {
                       {previews.map(({ file, url }, index) => (
                         <figure
                           key={`${file.name}-${index}`}
-                          className="group relative aspect-square overflow-hidden rounded-xl bg-black/30"
+                          className={`group relative aspect-square overflow-hidden rounded-xl border-2 bg-black/30 ${thumbnailIndex === index ? "border-[#f0c878]" : "border-transparent"}`}
                         >
                           <img
                             src={url}
@@ -217,11 +237,28 @@ export default function AdminGallery() {
                           />
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={() => setThumbnailIndex(index)}
+                            className="absolute inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#f0c878]"
+                            aria-label={`Use ${file.name} as the album thumbnail`}
+                          />
+                          {thumbnailIndex === index && (
+                            <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-[#f0c878] px-2.5 py-1 text-xs font-semibold text-[#211811] shadow-lg">
+                              <Check size={13} /> Thumbnail
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
                               setFiles((current) =>
                                 current.filter((_, i) => i !== index),
-                              )
-                            }
+                              );
+                              setThumbnailIndex((current) => {
+                                if (current === null) return null;
+                                if (current === index)
+                                  return files.length > 1 ? 0 : null;
+                                return current > index ? current - 1 : current;
+                              });
+                            }}
                             className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-black/70 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                             aria-label={`Remove ${file.name}`}
                           >
@@ -230,6 +267,9 @@ export default function AdminGallery() {
                         </figure>
                       ))}
                     </div>
+                    <p className="mt-4 text-sm text-white/45">
+                      Tap a photograph to use it as the album thumbnail.
+                    </p>
                   </div>
                 ) : null}
               </>
@@ -241,6 +281,14 @@ export default function AdminGallery() {
                   <div className="flex justify-between gap-4 py-4">
                     <dt className="text-white/45">Album</dt>
                     <dd className="text-right font-medium">{eventName}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 py-4">
+                    <dt className="text-white/45">Thumbnail</dt>
+                    <dd className="font-medium">
+                      {thumbnailIndex === null
+                        ? "Not selected"
+                        : `Photograph ${thumbnailIndex + 1}`}
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-4 py-4">
                     <dt className="text-white/45">Date</dt>
@@ -293,7 +341,9 @@ export default function AdminGallery() {
               <button
                 type="button"
                 disabled={
-                  step === 1 ? !eventName.trim() || !eventDate : !files.length
+                  step === 1
+                    ? !eventName.trim() || !eventDate
+                    : !files.length || thumbnailIndex === null
                 }
                 onClick={() => setStep((value) => value + 1)}
                 className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0c878] px-5 font-semibold text-[#211811] disabled:opacity-40"
@@ -305,12 +355,16 @@ export default function AdminGallery() {
             {step === 3 && (
               <button
                 type="button"
-                disabled={publish.isPending}
+                disabled={isUploading || publish.isPending}
                 onClick={() => void submit()}
                 className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f0c878] px-5 font-semibold text-[#211811] disabled:opacity-50"
               >
                 <Upload size={18} />
-                {publish.isPending ? "Publishing…" : "Publish album"}
+                {isUploading
+                  ? "Uploading photographs..."
+                  : publish.isPending
+                    ? "Publishing..."
+                    : "Publish album"}
               </button>
             )}
           </aside>
