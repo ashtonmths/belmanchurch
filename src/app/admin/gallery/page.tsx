@@ -21,7 +21,7 @@ import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
 import { api } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
-const COMPRESSION_THRESHOLD_BYTES = 5000 * 1024;
+const COMPRESSION_THRESHOLD_BYTES = 500 * 1024;
 const COMPRESSED_PHOTO_SIZE_MB = 300 / 1024;
 
 export default function AdminGallery() {
@@ -327,8 +327,8 @@ export default function AdminGallery() {
                     Choose photographs
                   </span>
                   <span className="mt-2 max-w-md text-sm leading-6 text-white/45">
-                    JPG, PNG or WebP. Files above 5,000 KB are compressed to
-                    about 300 KB; smaller files keep their original quality.
+                    JPG, PNG or WebP. Files above 500 KB are compressed to about
+                    300 KB; smaller files keep their original quality.
                   </span>
                 </label>
                 {previews.length ? (
