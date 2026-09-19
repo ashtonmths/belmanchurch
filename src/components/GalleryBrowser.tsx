@@ -158,7 +158,7 @@ export default function GalleryBrowser({
   }, [albumId, images, session, toggleLike]);
 
   const shareAlbum = async (folder: NonNullable<typeof folders>[number]) => {
-    const url = `${window.location.origin}/gallery/${folder.id}`;
+    const url = `${window.location.origin}/gallery/${folder.id}?share=1`;
     const date = new Date(folder.eventDate).toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "long",
@@ -170,19 +170,18 @@ export default function GalleryBrowser({
       "",
       "Photographs from St. Joseph Church, Belman",
       "Open the album and download the photographs you want:",
-      url,
     ].join("\n");
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: folder.eventName, text });
+        await navigator.share({ title: folder.eventName, text, url });
         return;
       }
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(`${text}\n${url}`);
       toast.success("Album details and link copied");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(`${text}\n${url}`);
       toast.success("Album details and link copied");
     }
   };

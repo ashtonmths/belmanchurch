@@ -7,6 +7,16 @@ import { galleries, galleryImages } from "~/server/db/schema";
 
 type AlbumPageProps = { params: Promise<{ id: string }> };
 
+function getSocialImage(url: string | undefined) {
+  if (!url) return undefined;
+  return url.includes("res.cloudinary.com") && url.includes("/image/upload/")
+    ? url.replace(
+        "/image/upload/",
+        "/image/upload/c_fill,g_auto,w_1200,h_630,q_auto,f_jpg/",
+      )
+    : url;
+}
+
 export async function generateMetadata({
   params,
 }: AlbumPageProps): Promise<Metadata> {
@@ -32,7 +42,7 @@ export async function generateMetadata({
         columns: { url: true },
         orderBy: asc(galleryImages.createdAt),
       });
-  const image = gallery.thumbnailUrl ?? firstImage?.url;
+  const image = getSocialImage(gallery.thumbnailUrl ?? firstImage?.url);
   const date = gallery.eventDate.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "long",
@@ -52,7 +62,15 @@ export async function generateMetadata({
       title,
       description,
       images: image
-        ? [{ url: image, alt: `${gallery.eventName} album thumbnail` }]
+        ? [
+            {
+              url: image,
+              width: 1200,
+              height: 630,
+              type: "image/jpeg",
+              alt: `${gallery.eventName} album thumbnail`,
+            },
+          ]
         : [],
     },
     twitter: {
