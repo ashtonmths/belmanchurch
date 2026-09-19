@@ -3,6 +3,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   doublePrecision,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -281,7 +282,13 @@ export const galleryImages = pgTable(
       .references(() => galleries.id, { onDelete: "cascade" }),
     uploadedById: text("uploadedById").references(() => users.id),
   },
-  (table) => [uniqueIndex("GalleryImage_url_key").on(table.url)],
+  (table) => [
+    uniqueIndex("GalleryImage_url_key").on(table.url),
+    index("GalleryImage_galleryId_createdAt_idx").on(
+      table.galleryId,
+      table.createdAt,
+    ),
+  ],
 );
 
 export const usersRelations = relations(users, ({ many, one }) => ({

@@ -1,0 +1,1 @@
+CREATE INDEX "GalleryImage_galleryId_createdAt_idx" ON "GalleryImage" USING btree ("galleryId","createdAt");
