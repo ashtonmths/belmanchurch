@@ -30,7 +30,7 @@ export const galleryRouter = createTRPCRouter({
         eventName: z.string().trim().min(3).max(120),
         eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         eventId: z.string().optional(),
-        images: z.array(z.string().url()).min(1).max(200),
+        images: z.array(z.string().url()).min(1).max(500),
         thumbnailUrl: z.string().url(),
       }),
     )

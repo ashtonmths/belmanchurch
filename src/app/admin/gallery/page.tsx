@@ -62,8 +62,8 @@ export default function AdminGallery() {
     const next = Array.from(incoming).filter((file) =>
       file.type.startsWith("image/"),
     );
-    if (files.length + next.length > 200) {
-      toast.error("A gallery can contain up to 200 photographs");
+    if (files.length + next.length > 500) {
+      toast.error("A gallery can contain up to 500 photographs");
       return;
     }
     const id = toast.loading(`Preparing ${next.length} photographs…`);
@@ -332,7 +332,7 @@ export default function AdminGallery() {
                   <div className="p-4 sm:p-6">
                     <div className="mb-4 flex items-center justify-between">
                       <p className="text-sm text-white/55">
-                        {files.length} of 200 photographs
+                        {files.length} of 500 photographs
                       </p>
                       <button
                         type="button"

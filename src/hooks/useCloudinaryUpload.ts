@@ -9,16 +9,16 @@ export function useCloudinaryUpload() {
     folderName: string,
   ): Promise<string[]> => {
     setIsUploading(true);
-    const uploadedUrls: string[] = [];
+    const uploadedUrls = new Array<string>(files.length);
+    let uploadedCount = 0;
 
     const toastId = toast.info(`Uploading 0/${files.length} images...`, {
       autoClose: false,
       progress: 0,
     });
 
-    for (let i = 0; i < files.length; i++) {
+    const uploadOne = async (i: number) => {
       const file = files[i];
-
       try {
         const formData = new FormData();
         if (file) {
@@ -48,11 +48,12 @@ export function useCloudinaryUpload() {
         if (!response.ok) throw new Error(`Upload failed for image ${i + 1}`);
 
         const data = (await response.json()) as { secure_url: string };
-        uploadedUrls.push(data.secure_url);
+        uploadedUrls[i] = data.secure_url;
+        uploadedCount += 1;
 
         toast.update(toastId, {
-          render: `Uploading ${i + 1}/${files.length} images...`,
-          progress: (i + 1) / files.length,
+          render: `Uploading ${uploadedCount}/${files.length} images...`,
+          progress: uploadedCount / files.length,
         });
       } catch (err) {
         toast.update(toastId, {
@@ -64,7 +65,18 @@ export function useCloudinaryUpload() {
         setIsUploading(false);
         throw err;
       }
-    }
+    };
+
+    const workerCount = Math.min(5, files.length);
+    let nextIndex = 0;
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (nextIndex < files.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        await uploadOne(index);
+      }
+    });
+    await Promise.all(workers);
 
     toast.update(toastId, {
       render: `Uploaded ${files.length} images successfully!`,
@@ -74,7 +86,7 @@ export function useCloudinaryUpload() {
     });
 
     setIsUploading(false);
-    return uploadedUrls;
+    return uploadedUrls.filter((url): url is string => Boolean(url));
   };
 
   return { uploadImages, isUploading };
