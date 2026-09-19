@@ -21,7 +21,8 @@ import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
 import { api } from "~/trpc/react";
 import "react-toastify/dist/ReactToastify.css";
 
-const MAX_PHOTO_SIZE_MB = 100 / 1024;
+const COMPRESSION_THRESHOLD_BYTES = 5000 * 1024;
+const COMPRESSED_PHOTO_SIZE_MB = 300 / 1024;
 
 export default function AdminGallery() {
   const utils = api.useUtils();
@@ -70,12 +71,14 @@ export default function AdminGallery() {
     try {
       const compressed = await Promise.all(
         next.map((file) =>
-          imageCompression(file, {
-            maxSizeMB: MAX_PHOTO_SIZE_MB,
-            maxWidthOrHeight: 1600,
-            maxIteration: 20,
-            useWebWorker: true,
-          }),
+          file.size > COMPRESSION_THRESHOLD_BYTES
+            ? imageCompression(file, {
+                maxSizeMB: COMPRESSED_PHOTO_SIZE_MB,
+                maxWidthOrHeight: 2000,
+                maxIteration: 20,
+                useWebWorker: true,
+              })
+            : Promise.resolve(file),
         ),
       );
       if (files.length === 0 && compressed.length > 0) setThumbnailIndex(0);
@@ -324,8 +327,8 @@ export default function AdminGallery() {
                     Choose photographs
                   </span>
                   <span className="mt-2 max-w-md text-sm leading-6 text-white/45">
-                    JPG, PNG or WebP. Each image is compressed to about 100 KB
-                    before upload. You can add more in several batches.
+                    JPG, PNG or WebP. Files above 5,000 KB are compressed to
+                    about 300 KB; smaller files keep their original quality.
                   </span>
                 </label>
                 {previews.length ? (
