@@ -6,6 +6,7 @@ import TransitionWrapper from "~/components/Loader";
 import NavbarSelector from "~/components/navbars/NavbarSelector";
 import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from "~/components/ScrollToTop";
+import { env } from "~/env";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://belmanchurch.in"),
@@ -80,7 +81,7 @@ export default function RootLayout({
         url: "https://belmanchurch.in",
         logo: "https://belmanchurch.in/Logo.png",
         image: "https://belmanchurch.in/screenshots/hero.png",
-        email: "belmanchurch.in@gmail.com",
+        email: env.SMTP_USER,
         telephone: "+91 91410 31604",
         address: {
           "@type": "PostalAddress",

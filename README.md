@@ -87,4 +87,4 @@ npm run db:studio    # Open Drizzle Studio
 
 ## Contact
 
-[belmanchurch.in@gmail.com](mailto:belmanchurch.in@gmail.com)
+The parish contact address is configured through `SMTP_USER`.
