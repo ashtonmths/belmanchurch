@@ -31,6 +31,7 @@ export const galleryRouter = createTRPCRouter({
         id: galleries.id,
         eventName: galleries.eventName,
         eventDate: galleries.eventDate,
+        cloudinaryFolder: galleries.cloudinaryFolder,
         thumbnailUrl: galleries.thumbnailUrl,
         eventId: galleries.eventId,
         imageCount: count(galleryImages.id),
@@ -111,6 +112,44 @@ export const galleryRouter = createTRPCRouter({
       revalidatePath("/gallery");
       revalidatePath(`/gallery/${input.id}`);
       revalidatePath("/events");
+      return { success: true };
+    }),
+
+  appendImages: protectedProcedure
+    .input(
+      z.object({
+        galleryId: z.string(),
+        images: z.array(z.string().url()).min(1).max(500),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      ensureGalleryRole(ctx.session.user.role);
+      const album = await ctx.db.query.galleries.findFirst({
+        where: eq(galleries.id, input.galleryId),
+        columns: { id: true },
+        with: { images: { columns: { id: true } } },
+      });
+      if (!album) throw new TRPCError({ code: "NOT_FOUND" });
+      if (album.images.length + input.images.length > 500) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "An album can contain up to 500 photographs",
+        });
+      }
+      await ctx.db
+        .insert(galleryImages)
+        .values(
+          input.images.map((url) => ({
+            url,
+            galleryId: input.galleryId,
+            uploadedById: ctx.session.user.id,
+          })),
+        )
+        .onConflictDoNothing({ target: galleryImages.url });
+      revalidateTag("gallery-folders");
+      revalidateTag("gallery-images");
+      revalidatePath("/gallery");
+      revalidatePath(`/gallery/${input.galleryId}`);
       return { success: true };
     }),
 

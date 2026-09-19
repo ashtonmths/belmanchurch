@@ -1,10 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { CalendarDays, Check, Images, Pencil, Save } from "lucide-react";
+import imageCompression from "browser-image-compression";
+import {
+  CalendarDays,
+  Check,
+  ImagePlus,
+  Images,
+  Pencil,
+  Save,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useCloudinaryUpload } from "~/hooks/useCloudinaryUpload";
 import { api } from "~/trpc/react";
+
+const COMPRESSION_THRESHOLD_BYTES = 500 * 1024;
+const COMPRESSED_PHOTO_SIZE_MB = 300 / 1024;
 
 function inputDate(value: Date | string) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -24,6 +36,8 @@ export default function GalleryHistory() {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [isPreparing, setIsPreparing] = useState(false);
+  const { uploadImages, isUploading } = useCloudinaryUpload();
   const { data: albums = [], isLoading } =
     api.gallery.getAdminAlbums.useQuery();
   const { data: images = [], isFetching: loadingImages } =
@@ -65,12 +79,64 @@ export default function GalleryHistory() {
     },
     onError: (error) => toast.error(error.message),
   });
+  const appendImages = api.gallery.appendImages.useMutation({
+    onSuccess: async () => {
+      toast.success("Photographs added");
+      await Promise.all([
+        utils.gallery.getAdminAlbums.invalidate(),
+        selectedId
+          ? utils.gallery.getImagesByID.invalidate({ id: selectedId })
+          : Promise.resolve(),
+      ]);
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   const edit = (album: (typeof albums)[number]) => {
     setSelectedId(album.id);
     setName(album.eventName);
     setDate(inputDate(album.eventDate));
     setThumbnailUrl(album.thumbnailUrl ?? "");
+  };
+
+  const addPhotographs = async (incoming: FileList | null) => {
+    if (!incoming || !selectedId) return;
+    const album = albums.find((item) => item.id === selectedId);
+    if (!album) return;
+    const files = Array.from(incoming).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    if (!files.length) return;
+    if (Number(album.imageCount) + files.length > 500) {
+      toast.error("An album can contain up to 500 photographs");
+      return;
+    }
+    setIsPreparing(true);
+    const preparationToast = toast.loading(
+      `Preparing ${files.length} photographs...`,
+    );
+    try {
+      const prepared = await Promise.all(
+        files.map((file) =>
+          file.size > COMPRESSION_THRESHOLD_BYTES
+            ? imageCompression(file, {
+                maxSizeMB: COMPRESSED_PHOTO_SIZE_MB,
+                maxWidthOrHeight: 2000,
+                maxIteration: 20,
+                useWebWorker: true,
+              })
+            : Promise.resolve(file),
+        ),
+      );
+      toast.dismiss(preparationToast);
+      const urls = await uploadImages(prepared, album.cloudinaryFolder);
+      await appendImages.mutateAsync({ galleryId: selectedId, images: urls });
+    } catch {
+      toast.dismiss(preparationToast);
+      toast.error("Could not add the photographs");
+    } finally {
+      setIsPreparing(false);
+    }
   };
 
   if (isLoading) {
@@ -112,6 +178,35 @@ export default function GalleryHistory() {
                 onChange={(event) => setDate(event.target.value)}
                 className="mt-2 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-[#f0c878]"
               />
+            </label>
+          </div>
+          <div className="mt-6 border-t border-white/10 pt-6">
+            <p className="text-sm font-medium text-white">Add photographs</p>
+            <p className="mt-1 text-xs leading-5 text-white/40">
+              Files above 500 KB are compressed to about 300 KB.
+            </p>
+            <label
+              className={`mt-4 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-white/15 px-4 text-sm font-semibold text-white/70 transition hover:border-[#f0c878]/50 hover:text-[#f0c878] ${(isPreparing || isUploading || appendImages.isPending) && "pointer-events-none opacity-45"}`}
+            >
+              <input
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={isPreparing || isUploading || appendImages.isPending}
+                onChange={(event) => {
+                  void addPhotographs(event.target.files);
+                  event.target.value = "";
+                }}
+              />
+              <ImagePlus size={17} />
+              {isPreparing
+                ? "Preparing..."
+                : isUploading
+                  ? "Uploading..."
+                  : appendImages.isPending
+                    ? "Adding..."
+                    : "Choose more photos"}
             </label>
           </div>
           <button
