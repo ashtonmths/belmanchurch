@@ -260,6 +260,9 @@ export const galleries = pgTable("Gallery", {
   eventDate: timestamp("eventDate", { precision: 3 }).notNull(),
   cloudinaryFolder: text("cloudinaryFolder").notNull(),
   thumbnailUrl: text("thumbnailUrl"),
+  eventId: text("eventId").references(() => events.id, {
+    onDelete: "set null",
+  }),
   createdAt: createdAt(),
 });
 
@@ -324,8 +327,12 @@ export const ordersRelations = relations(orders, ({ many }) => ({
 export const donationsRelations = relations(donations, ({ one }) => ({
   order: one(orders, { fields: [donations.orderId], references: [orders.id] }),
 }));
-export const galleriesRelations = relations(galleries, ({ many }) => ({
+export const galleriesRelations = relations(galleries, ({ many, one }) => ({
   images: many(galleryImages),
+  event: one(events, {
+    fields: [galleries.eventId],
+    references: [events.id],
+  }),
 }));
 export const galleryImagesRelations = relations(galleryImages, ({ one }) => ({
   gallery: one(galleries, {

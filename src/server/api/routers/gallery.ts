@@ -7,59 +7,111 @@ import {
 import cloudinary from "cloudinary";
 import { db } from "~/server/db";
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
-import { galleries, galleryImages } from "~/server/db/schema";
+import { asc, desc, eq } from "drizzle-orm";
+import { events, galleries, galleryImages } from "~/server/db/schema";
 
 cloudinary.v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+
+const normalizedName = (value: string) =>
+  value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
+const dateKey = (value: Date) => value.toISOString().slice(0, 10);
+
+function ensureGalleryRole(role: string) {
+  if (!["ADMIN", "DEVELOPER", "PHOTOGRAPHER"].includes(role)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
+  }
+}
 
 export const galleryRouter = createTRPCRouter({
   uploadGallery: protectedProcedure
     .input(
       z.object({
-        eventName: z.string(),
-        eventDate: z.string(),
-        images: z.array(z.string()),
+        eventName: z.string().trim().min(3).max(120),
+        eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        eventId: z.string().optional(),
+        images: z.array(z.string().url()).min(1).max(200),
         thumbnailUrl: z.string().url(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (
-        !["ADMIN", "DEVELOPER", "PHOTOGRAPHER"].includes(ctx.session.user.role)
-      ) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized" });
-      }
-      const { eventName, eventDate, images, thumbnailUrl } = input;
+      ensureGalleryRole(ctx.session.user.role);
+      const { eventName, eventDate, eventId, images, thumbnailUrl } = input;
 
       const cloudinaryFolder = `${eventName} - ${eventDate}`;
+      return ctx.db.transaction(async (tx) => {
+        let gallery = await tx.query.galleries.findFirst({
+          where: eq(galleries.cloudinaryFolder, cloudinaryFolder),
+        });
+        const isNewAlbum = !gallery;
+        let linkedEventId = eventId ?? gallery?.eventId ?? null;
+        let linkedEvent = linkedEventId
+          ? await tx.query.events.findFirst({
+              where: eq(events.id, linkedEventId),
+            })
+          : null;
 
-      let gallery = await db.query.galleries.findFirst({
-        where: eq(galleries.cloudinaryFolder, cloudinaryFolder),
-      });
+        if (linkedEventId && !linkedEvent) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "The selected event no longer exists",
+          });
+        }
 
-      // If not, create it
-      if (!gallery) {
-        [gallery] = await db
-          .insert(galleries)
-          .values({
-            eventName,
-            eventDate: new Date(eventDate),
-            cloudinaryFolder,
-            thumbnailUrl,
-          })
-          .returning();
-      } else {
-        [gallery] = await db
-          .update(galleries)
-          .set({ thumbnailUrl })
-          .where(eq(galleries.id, gallery.id))
-          .returning();
-      }
+        if (!linkedEvent) {
+          const allEvents = await tx.query.events.findMany();
+          linkedEvent = allEvents.find(
+            (event) =>
+              normalizedName(event.name) === normalizedName(eventName) &&
+              dateKey(event.date) === eventDate,
+          );
+          linkedEventId = linkedEvent?.id ?? null;
+        }
 
-      if (!gallery) throw new Error("Failed to create gallery");
+        let eventCreated = false;
+        if (!linkedEvent && isNewAlbum) {
+          [linkedEvent] = await tx
+            .insert(events)
+            .values({
+              name: eventName,
+              date: new Date(`${eventDate}T12:00:00+05:30`),
+              venue: "St. Joseph Church, Belman",
+              info: "Photographs are available in the parish gallery.",
+              image: thumbnailUrl,
+            })
+            .returning();
+          linkedEventId = linkedEvent?.id ?? null;
+          eventCreated = true;
+        }
 
-      // Then insert images into the existing or new gallery
-      if (images.length > 0) {
-        await db
+        if (linkedEvent) {
+          await tx
+            .update(events)
+            .set({ image: thumbnailUrl })
+            .where(eq(events.id, linkedEvent.id));
+        }
+
+        if (!gallery) {
+          [gallery] = await tx
+            .insert(galleries)
+            .values({
+              eventName,
+              eventDate: new Date(eventDate),
+              cloudinaryFolder,
+              thumbnailUrl,
+              eventId: linkedEventId,
+            })
+            .returning();
+        } else {
+          [gallery] = await tx
+            .update(galleries)
+            .set({ thumbnailUrl, eventId: linkedEventId })
+            .where(eq(galleries.id, gallery.id))
+            .returning();
+        }
+
+        if (!gallery) throw new Error("Failed to create gallery");
+
+        await tx
           .insert(galleryImages)
           .values(
             images.map((url) => ({
@@ -69,10 +121,31 @@ export const galleryRouter = createTRPCRouter({
             })),
           )
           .onConflictDoNothing({ target: galleryImages.url });
-      }
 
-      return { success: true, cloudinaryFolder };
+        return { success: true, cloudinaryFolder, eventCreated };
+      });
     }),
+
+  getPendingEvents: protectedProcedure.query(async ({ ctx }) => {
+    ensureGalleryRole(ctx.session.user.role);
+    const [scheduledEvents, albums] = await Promise.all([
+      ctx.db.query.events.findMany({ orderBy: asc(events.date) }),
+      ctx.db.query.galleries.findMany({
+        columns: { eventId: true, eventName: true, eventDate: true },
+      }),
+    ]);
+    return scheduledEvents
+      .filter(
+        (event) =>
+          !albums.some(
+            (album) =>
+              album.eventId === event.id ||
+              (normalizedName(album.eventName) === normalizedName(event.name) &&
+                dateKey(album.eventDate) === dateKey(event.date)),
+          ),
+      )
+      .slice(0, 12);
+  }),
 
   getFolders: publicProcedure.query(async ({}) => {
     const folders = await db.query.galleries.findMany({
