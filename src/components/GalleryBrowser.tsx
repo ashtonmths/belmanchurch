@@ -203,6 +203,37 @@ export default function GalleryBrowser({
 
     try {
       if (navigator.share) {
+        const message = `${text}\n${url}`;
+        if (folder.previewImage && navigator.canShare) {
+          try {
+            const thumbnailResponse = await fetch(
+              cloudinaryUrl(
+                folder.previewImage,
+                "c_fill,g_auto,w_1200,h_900,q_auto,f_jpg",
+              ),
+            );
+            if (thumbnailResponse.ok) {
+              const thumbnail = new File(
+                [await thumbnailResponse.blob()],
+                `${folder.eventName
+                  .replace(/[^a-z0-9]+/gi, "-")
+                  .replace(/^-|-$/g, "")
+                  .toLowerCase()}-thumbnail.jpg`,
+                { type: "image/jpeg" },
+              );
+              if (navigator.canShare({ files: [thumbnail] })) {
+                await navigator.share({
+                  title: folder.eventName,
+                  text: message,
+                  files: [thumbnail],
+                });
+                return;
+              }
+            }
+          } catch {
+            // Fall back to sharing the album text and link.
+          }
+        }
         await navigator.share({ title: folder.eventName, text, url });
         return;
       }
@@ -357,7 +388,7 @@ export default function GalleryBrowser({
                 <button
                   type="button"
                   onClick={closeAlbum}
-                  className="grid h-11 w-11 place-items-center rounded-full border border-white/15 text-white"
+                  className="grid h-11 w-11 min-w-11 shrink-0 place-items-center rounded-full border border-white/15 p-0 text-white"
                 >
                   <X size={20} />
                 </button>
