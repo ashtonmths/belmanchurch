@@ -1,12 +1,13 @@
 import nodemailer from "nodemailer";
+import { env } from "~/env";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
+  host: env.SMTP_HOST,
+  port: Number(env.SMTP_PORT),
   secure: true,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASS,
   },
 });
 
@@ -16,7 +17,7 @@ export async function sendReceipt(
 ) {
   try {
     const mailOptions = {
-      from: `"St. Joseph Church, Belman" <${process.env.SMTP_USER}>`,
+      from: `"St. Joseph Church, Belman" <${env.SMTP_USER}>`,
       to: email,
       subject: "Donation Receipt",
       text: "Attached is your donation receipt. We are truly grateful for your kindness and support. Your generosity is a blessing, and we deeply appreciate your willingness to give. Every gift, no matter the amount, is a reflection of a generous heart. Your contribution means so much, and we thank you for being a part of this journey. May you be blessed abundantly for your kindness. Thank you once again for your support!",
@@ -49,8 +50,8 @@ type ContactNotification = {
 export async function sendContactNotification(inquiry: ContactNotification) {
   try {
     await transporter.sendMail({
-      from: `"St. Joseph Church Website" <${process.env.SMTP_USER}>`,
-      to: process.env.SMTP_USER,
+      from: `"St. Joseph Church Website" <${env.SMTP_USER}>`,
+      to: env.SMTP_USER,
       replyTo: inquiry.email,
       subject: `New website enquiry: ${inquiry.subject}`,
       text: [
@@ -68,6 +69,47 @@ export async function sendContactNotification(inquiry: ContactNotification) {
     return true;
   } catch (error) {
     console.error("Contact notification email failed:", error);
+    return false;
+  }
+}
+
+type DonationNotification = {
+  paymentId: string;
+  type: "CHURCH" | "CHAPEL" | "THANKSGIVING";
+  amount: number;
+  forWhom: string;
+  byWhom: string;
+  email: string;
+  massTiming: string | null;
+};
+
+export async function sendDonationNotification(donation: DonationNotification) {
+  try {
+    const amount = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(donation.amount);
+
+    await transporter.sendMail({
+      from: `"St. Joseph Church Website" <${env.SMTP_USER}>`,
+      to: env.SMTP_USER,
+      replyTo: donation.email,
+      subject: `New successful donation: ${amount}`,
+      text: [
+        "A donation was completed successfully through the parish website.",
+        "",
+        `Donor: ${donation.byWhom}`,
+        `Email: ${donation.email}`,
+        `Amount: ${amount}`,
+        `Purpose: ${donation.type}`,
+        `Offering for: ${donation.forWhom}`,
+        `Mass timing: ${donation.massTiming ?? "Not applicable"}`,
+        `Payment ID: ${donation.paymentId}`,
+      ].join("\n"),
+    });
+    return true;
+  } catch (error) {
+    console.error("Donation notification email failed:", error);
     return false;
   }
 }

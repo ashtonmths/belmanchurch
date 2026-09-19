@@ -8,7 +8,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
-import { sendReceipt } from "~/server/utils/mail";
+import { sendDonationNotification, sendReceipt } from "~/server/utils/mail";
 import { desc, eq } from "drizzle-orm";
 import { donations, orders, siteSettings } from "~/server/db/schema";
 
@@ -128,7 +128,17 @@ export const donationRouter = createTRPCRouter({
           orderId: updatedOrder.id,
         });
 
-        return { success: true };
+        const emailSent = await sendDonationNotification({
+          paymentId: input.razorpay_payment_id,
+          type: updatedOrder.type,
+          amount: updatedOrder.amount,
+          forWhom: updatedOrder.forWhom,
+          byWhom: updatedOrder.byWhom,
+          email: updatedOrder.email,
+          massTiming: updatedOrder.massTiming,
+        });
+
+        return { success: true, emailSent };
       } catch (error) {
         console.error("Payment verification failed:", error);
         throw new TRPCError({
