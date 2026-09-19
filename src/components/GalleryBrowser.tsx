@@ -164,7 +164,14 @@ export default function GalleryBrowser({
       month: "long",
       year: "numeric",
     });
-    const text = `${folder.eventName}\n${date}\nView and download photographs: ${url}`;
+    const text = [
+      folder.eventName,
+      date,
+      "",
+      "Photographs from St. Joseph Church, Belman",
+      "Open the album and download the photographs you want:",
+      url,
+    ].join("\n");
 
     try {
       if (navigator.share) {
