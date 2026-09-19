@@ -5,7 +5,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, ne } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { events, galleries, galleryImages } from "~/server/db/schema";
 import {
@@ -24,6 +24,93 @@ function ensureGalleryRole(role: string) {
 }
 
 export const galleryRouter = createTRPCRouter({
+  getAdminAlbums: protectedProcedure.query(async ({ ctx }) => {
+    ensureGalleryRole(ctx.session.user.role);
+    return ctx.db
+      .select({
+        id: galleries.id,
+        eventName: galleries.eventName,
+        eventDate: galleries.eventDate,
+        thumbnailUrl: galleries.thumbnailUrl,
+        eventId: galleries.eventId,
+        imageCount: count(galleryImages.id),
+      })
+      .from(galleries)
+      .leftJoin(galleryImages, eq(galleryImages.galleryId, galleries.id))
+      .groupBy(galleries.id)
+      .orderBy(desc(galleries.eventDate));
+  }),
+
+  updateAlbum: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        eventName: z.string().trim().min(3).max(120),
+        eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        thumbnailUrl: z.string().url(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      ensureGalleryRole(ctx.session.user.role);
+      const cloudinaryFolder = `${input.eventName} - ${input.eventDate}`;
+      await ctx.db.transaction(async (tx) => {
+        const album = await tx.query.galleries.findFirst({
+          where: eq(galleries.id, input.id),
+        });
+        if (!album) throw new TRPCError({ code: "NOT_FOUND" });
+        const thumbnail = await tx.query.galleryImages.findFirst({
+          where: and(
+            eq(galleryImages.galleryId, input.id),
+            eq(galleryImages.url, input.thumbnailUrl),
+          ),
+          columns: { id: true },
+        });
+        if (!thumbnail) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Choose a photograph from this album",
+          });
+        }
+        const collision = await tx.query.galleries.findFirst({
+          where: and(
+            eq(galleries.cloudinaryFolder, cloudinaryFolder),
+            ne(galleries.id, input.id),
+          ),
+          columns: { id: true },
+        });
+        if (collision) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Another album already uses this name and date",
+          });
+        }
+
+        await tx
+          .update(galleries)
+          .set({
+            eventName: input.eventName,
+            eventDate: new Date(input.eventDate),
+            cloudinaryFolder,
+            thumbnailUrl: input.thumbnailUrl,
+          })
+          .where(eq(galleries.id, input.id));
+
+        if (album.eventId) {
+          await tx
+            .update(events)
+            .set({
+              name: input.eventName,
+              date: new Date(`${input.eventDate}T12:00:00+05:30`),
+              image: input.thumbnailUrl,
+            })
+            .where(eq(events.id, album.eventId));
+        }
+      });
+      revalidateTag("gallery-folders");
+      revalidateTag("gallery-images");
+      return { success: true };
+    }),
+
   uploadGallery: protectedProcedure
     .input(
       z.object({
